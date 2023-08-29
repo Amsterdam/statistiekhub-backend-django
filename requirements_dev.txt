@@ -14,7 +14,7 @@ black==23.7.0
     # via -r requirements_dev.in
 build==0.10.0
     # via pip-tools
-click==8.1.6
+click==8.1.7
     # via
     #   black
     #   pip-tools
@@ -26,7 +26,7 @@ diff-match-patch==20230430
     # via
     #   -r ./requirements.txt
     #   django-import-export
-django==4.2.3
+django==4.1.10
     # via
     #   -r ./requirements.txt
     #   django-db-views
@@ -50,7 +50,7 @@ markuppy==1.14
     #   tablib
 mypy-extensions==1.0.0
     # via black
-numpy==1.25.1
+numpy==1.25.2
     # via
     #   -r ./requirements.txt
     #   pandas
@@ -68,15 +68,15 @@ packaging==23.1
     #   build
 pandas==2.0.3
     # via -r ./requirements.txt
-pathspec==0.11.1
+pathspec==0.11.2
     # via black
-pip-tools==7.1.0
+pip-tools==7.3.0
     # via -r requirements_dev.in
-platformdirs==3.9.1
+platformdirs==3.10.0
     # via black
-psycopg2-binary==2.9.6
+psycopg2-binary==2.9.7
     # via -r ./requirements.txt
-pyflakes==3.0.1
+pyflakes==3.1.0
     # via autoflake
 pyproject-hooks==1.0.0
     # via build
@@ -111,6 +111,7 @@ tomli==2.0.1
     #   black
     #   build
     #   pip-tools
+    #   pyproject-hooks
 typing-extensions==4.7.1
     # via
     #   -r ./requirements.txt
@@ -119,7 +120,7 @@ tzdata==2023.3
     # via
     #   -r ./requirements.txt
     #   pandas
-wheel==0.40.0
+wheel==0.41.2
     # via pip-tools
 xlrd==2.0.1
     # via
@@ -131,7 +132,7 @@ xlwt==1.3.0
     #   tablib
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==23.2
+pip==23.2.1
     # via pip-tools
-setuptools==68.0.0
+setuptools==68.1.2
     # via pip-tools

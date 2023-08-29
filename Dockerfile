@@ -22,7 +22,7 @@ COPY src .
 ARG SECRET_KEY=not-used
 ARG AUTHORIZATION_TOKEN=not-used
 ARG GET_AUTHORIZATION_TOKEN=not-used
-#RUN python manage.py collectstatic --no-input
+RUN python manage.py collectstatic --no-input
 
 USER datapunt
 
