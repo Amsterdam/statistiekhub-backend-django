@@ -35,7 +35,6 @@ services:
     env_file: .acc.env
     environment:
       DEBUG: false
-      SECRET_KEY: 123456
       DJANGO_SETTINGS_MODULE: main.settings
     image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}:${VERSION:-latest}
     command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
