@@ -1,0 +1,61 @@
+[
+{
+    "model": "statistiek_hub.topic",
+    "pk": 1,
+    "fields": {
+        "name": "BBGA",
+        "description": "Het BBGA bevat ruim 800 variabelen. Een overzicht van alle variabelen staat in de BBGA Metadata of in de visualisatie Kerncijfers gebieden Amsterdam.",
+        "version": "V1.0"
+    }
+},
+{
+    "model": "statistiek_hub.topic",
+    "pk": 2,
+    "fields": {
+        "name": "Leeftijden",
+        "description": "Bevolking naar verschillende leeftijden",
+        "version": "V1.0"
+    }
+},
+{
+    "model": "statistiek_hub.topic",
+    "pk": 3,
+    "fields": {
+        "name": "Loop van de bevolking",
+        "description": "geboorte sterfte\r\nbinnenlands en buitenlandse migratie",
+        "version": "V1.0"
+    }
+},
+    {
+        "model": "statistiek_hub.topicset",
+        "pk": 1,
+        "fields": {
+            "topic": 1,
+            "measure": 1
+        }
+    },
+    {
+        "model": "statistiek_hub.topicset",
+        "pk": 2,
+        "fields": {
+            "topic": 1,
+            "measure": 2
+        }
+    },
+    {
+        "model": "statistiek_hub.topicset",
+        "pk": 3,
+        "fields": {
+            "topic": 1,
+            "measure": 3
+        }
+    },
+    {
+        "model": "statistiek_hub.topicset",
+        "pk": 4,
+        "fields": {
+            "topic": 3,
+            "measure": 1
+        }
+    }
+]

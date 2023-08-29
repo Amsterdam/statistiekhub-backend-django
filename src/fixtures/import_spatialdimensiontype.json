@@ -1,0 +1,129 @@
+[ {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Land",
+            "description": "Landsgrenzen van Nederland",
+            "source": "Centraal Bureau voor de Statistiek (CBS)"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Provincie",
+            "description": "Grenzen van alle provincies in Nederland",
+            "source": "Centraal Bureau voor de Statistiek (CBS)"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Waterschap",
+            "description": "Grenzen van alle waterschappen in Nederland",
+            "source": "n.b.t."
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Gemeente",
+            "description": "Grenzen van alle gemeentes in Nederland",
+            "source": "Centraal Bureau voor de Statistiek (CBS)"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Stadsdeel",
+            "description": "Grenzen van alle stadsdelen in Amsterdam",
+            "source": "Kernregistratie Gebieden, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Wijk",
+            "description": "Grenzen van alle wijken in Amsterdam",
+            "source": "Kernregistratie Gebieden, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Buurt",
+            "description": "Grenzen van alle buurten in Amsterdam",
+            "source": "Kernregistratie Gebieden, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "GGW-gebied",
+            "description": "Grenzen van alle gebiedsgerichtwerken gebieden in Amsterdam",
+            "source": "Kernregistratie Gebieden, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "GGW-praktijkgebied",
+            "description": "Grenzen van alle gebiedsgerichtwerken praktijkgebieden in Amsterdam",
+            "source": "Kernregistratie Gebieden, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Alternatief gebied",
+            "description": "Grenzen van de alternatieve gebiedsindeling in Amsterdam",
+            "source": "Onderzoek en Statistiek, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Rayon",
+            "description": "Grenzen van de rayon-indeling in Amsterdam",
+            "source": "Onderzoek en Statistiek, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "27 gebied",
+            "description": "Grenzen van de '27 gebied' indeling in Amsterdam",
+            "source": "Onderzoek en Statistiek, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Winkelgebied",
+            "description": "Grenzen van de winkelgebieden in Amsterdam",
+            "source": "Onderzoek en Statistiek / Economische Zaken, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Bedrijventerrein",
+            "description": "Grenzen van de bedrijvengebieden in Amsterdam",
+            "source": "Onderzoek en Statistiek / Economische Zaken, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Postcode 4 gebied",
+            "description": "Geconstrueerde grenzen van gebieden met dezelfde 4-cijferige postcode in Amsterdam",
+            "source": "PostNL / Onderzoek en Statistiek, gemeente Amsterdam"
+        }
+    },
+    {
+        "model": "referentie_tabellen.spatialdimensiontype",
+        "fields": {
+            "name": "Postcode 6 gebied",
+            "description": "Geconstrueerde grenzen van gebieden met dezelfde 6-cijferige postcode in Amsterdam",
+            "source": "PostNL / Onderzoek en Statistiek, gemeente Amsterdam"
+        }
+    }
+]

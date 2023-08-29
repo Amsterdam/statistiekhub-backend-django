@@ -1,0 +1,19 @@
+[{
+    "model": "statistiek_hub.filter",
+    "pk": 1,
+    "fields": {
+      "measure": 2,
+      "rule": "( $BEVMAN < 5 AND $ORLAND = 10 )",
+      "value_new": 5
+    }
+  },
+  {
+    "model": "statistiek_hub.filter",
+    "pk": 2,
+    "fields": {
+      "measure": 3,
+      "rule": "( $BEVTOTAAL < 3 OR $ BEVVROUW < 8 )",
+      "value_new": null
+    }
+  }
+]

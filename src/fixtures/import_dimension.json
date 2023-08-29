@@ -1,0 +1,119 @@
+[
+  {
+    "model": "statistiek_hub.dimensiongroup",
+    "pk": 1,
+    "fields": {
+      "dimensionkey": "persoonskenmerken",
+      "name": "geslacht",
+      "description": "",
+      "version": "1.0",
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimensiongroup",
+    "pk": 2,
+    "fields": {
+      "dimensionkey": "persoonskenmerken",
+      "name": "leeftijd 0-17,18-22, 23-39, 40-46,65+",
+      "description": "",
+      "version": "1.0",
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimensiongroup",
+    "pk": 3,
+    "fields": {
+      "dimensionkey": "persoonskenmerken",
+      "name": "migratieachtergrond",
+      "description": "",
+      "version": "V1.0",
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimension",
+    "pk": 1,
+    "fields": {
+      "name": "geslacht: vrouw",
+      "code": "VROUW",
+      "description": "van vrouwelijk geslacht",
+      "version": "1.0",
+      "dimensiongroup": 1,
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimension",
+    "pk": 2,
+    "fields": {
+      "name": "geslacht: man",
+      "code": "MAN",
+      "description": "van mannelijk geslacht",
+      "version": "1.0",
+      "dimensiongroup": 1,
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimension",
+    "pk": 3,
+    "fields": {
+      "name": "geslacht: onbekend",
+      "code": "ONBEKEND",
+      "description": "geslacht onbekend",
+      "version": "1.0",
+      "dimensiongroup": 1,
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimension",
+    "pk": 4,
+    "fields": {
+      "name": "leeftijd: 0 t/m 17",
+      "code": "0017",
+      "description": "Leeftijd: Jonger dan 18 jaar",
+      "version": "1.0",
+      "dimensiongroup": 2,
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimension",
+    "pk": 5,
+    "fields": {
+      "name": "leeftijd: 18 t/m 22 jaar",
+      "code": "1822",
+      "description": "",
+      "version": "1.0",
+      "dimensiongroup": 2,
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimension",
+    "pk": 6,
+    "fields": {
+      "name": "leeftijd: 23 t/m 39 jaar",
+      "code": "2339",
+      "description": "",
+      "version": "1.0",
+      "dimensiongroup": 2,
+      "parent": null
+    }
+  },
+  {
+    "model": "statistiek_hub.dimension",
+    "pk": 7,
+    "fields": {
+      "name": "migratieachtergrond: niet-westers",
+      "code": "NW",
+      "description": "Persoon met een niet-westerse migratieachtergrond \\r\\n \\r\\nPersoon met als migratieachtergrond een van de landen in Afrika, Latijns-Amerika en Azië (exclusief Indonesië en Japan) of Turkije. Op grond van hun sociaal-economische en sociaal-culturele positie worden personen met een migratieachtergrond uit Indonesië en Japan tot de westerse migratieachtergrond gerekend. Het gaat vooral om mensen die in het voormalig Nederlands-Indië zijn geboren en werknemers van Japanse bedrijven met hun gezin.",
+      "version": "V1.0",
+      "dimensiongroup": 3,
+      "parent": null
+    }
+  }
+]

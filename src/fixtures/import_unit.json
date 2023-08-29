@@ -1,0 +1,109 @@
+[  {
+    "model": "referentie_tabellen.unit",
+    "pk": 1,
+    "fields": {
+      "name": "aantal",
+      "code": null,
+      "symbol": null
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 2,
+    "fields": {
+      "name": "percentage",
+      "code": "P",
+      "symbol": "%"
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 3,
+    "fields": {
+      "name": "rapportcijfer",
+      "code": "R",
+      "symbol": null
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 4,
+    "fields": {
+      "name": "index",
+      "code": "I",
+      "symbol": null
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 5,
+    "fields": {
+      "name": "gemiddelde duur in jaren",
+      "code": "GEM",
+      "symbol": "jaar"
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 6,
+    "fields": {
+      "name": "per 1000 woningen",
+      "code": "1000",
+      "symbol": "/1.000 woningen"
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 7,
+    "fields": {
+      "name": "coëfficiënt",
+      "code": null,
+      "symbol": null
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 8,
+    "fields": {
+      "name": "5-puntsschaal",
+      "code": null,
+      "symbol": null
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 9,
+    "fields": {
+      "name": "per km2",
+      "code": null,
+      "symbol": "/km2"
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 10,
+    "fields": {
+      "name": "gemiddelde prijs",
+      "code": "GEM",
+      "symbol": "euro"
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 11,
+    "fields": {
+      "name": "gemiddelde prijs per m2",
+      "code": null,
+      "symbol": "euro/m2"
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 12,
+    "fields": {
+      "name": "per 1000 inwoners",
+      "code": "1000",
+      "symbol": "/1.000 inwoners"
+    }
+  }
+]

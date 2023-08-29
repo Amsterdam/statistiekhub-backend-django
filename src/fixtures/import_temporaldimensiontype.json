@@ -1,0 +1,37 @@
+[   {
+  "model": "referentie_tabellen.temporaldimensiontype",
+  "fields": {
+    "name": "Peildatum"
+  }
+},
+  {
+    "model": "referentie_tabellen.temporaldimensiontype",
+    "fields": {
+      "name": "Dag"
+    }
+  },
+  {
+    "model": "referentie_tabellen.temporaldimensiontype",
+    "fields": {
+      "name": "Week"
+    }
+  },
+  {
+    "model": "referentie_tabellen.temporaldimensiontype",
+    "fields": {
+      "name": "Maand"
+    }
+  },
+  {
+    "model": "referentie_tabellen.temporaldimensiontype",
+    "fields": {
+      "name": "Kwartaal"
+    }
+  },
+  {
+    "model": "referentie_tabellen.temporaldimensiontype",
+    "fields": {
+      "name": "Jaar"
+    }
+  }
+]

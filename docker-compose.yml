@@ -1,0 +1,61 @@
+version: "3.5"
+
+x-app: &base-app
+  build:
+    context: .
+    target: app
+  depends_on:
+    - database
+  volumes:
+    - ./src:/src
+    - ./tests:/tests
+    - ./deploy:/deploy
+  environment: &base-app-env
+    DEBUG: "True"
+    SECRET_KEY: "insecure"
+    AUTHORIZATION_TOKEN: "auth-token"
+    GET_AUTHORIZATION_TOKEN: "get-auth-token"
+  entrypoint: /deploy/wait-for-it.sh database:5432 --
+
+services:
+  database:
+    image: postgis/postgis:15-3.3
+    ports:
+      - "5408:5432"
+    environment:
+      POSTGRES_DB: statistiek_hub
+      POSTGRES_USER: statistiek_hub
+      POSTGRES_PASSWORD: insecure
+    #command: postgres -c datestyle='iso, dmy'
+
+  app:
+    <<: *base-app
+    build:
+      context: .
+      target: app
+    env_file: .acc.env
+    image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}:${VERSION:-latest}
+    command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
+
+  dev:
+    <<: *base-app
+    build:
+      context: .
+      target: dev
+    environment:
+      DJANGO_SUPERUSER_PASSWORD: "admin"
+      DJANGO_SUPERUSER_USERNAME: "admin"
+      DJANGO_SUPERUSER_EMAIL: "admin@amsterdam.nl"
+      DEBUG: "True"
+    image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}-dev:${VERSION:-latest}
+    command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
+
+  test:
+    <<: *base-app
+    build:
+      context: .
+      target: tests
+    environment:
+      <<: *base-app-env
+      DJANGO_SETTINGS_MODULE: "main.settings"
+      DEBUG: "True"
