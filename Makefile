@@ -49,6 +49,15 @@ app:
 dev: migrate
 	$(run) --name bereikbaarheid-backend-django-dev --service-ports dev
 
+load_fixtures:  migrate                  ## Load initial data into database by django fixtures
+	$(manage) loaddata import_auth.json \
+	import_theme.json \
+	import_unit.json \
+	import_temporaldimensiontype.json \
+	import_spatialdimensiontype.json \
+	import_spatialdimension.json
+
+
 test: lint							## Execute tests
 	$(run) test pytest $(ARGS)
 
