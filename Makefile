@@ -55,7 +55,8 @@ load_fixtures:  migrate                  ## Load initial data into database by d
 	import_unit.json \
 	import_temporaldimensiontype.json \
 	import_spatialdimensiontype.json \
-	import_spatialdimension.json
+	import_spatialdimension.json \
+	import_temporaldimension.json
 
 
 test: lint							## Execute tests

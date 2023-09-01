@@ -13,3 +13,5 @@ pip-tools
 isort
 autoflake
 black
+pytest
+pytest-django

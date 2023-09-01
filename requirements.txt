@@ -32,7 +32,7 @@ odfpy==1.4.1
     # via tablib
 openpyxl==3.1.2
     # via tablib
-pandas==2.0.3
+pandas==2.1.0
     # via -r requirements.in
 psycopg2-binary==2.9.7
     # via -r requirements.in
