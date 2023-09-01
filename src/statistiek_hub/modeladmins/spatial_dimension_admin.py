@@ -1,9 +1,9 @@
 from django.contrib import admin
 from import_export.admin import ImportMixin
 from leaflet.admin import LeafletGeoAdminMixin
+
 from statistiek_hub.models.spatial_dimension import SpatialDimension
-from statistiek_hub.resources.spatial_dimension_resource import \
-    SpatialDimensionResource
+from statistiek_hub.resources.spatial_dimension_resource import SpatialDimensionResource
 from statistiek_hub.utils.formatters import GEOJSON
 
 

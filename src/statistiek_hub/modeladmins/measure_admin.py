@@ -1,5 +1,6 @@
 from django.contrib import admin
 from import_export.admin import ImportExportMixin
+
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.resources.measure_resource import MeasureResource
 from statistiek_hub.utils.formatters import SCSV

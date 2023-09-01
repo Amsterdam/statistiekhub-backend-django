@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+
 from referentie_tabellen.models import TemporalDimensionType
 from statistiek_hub.utils.datetime import add_timedelta
 

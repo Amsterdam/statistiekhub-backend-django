@@ -1,6 +1,11 @@
 from django.contrib import admin
-from referentie_tabellen.models import (SpatialDimensionType,
-                                        TemporalDimensionType, Theme, Unit)
+
+from referentie_tabellen.models import (
+    SpatialDimensionType,
+    TemporalDimensionType,
+    Theme,
+    Unit,
+)
 
 
 # referentie tabellen

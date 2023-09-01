@@ -4,30 +4,56 @@ from datetime import datetime
 from dateutil.relativedelta import *
 
 
-def convert_to_datetime(date: str = None, format: str = "%Y%m%d"):
-    """Convert string format to datetime"""
+def convert_to_datetime(date: str = None) -> datetime:
+    """Convert string format %Y%m%d (/,-) to datetime with time as 0 or %d/%m/%y %H:%M of %Y-%m-%d %H:%M:%S.%f to datetime"""
+
     if date in [None, " ", ""]:
         return ""
 
-    date = date.replace("-", "")
-
+    formats_allowed = [
+        "%Y%m%d",
+        "%Y/%m/%d",
+        "%Y-%m-%d",
+        "%d-%m-%Y",
+        "%d/%m/%Y",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%d/%m/%y %H:%M",
+    ]
     try:
-        date = datetime.strptime(date, format)
-    except ValueError:
+        for format in formats_allowed:
+            try:
+                _date = datetime.strptime(date, format)
+                break
+            except:
+                pass
+
+        return _date
+    except:
+        # remove date notation
+        replace_list = ["-", "/"]
+        for i in replace_list:
+            date = date.replace(i, "")
+
+        # O&S aanlever-format
         try:
+            print(f"print date o&s format: {date}")
             year = int(date[0:4])
             month = int(date[4:6])
             day = int(date[6:8])
-            date = datetime(
-                year, month if month != 0 else month + 1, day if day != 0 else day + 1
+            _date = datetime(
+                year,
+                month if month != 0 else month + 1,
+                day if day != 0 else day + 1,
             )
-        except ValueError:
-            return f"verkeerd format: {date}"
 
-    return date
+            return _date
+        except:
+            raise ValueError(
+                f"verkeerd datumformat: {date}, toegestane formats zijn {formats_allowed}"
+            )
 
 
-def add_timedelta(date, delta: str = None):
+def add_timedelta(date: datetime, delta: str = None):
     """Add timedelta to datetime"""
 
     delta_date = None
@@ -48,10 +74,10 @@ def add_timedelta(date, delta: str = None):
     return delta_date
 
 
-def convert_to_date(date: str = None, format: str = "%Y%m%d") -> datetime.date:
+def convert_to_date(date: str = None) -> datetime.date:
     """Convert string format to date"""
 
-    _date = convert_to_datetime(date, format)
+    _date = convert_to_datetime(date)
 
     if type(_date) != str:
         _date = _date.date()

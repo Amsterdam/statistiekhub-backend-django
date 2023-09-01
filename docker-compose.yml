@@ -61,7 +61,8 @@ services:
       <<: *base-app-env
       DJANGO_SETTINGS_MODULE: "main.settings"
       DEBUG: "True"
-
+    networks:
+      - backend
 
 networks:
   backend:

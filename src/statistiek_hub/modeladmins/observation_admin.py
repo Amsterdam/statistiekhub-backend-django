@@ -1,5 +1,6 @@
 from django.contrib import admin
 from import_export.admin import ImportExportMixin
+
 from statistiek_hub.resources.observation_resource import ObservationResource
 from statistiek_hub.utils.formatters import SCSV
 

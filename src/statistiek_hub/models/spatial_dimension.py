@@ -1,5 +1,6 @@
 from django.contrib.gis.db.models import GeometryField
 from django.db import models
+
 from referentie_tabellen.models import SpatialDimensionType
 
 
