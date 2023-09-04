@@ -23,7 +23,7 @@ admin.site.site_title = "Statistiek_hub Admin Portal"
 admin.site.index_title = "Welcome to Statistiek_hub Portal"
 
 urlpatterns = [    
-    path("status/", include("health.urls")),
+    path("", include("health.urls")),
     path("admin/", admin.site.urls),
 ]
 
