@@ -4,21 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
 # field validation
-def check_value_uppercase(value: str) -> ValidationError:
-    """check if value is all uppercase
-
-    Params
-    ------------
-    value: str
-
-    Return
-    -----------
-    ValidationError() if not uppercase
-    """
-
-    if value != value.upper():
-        return ValidationError(f"This field needs to be in Uppercase")
-
 
 def check_value_context(unit_code: str, value: float) -> ValidationError:
     """check if value is valid given the unit_code

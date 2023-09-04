@@ -16,13 +16,14 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
 admin.site.site_header = "Statistiek_hub Admin"
 admin.site.site_title = "Statistiek_hub Admin Portal"
 admin.site.index_title = "Welcome to Statistiek_hub Portal"
 
-urlpatterns = [
+urlpatterns = [    
+    path("status/", include("health.urls")),
     path("admin/", admin.site.urls),
 ]
 
