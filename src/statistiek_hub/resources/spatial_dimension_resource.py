@@ -2,6 +2,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from import_export.fields import Field
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
+
 from referentie_tabellen.models import SpatialDimensionType
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 

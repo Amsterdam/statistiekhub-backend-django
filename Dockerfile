@@ -1,39 +1,44 @@
-FROM python:3.11-slim-bullseye as app
+FROM python:3.11-buster as app
+MAINTAINER datapunt@amsterdam.nl
 
 ENV PYTHONUNBUFFERED 1 \
     PIP_NO_CACHE_DIR=off
 
 RUN apt-get update \
- && apt-get dist-upgrade -y \
- && apt-get install --no-install-recommends -y \
-        gdal-bin \
- && pip install --upgrade pip \
- && useradd --user-group --system datapunt
+    && apt-get dist-upgrade -y \
+    && apt-get install --no-install-recommends -y \
+	&& apt-get install -y gdal-bin libgeos-dev netcat \
+    && pip install --upgrade pip \
+    && pip install uwsgi \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-WORKDIR /app_install
-COPY requirements.txt requirements.txt
+RUN adduser --system datapunt
+
+RUN mkdir -p /src && chown datapunt /src
+RUN mkdir -p /deploy && chown datapunt /deploy
+RUN mkdir -p /var/log/uwsgi && chown datapunt /var/log/uwsgi
+
+WORKDIR /install
+ADD requirements.txt .
 RUN pip install -r requirements.txt
-
-COPY deploy /deploy
+RUN chmod -R a+r /install
 
 WORKDIR /src
-COPY src .
 
-ARG SECRET_KEY=not-used
-ARG AUTHORIZATION_TOKEN=not-used
-ARG GET_AUTHORIZATION_TOKEN=not-used
-#RUN python manage.py collectstatic --no-input
+COPY src .
+COPY deploy /deploy
 
 USER datapunt
 
 CMD ["/deploy/docker-run.sh"]
 
-# stage 2, dev
+# devserver
 FROM app as dev
 
 USER root
-WORKDIR /app_install
-ADD requirements_dev.txt requirements_dev.txt
+WORKDIR /install
+ADD requirements_dev.txt .
 RUN pip install -r requirements_dev.txt
 
 WORKDIR /src
@@ -43,16 +48,18 @@ USER datapunt
 # we write to /tmp since we have no home dir
 ENV HOME /tmp
 
-CMD ["./manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python manage.py runserver 0.0.0.0"]
 
-# stage 3, tests
+# tests
 FROM dev as tests
 
 USER datapunt
 WORKDIR /tests
 ADD tests .
+COPY pyproject.toml /.
 
-ENV COVERAGE_FILE=/tmp/.coverage
+# ENV COVERAGE_FILE=/tmp/.coverage
 ENV PYTHONPATH=/src
+# ENV USE_JWKS_TEST_KEY=True
 
 CMD ["pytest"]

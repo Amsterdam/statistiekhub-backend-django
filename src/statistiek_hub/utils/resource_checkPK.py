@@ -1,4 +1,6 @@
 from import_export.resources import Error
+from pandas import DataFrame
+from tablib import Dataset
 
 
 class SimpleError(Error):
@@ -7,8 +9,18 @@ class SimpleError(Error):
         self.traceback = ""
 
 
-def check_exists_in_model(dataset, dfmodel, column: list, field: list):
-    """check if values from import (dataset[column]) exists in a model field"""
+def check_exists_in_model(
+    dataset: Dataset, dfmodel: DataFrame, column: list, field: list
+):
+    """check if values from import (dataset[column]) exists in a model field
+
+    Return
+    -----------
+    if value not exists in model:
+    Returned: self made error with information on not_found
+    if value exists:
+    Returned: False (=no error)
+    """
 
     data_set = set(zip(*[list(str(x).upper() for x in dataset[c]) for c in column]))
     model_field = set(

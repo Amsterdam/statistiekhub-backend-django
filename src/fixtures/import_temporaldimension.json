@@ -1,0 +1,12 @@
+[
+{
+    "model": "statistiek_hub.temporaldimension",
+    "fields": {
+        "name": "Peildatum: 1900-01-01-->1900-01-01",
+        "type": 1,
+        "startdate": "1900-01-01T00:00:01",
+        "enddate": "1900-01-01T00:00:01",
+        "parent": null
+    }
+}
+]

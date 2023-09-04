@@ -19,7 +19,7 @@ x-app: &base-app
 
 services:
   database:
-    image: postgis/postgis:15-3.3
+    image: postgis/postgis:11-3.3 #postgis/postgis:15-3.3
     ports:
       - "5408:5432"
     environment:
@@ -27,35 +27,44 @@ services:
       POSTGRES_USER: statistiek_hub
       POSTGRES_PASSWORD: insecure
     #command: postgres -c datestyle='iso, dmy'
+    networks:
+      - backend
 
   app:
     <<: *base-app
-    build:
-      context: .
-      target: app
     env_file: .acc.env
+    environment:
+      DEBUG: false
+      DJANGO_SETTINGS_MODULE: main.settings
     image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}:${VERSION:-latest}
     command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
 
   dev:
     <<: *base-app
     build:
-      context: .
       target: dev
     environment:
+      <<: *base-app-env
       DJANGO_SUPERUSER_PASSWORD: "admin"
       DJANGO_SUPERUSER_USERNAME: "admin"
       DJANGO_SUPERUSER_EMAIL: "admin@amsterdam.nl"
       DEBUG: "True"
     image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}-dev:${VERSION:-latest}
     command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
+    networks:
+      - backend
 
   test:
     <<: *base-app
     build:
-      context: .
       target: tests
     environment:
       <<: *base-app-env
       DJANGO_SETTINGS_MODULE: "main.settings"
       DEBUG: "True"
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: amsterdam-statistiek_hub

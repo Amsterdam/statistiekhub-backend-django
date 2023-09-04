@@ -3,17 +3,19 @@ from django.core.exceptions import ValidationError
 from import_export.fields import Field
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
-from referentie_tabellen.models import (SpatialDimensionType,
-                                        TemporalDimensionType)
+
+from referentie_tabellen.models import SpatialDimensionType, TemporalDimensionType
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
-from statistiek_hub.utils.converter import convert
-from statistiek_hub.utils.datetime import (add_timedelta, convert_to_date,
-                                           convert_to_datetime)
-from statistiek_hub.utils.resource_checkPK import (SimpleError,
-                                                   check_exists_in_model)
+from statistiek_hub.utils.converter import convert_str
+from statistiek_hub.utils.datetime import (
+    add_timedelta,
+    convert_to_date,
+    convert_to_datetime,
+)
+from statistiek_hub.utils.resource_checkPK import SimpleError, check_exists_in_model
 from statistiek_hub.utils.timer import timeit
 from statistiek_hub.validations import get_instance
 
@@ -147,6 +149,9 @@ class ObservationResource(ModelResource):
                 header="start_date",
             )
 
+            print(dataset.headers)
+            print(dfmeasure[0:2])
+
             check = {
                 "measure_names": {
                     "dataset": dataset,
@@ -224,7 +229,7 @@ class ObservationResource(ModelResource):
             raise ValidationError(errors)
 
     def before_import_row(self, row, row_number, **kwargs):
-        row["value"] = convert(row["value"])
+        row["value"] = convert_str(row["value"])
         row["spatialdimension"] = "-"
         row["temporaldimension"] = "-"
 

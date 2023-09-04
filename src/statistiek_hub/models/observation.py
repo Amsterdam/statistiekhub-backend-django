@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+
 from statistiek_hub.validations import check_value_context
 
 from .measure import Measure
