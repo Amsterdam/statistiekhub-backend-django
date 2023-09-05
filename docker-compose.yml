@@ -32,7 +32,7 @@ services:
 
   app:
     <<: *base-app
-    env_file: .acc.env
+    #env_file: .acc.env
     environment:
       DEBUG: false
       DJANGO_SETTINGS_MODULE: main.settings
