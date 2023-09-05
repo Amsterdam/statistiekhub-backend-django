@@ -24,11 +24,11 @@ def convert_to_datetime(date: str = None) -> datetime:
             try:
                 _date = datetime.strptime(date, format)
                 break
-            except:
+            except ValueError:
                 pass
 
         return _date
-    except:
+    except UnboundLocalError:
         # remove date notation
         replace_list = ["-", "/"]
         for i in replace_list:
@@ -47,7 +47,7 @@ def convert_to_datetime(date: str = None) -> datetime:
             )
 
             return _date
-        except:
+        except ValueError:
             raise ValueError(
                 f"verkeerd datumformat: {date}, toegestane formats zijn {formats_allowed}"
             )
