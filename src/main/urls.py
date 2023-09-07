@@ -25,7 +25,7 @@ admin.site.index_title = "Welcome to Statistiek_hub Portal"
 urlpatterns = [
     path("", include("health.urls")),
     path("admin/", admin.site.urls),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(

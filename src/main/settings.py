@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "statistiek_hub",
     "referentie_tabellen",
     "import_export",
+    "import_export_celery",
     "leaflet",
 ]
 
@@ -58,7 +59,27 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
+
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq'
+
+IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
+
+def resource():  # Optional
+    from statistiek_hub.resources.observation_resource import ObservationResource
+    return ObservationResource
+
+IMPORT_EXPORT_CELERY_MODELS = {
+    "Observation": {
+        'app_label': 'observations',
+        'model_name': 'observation',
+        'resource': resource,  # Optional
+    }
+}
+
+IMPORT_EXPORT_CELERY_STORAGE = "django.core.files.storage.FileSystemStorage"
+
 
 ROOT_URLCONF = "main.urls"
 BASE_URL = os.getenv("BASE_URL", "")
@@ -154,14 +175,6 @@ CACHES = {
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "django_cache",
-    }
-}
 
 
 FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]

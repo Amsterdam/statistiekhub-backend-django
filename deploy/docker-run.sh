@@ -7,5 +7,7 @@ set -x
 echo Collecting static files
 python manage.py collectstatic --no-input
 
+python manage.py createcachetable
+
 # run uwsgi
 exec uwsgi --ini main/uwsgi.ini
