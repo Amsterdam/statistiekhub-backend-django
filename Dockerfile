@@ -18,6 +18,7 @@ RUN adduser --system datapunt
 RUN mkdir -p /src && chown datapunt /src
 RUN mkdir -p /deploy && chown datapunt /deploy
 RUN mkdir -p /var/log/uwsgi && chown datapunt /var/log/uwsgi
+RUN mkdir -p /src/media/django-import-export-celery-import-jobs && chown datapunt /src/media/django-import-export-celery-import-jobs
 
 WORKDIR /install
 ADD requirements.txt .

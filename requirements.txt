@@ -43,7 +43,7 @@ django-import-export==3.2.0
     # via
     #   -r requirements.in
     #   django-import-export-celery
-django-import-export-celery==1.6
+django-import-export-celery @ git+https://github.com/auto-mat/django-import-export-celery@master
     # via -r requirements.in
 django-leaflet==0.29.0
     # via -r requirements.in

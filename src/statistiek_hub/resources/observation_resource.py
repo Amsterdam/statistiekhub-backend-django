@@ -258,3 +258,6 @@ class ObservationResource(ModelResource):
         report_skipped = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("measure", "spatialdimension", "temporaldimension")
+        #Iterate over chunks of 5000 objects at once
+        chunk_size = 5000
+

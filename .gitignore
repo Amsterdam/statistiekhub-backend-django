@@ -95,6 +95,7 @@ venv.bak/
 # Spyder project settings
 .spyderproject
 .spyproject
+**media/
 
 # Rope project settings
 .ropeproject
@@ -114,7 +115,6 @@ venv.bak/
 # Local settings that should never be committed
 docker-compose.override.yml
 .pre-commit-config.yaml
-**media/
 
 # macos
 .DS_Store

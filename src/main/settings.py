@@ -62,6 +62,7 @@ MIDDLEWARE = [
     "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
 
+
 CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq'
 
 IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
@@ -72,9 +73,9 @@ def resource():  # Optional
 
 IMPORT_EXPORT_CELERY_MODELS = {
     "Observation": {
-        'app_label': 'observations',
-        'model_name': 'observation',
-        'resource': resource,  # Optional
+        "app_label": "statistiek_hub",
+        "model_name": "Observation",
+        "resource": resource,  # Optional
     }
 }
 

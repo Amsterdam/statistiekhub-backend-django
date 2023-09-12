@@ -43,11 +43,9 @@ clean:                              ## Clean docker stuff
 app:
 	$(dc) up app
 
-# the name option is explicitly set, so the back- and frontend can communicate
-# with eachother while on the same docker network. The frontend docker-compose
-# file contains a reference to the set name
+
 dev: migrate
-	$(run) --name bereikbaarheid-backend-django-dev --service-ports dev
+	$(run) --service-ports dev
 
 load_fixtures:  migrate                  ## Load initial data into database by django fixtures
 	$(manage) loaddata import_auth.json \
@@ -89,7 +87,7 @@ migrations:
 
 trivy: 	    						## Detect image vulnerabilities
 	$(dc) build --no-cache app
-	trivy image --ignore-unfixed docker-registry.secure.amsterdam.nl/datapunt/bereikbaarheid-backend
+	trivy image --ignore-unfixed docker-registry.secure.amsterdam.nl/datapunt/statistiek_hub
 
 kustomize:
 	kustomize build manifests/overlays/local | kubectl apply -f -

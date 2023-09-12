@@ -9,4 +9,4 @@ psycopg2-binary
 python-dateutil
 pandas
 celery
-django-import-export-celery
+django-import-export-celery @ git+https://github.com/auto-mat/django-import-export-celery@master #main is verder dan pypy op dit moment september 2023
