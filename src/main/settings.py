@@ -185,13 +185,19 @@ LOGGING = {
     "disable_existing_loggers": False,
     "handlers": {
         "console": {
-            "level": "INFO",
             "class": "logging.StreamHandler",
         },
     },
-    "django": {
+    "root": {
         "handlers": ["console"],
-        "level": "DEBUG",
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
     },
 }
 

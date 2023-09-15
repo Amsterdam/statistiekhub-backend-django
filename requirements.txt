@@ -33,24 +33,19 @@ django==4.1.11
     #   -r requirements.in
     #   django-db-views
     #   django-import-export
-    #   django-import-export-celery
     #   django-leaflet
 django-author==1.2.0
-    # via django-import-export-celery
+    # via -r requirements.in
 django-db-views==0.1.5
     # via -r requirements.in
-django-import-export==3.2.0
-    # via
-    #   -r requirements.in
-    #   django-import-export-celery
-django-import-export-celery @ git+https://github.com/auto-mat/django-import-export-celery@master
+django-import-export==3.3.1
     # via -r requirements.in
 django-leaflet==0.29.0
     # via -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
 html2text==2020.1.16
-    # via django-import-export-celery
+    # via -r requirements.in
 kombu==5.3.2
     # via celery
 markuppy==1.14

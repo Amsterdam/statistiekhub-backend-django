@@ -58,19 +58,12 @@ django==4.1.11
     #   -r ./requirements.txt
     #   django-db-views
     #   django-import-export
-    #   django-import-export-celery
     #   django-leaflet
 django-author==1.2.0
-    # via
-    #   -r ./requirements.txt
-    #   django-import-export-celery
+    # via -r ./requirements.txt
 django-db-views==0.1.5
     # via -r ./requirements.txt
-django-import-export==3.2.0
-    # via
-    #   -r ./requirements.txt
-    #   django-import-export-celery
-django-import-export-celery @ git+https://github.com/auto-mat/django-import-export-celery@master
+django-import-export==3.3.1
     # via -r ./requirements.txt
 django-leaflet==0.29.0
     # via -r ./requirements.txt
@@ -81,9 +74,7 @@ et-xmlfile==1.1.0
 exceptiongroup==1.1.3
     # via pytest
 html2text==2020.1.16
-    # via
-    #   -r ./requirements.txt
-    #   django-import-export-celery
+    # via -r ./requirements.txt
 iniconfig==2.0.0
     # via pytest
 isort==5.12.0
@@ -213,5 +204,5 @@ xlwt==1.3.0
 # The following packages are considered to be unsafe in a requirements file:
 pip==23.2.1
     # via pip-tools
-setuptools==68.2.1
+setuptools==68.2.2
     # via pip-tools
