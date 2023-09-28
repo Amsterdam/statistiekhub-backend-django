@@ -11,7 +11,7 @@ class SpatialDimensionResource(ModelResource):
     type = Field(
         column_name="type",
         attribute="type",
-        widget=ForeignKeyWidget(SpatialDimensionType, field="type"),
+        widget=ForeignKeyWidget(SpatialDimensionType, field="name"),
     )
 
     def before_import_row(self, row, row_number, **kwargs):

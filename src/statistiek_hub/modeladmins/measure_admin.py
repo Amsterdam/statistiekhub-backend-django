@@ -3,8 +3,7 @@ from import_export.admin import ImportExportMixin
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.resources.measure_resource import MeasureResource
-from statistiek_hub.utils.formatters import SCSV
-
+from . import_export_formats_mixin import ImportExportFormatsMixin
 
 class FilterInline(admin.TabularInline):
     model = Filter
@@ -12,7 +11,7 @@ class FilterInline(admin.TabularInline):
     extra = 0  # <=== For remove empty fields from admin view
 
 
-class MeasureAdmin(ImportExportMixin, admin.ModelAdmin):
+class MeasureAdmin(ImportExportFormatsMixin, ImportExportMixin, admin.ModelAdmin):
     list_display = (
         "name",
         "label",
@@ -75,8 +74,6 @@ class MeasureAdmin(ImportExportMixin, admin.ModelAdmin):
         ),
     )
 
-    def get_import_formats(self):
-        return [SCSV] + self.formats
 
     def get_readonly_fields(self, request, obj=None):
         if request.user.is_superuser:

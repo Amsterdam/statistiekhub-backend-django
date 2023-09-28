@@ -31,19 +31,25 @@ def convert_to_datetime(date: str = None) -> datetime:
 
     if _date == None:
         # probeer O&S aanlever-format
-            
+
         # remove date notation
         replace_list = ["-", "/"]
         for i in replace_list:
             date = date.replace(i, "")
 
-        try:           
+        try:
             year = int(date[0:4])
             month = int(date[4:6])
             day = int(date[6:8])
-            _date = datetime(year, month if month != 0 else month + 1, day if day != 0 else day + 1,)
+            _date = datetime(
+                year,
+                month if month != 0 else month + 1,
+                day if day != 0 else day + 1,
+            )
         except:
-            raise ValueError(f"verkeerd datumformat voor {date}, toegestane formats zijn {formats_allowed}")       
+            raise ValueError(
+                f"verkeerd datumformat voor {date}, toegestane formats zijn {formats_allowed}"
+            )
 
     if _date != None:
         return _date

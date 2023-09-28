@@ -6,5 +6,5 @@ added the following requirements to requirements.txt:
 django-author
 html2text
 
-and adjusted the admin to only import_jobs
+Adjusted the admin to only IMPORT - removed the export code
 

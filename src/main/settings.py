@@ -63,19 +63,29 @@ MIDDLEWARE = [
 ]
 
 
-CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq'
+CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq"
 
 IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
 
-def resource():  # Optional
+
+def resource_observation():  # Optional
     from statistiek_hub.resources.observation_resource import ObservationResource
     return ObservationResource
+
+def resource_spatialdimension():  # Optional
+    from statistiek_hub.resources.spatial_dimension_resource import SpatialDimensionResource
+    return SpatialDimensionResource
 
 IMPORT_EXPORT_CELERY_MODELS = {
     "Observation": {
         "app_label": "statistiek_hub",
         "model_name": "Observation",
-        "resource": resource,  # Optional
+        "resource": resource_observation,  # Optional
+    },
+    "SpatialDimension": {
+        "app_label": "statistiek_hub",
+        "model_name": "SpatialDimension",
+        "resource": resource_spatialdimension,  # Optional
     }
 }
 

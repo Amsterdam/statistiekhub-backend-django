@@ -6,15 +6,17 @@ import tablib
 from django.core.exceptions import ValidationError
 from import_export.formats import base_formats
 
-from statistiek_hub.utils.timer import timeit
-
 
 class SCSV(base_formats.CSV):
+    CONTENT_TYPE = 'semicolon text/csv'
+
     def get_title(self):
         return "semicolon_csv"
 
-    @timeit
     def create_dataset(self, in_stream, **kwargs):
+        if isinstance(in_stream, bytes) and self.encoding:
+            in_stream = in_stream.decode(self.encoding)
+
         delimiter = csv.Sniffer().sniff(in_stream, delimiters=";,").delimiter
         if delimiter != ";":
             raise ValidationError(
@@ -25,8 +27,21 @@ class SCSV(base_formats.CSV):
         kwargs["format"] = "csv"
         return tablib.import_set(in_stream, **kwargs)
 
+    def export_data(self, dataset, **kwargs):
+        # remove the deprecated `escape_output` param if present
+        kwargs.pop("escape_output", None)
+        if kwargs.pop("escape_html", None):
+            self._escape_html(dataset)
+        if kwargs.pop("escape_formulae", None):
+            self._escape_formulae(dataset)
+
+        kwargs['delimiter'] = ';'
+        return dataset.export("csv",**kwargs)
+
 
 class GEOJSON(base_formats.TablibFormat):
+    CONTENT_TYPE = 'geojson'
+
     def get_title(self):
         return "geojson"
 
@@ -34,6 +49,7 @@ class GEOJSON(base_formats.TablibFormat):
         """
         Create tablib.dataset from geojson.
         """
+        print('------------------------------- in create dataset geojson')
 
         data = json.load(tablib.utils.normalize_input(in_stream))
 

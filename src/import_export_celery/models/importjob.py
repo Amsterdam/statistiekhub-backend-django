@@ -1,22 +1,18 @@
 # Copyright (C) 2019 o.s. Auto*Mat
 
-from django.conf import settings
-from django.utils import timezone
+import logging
 
 from author.decorators import with_author
-
+from django.conf import settings
 from django.db import models, transaction
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-
-from django.db.models.signals import post_save, post_delete
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-from import_export.formats.base_formats import DEFAULT_FORMATS
+from ..utils import DEFAULT_FORMATS
 
 from ..fields import ImportExportFileField
 from ..tasks import run_import_job
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -81,10 +77,10 @@ class ImportJob(models.Model):
     @staticmethod
     def get_format_choices():
         """returns choices of available import formats"""
+        formats = DEFAULT_FORMATS
         return [
             (f.CONTENT_TYPE, f().get_title())
-            for f in DEFAULT_FORMATS
-            if f().can_import()
+            for f in formats
         ]
 
 
@@ -120,34 +116,9 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
                 instance.change_summary.delete()
             except Exception as e:
                 logger.error(
-                    "Some error occurred while deleting ImportJob change_summary file: {0}".format(e))
-                                
+                    "Some error occurred while deleting ImportJob change_summary file: {0}".format(
+                        e
+                    )
+                )
+
         ImportJob.objects.filter(id=instance.id).delete()
-
-
-# @receiver(models.signals.pre_save, sender=ImportJob)
-# def auto_delete_file_on_change(sender, instance, **kwargs):
-#     """
-#     Deletes old file from filesystem
-#     when corresponding `ImportJob` object is updated
-#     with new file.
-#     """
-#     # first time save -> exit
-#     # if not instance._state.adding:
-#     #     return False
-
-#     try:
-#         old_file = ImportJob.objects.get(pk=instance.pk).change_summary
-#     except ImportJob.DoesNotExist:
-#         return False
-
-#     new_file = instance.change_summary
-
-#     print(f'----------------------------in presave: {old_file} {new_file}')
-
-#     if not old_file == new_file and old_file != None:
-#         try:
-#             instance.change_summary.delete()
-#         except Exception as e:
-#             logger.error(
-#                 "Some error occurred while deleting ImportJob change_summary file: {0}".format(e))

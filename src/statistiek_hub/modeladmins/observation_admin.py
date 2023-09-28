@@ -2,10 +2,9 @@ from django.contrib import admin
 from import_export.admin import ImportExportMixin
 
 from statistiek_hub.resources.observation_resource import ObservationResource
-from statistiek_hub.utils.formatters import SCSV
+from . import_export_formats_mixin import ImportExportFormatsMixin
 
-
-class ObservationAdmin(ImportExportMixin, admin.ModelAdmin):
+class ObservationAdmin(ImportExportFormatsMixin, ImportExportMixin, admin.ModelAdmin):
     list_display = (
         "id",
         "measure",
@@ -25,11 +24,3 @@ class ObservationAdmin(ImportExportMixin, admin.ModelAdmin):
 
     resource_classes = [ObservationResource]
 
-    # change_list_template = "core/admin/change_list.html"
-
-    def get_import_formats(self):
-        """
-        Returns available import formats.
-        """
-
-        return [SCSV]
