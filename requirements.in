@@ -10,5 +10,3 @@ python-dateutil
 pandas
 celery
 django-author
-html2text
-#django-import-export-celery @ git+https://github.com/auto-mat/django-import-export-celery@master #main is verder dan pypy op dit moment september 2023
