@@ -14,9 +14,7 @@ from .models.temporal_dimension import TemporalDimension
 from .models.topic import Topic
 from .models.topic_set import TopicSet
 
-
 # Register your models here.
-
 
 
 # uitgebreide Admin functionaliteiten - import/export, leaflet, validatiechecks etc.

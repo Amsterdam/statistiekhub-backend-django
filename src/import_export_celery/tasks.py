@@ -8,12 +8,12 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
 from . import models
 from .model_config import ModelConfig
 from .utils import DEFAULT_FORMATS
+
 logger = logging.getLogger(__name__)
 
 log = get_task_logger(__name__)
@@ -198,4 +198,3 @@ def run_import_job(pk, dry_run=True):
         change_job_status(import_job, "import", "Import error", dry_run)
         import_job.save()
         return
-

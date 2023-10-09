@@ -3,7 +3,9 @@ from import_export.admin import ImportExportMixin
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.resources.measure_resource import MeasureResource
-from . import_export_formats_mixin import ImportExportFormatsMixin
+
+from .import_export_formats_mixin import ImportExportFormatsMixin
+
 
 class FilterInline(admin.TabularInline):
     model = Filter
@@ -73,7 +75,6 @@ class MeasureAdmin(ImportExportFormatsMixin, ImportExportMixin, admin.ModelAdmin
             },
         ),
     )
-
 
     def get_readonly_fields(self, request, obj=None):
         if request.user.is_superuser:

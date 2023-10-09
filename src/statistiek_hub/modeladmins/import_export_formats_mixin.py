@@ -1,9 +1,11 @@
 from import_export.formats import base_formats
+
 from statistiek_hub.utils.formatters import SCSV
 
-class ImportExportFormatsMixin():
-    """ overwrites the standard get_import_formats and get_export_formats from the ImoprtExportMixin
-        because it's an overwrite it must go to the left of the 'ImportExportMixin' class
+
+class ImportExportFormatsMixin:
+    """overwrites the standard get_import_formats and get_export_formats from the ImoprtExportMixin
+    because it's an overwrite it must go to the left of the 'ImportExportMixin' class
     """
 
     def get_import_formats(self):

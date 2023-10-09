@@ -24,7 +24,6 @@ class ImportJobTestCases(TestCase):
 
         assert not os.path.exists(file_path)
         assert not ImportJob.objects.filter(id=job.id).exists()
-        
+
         assert not os.path.exists(change_summary_path)
         assert not ImportJob.objects.filter(id=job.id).exists()
-

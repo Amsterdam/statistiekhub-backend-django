@@ -8,7 +8,7 @@ from import_export.formats import base_formats
 
 
 class SCSV(base_formats.CSV):
-    CONTENT_TYPE = 'semicolon text/csv'
+    CONTENT_TYPE = "semicolon text/csv"
 
     def get_title(self):
         return "semicolon_csv"
@@ -35,12 +35,12 @@ class SCSV(base_formats.CSV):
         if kwargs.pop("escape_formulae", None):
             self._escape_formulae(dataset)
 
-        kwargs['delimiter'] = ';'
-        return dataset.export("csv",**kwargs)
+        kwargs["delimiter"] = ";"
+        return dataset.export("csv", **kwargs)
 
 
 class GEOJSON(base_formats.TablibFormat):
-    CONTENT_TYPE = 'geojson'
+    CONTENT_TYPE = "geojson"
 
     def get_title(self):
         return "geojson"
@@ -49,7 +49,7 @@ class GEOJSON(base_formats.TablibFormat):
         """
         Create tablib.dataset from geojson.
         """
-        print('------------------------------- in create dataset geojson')
+        print("------------------------------- in create dataset geojson")
 
         data = json.load(tablib.utils.normalize_input(in_stream))
 

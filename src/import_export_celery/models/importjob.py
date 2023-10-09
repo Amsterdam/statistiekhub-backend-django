@@ -9,10 +9,10 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from ..utils import DEFAULT_FORMATS
 
 from ..fields import ImportExportFileField
 from ..tasks import run_import_job
+from ..utils import DEFAULT_FORMATS
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +78,7 @@ class ImportJob(models.Model):
     def get_format_choices():
         """returns choices of available import formats"""
         formats = DEFAULT_FORMATS
-        return [
-            (f.CONTENT_TYPE, f().get_title())
-            for f in formats
-        ]
+        return [(f.CONTENT_TYPE, f().get_title()) for f in formats]
 
 
 @receiver(post_save, sender=ImportJob)

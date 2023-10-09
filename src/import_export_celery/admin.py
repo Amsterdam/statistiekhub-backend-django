@@ -70,9 +70,10 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         admin_actions.run_import_job_action_dry,
     )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> list[str] | tuple[Any, ...]:
+    def get_readonly_fields(
+        self, request: HttpRequest, obj: Any | None = ...
+    ) -> list[str] | tuple[Any, ...]:
         if obj:
             return ("file",) + self.readonly_fields
         else:
             return self.readonly_fields
-
