@@ -64,8 +64,12 @@ MIDDLEWARE = [
 
 
 CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq"
-
 IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
+
+# For files
+FILE_UPLOAD_PERMISSIONS = 0o777
+# For directories
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o777
 
 
 def resource_observation():
