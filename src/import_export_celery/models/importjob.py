@@ -10,9 +10,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from ..fields import ImportExportFileField
-from ..tasks import run_import_job
-from ..utils import DEFAULT_FORMATS
+from import_export_celery.fields import ImportExportFileField
+from import_export_celery.tasks import run_import_job
+from import_export_celery.utils import DEFAULT_FORMATS
 
 logger = logging.getLogger(__name__)
 

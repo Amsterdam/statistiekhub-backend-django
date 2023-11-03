@@ -67,7 +67,7 @@ CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq"
 IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
 
 # For files
-FILE_UPLOAD_PERMISSIONS = 0o777
+FILE_UPLOAD_PERMISSIONS = 0o755
 # For directories
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o777
 
@@ -100,7 +100,6 @@ IMPORT_EXPORT_CELERY_MODELS = {
 }
 
 IMPORT_EXPORT_CELERY_STORAGE = "django.core.files.storage.FileSystemStorage"
-
 
 ROOT_URLCONF = "main.urls"
 BASE_URL = os.getenv("BASE_URL", "")

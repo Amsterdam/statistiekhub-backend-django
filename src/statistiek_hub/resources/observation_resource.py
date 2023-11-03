@@ -19,6 +19,8 @@ from statistiek_hub.utils.resource_checkPK import SimpleError, check_exists_in_m
 from statistiek_hub.utils.timer import timeit
 from statistiek_hub.validations import get_instance
 
+CHUNKSIZE = 5000
+
 
 class MeasureForeignKeyWidget(ForeignKeyWidget):
     def clean(self, value, row, **kwargs):
@@ -255,5 +257,5 @@ class ObservationResource(ModelResource):
         report_skipped = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("measure", "spatialdimension", "temporaldimension")
-        # Iterate over chunks of 5000 objects at once
-        chunk_size = 5000
+        # Iterate over chunks of CHUNKSIZE objects at once
+        chunk_size = CHUNKSIZE

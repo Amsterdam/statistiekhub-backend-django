@@ -51,8 +51,7 @@ def convert_to_datetime(date: str = None) -> datetime:
                 f"verkeerd datumformat voor {date}, toegestane formats zijn {formats_allowed}"
             )
 
-    if _date != None:
-        return _date
+    return _date
 
 
 def add_timedelta(date: datetime, delta: str = None):

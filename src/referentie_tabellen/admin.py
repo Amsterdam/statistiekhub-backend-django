@@ -28,7 +28,7 @@ class CustomUserAdmin(UserAdmin):
             }
 
         # Prevent non-superusers from editing their own permissions
-        if not is_superuser and obj is not None and obj == request.user:
+        if not is_superuser and obj == request.user:
             disabled_fields |= {
                 "is_staff",
                 "is_superuser",
