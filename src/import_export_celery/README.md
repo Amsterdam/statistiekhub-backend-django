@@ -12,7 +12,7 @@ Adjustments to original code:
 - fixed error if in_stream == bytes then decode to string
 - applied linting
 - adjusted job-formats to statistiek_hub import formats
-
+- create html in tasks.py with template
 
 
 

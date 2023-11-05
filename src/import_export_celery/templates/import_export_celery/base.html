@@ -1,0 +1,16 @@
+<body>
+    <header class="page-header">
+      <div class="container">
+        {% block header %}
+        {% endblock %}
+      </div>
+    </header>
+    <main class="container">
+        <div class="row">
+            <div class="col">
+            {% block content %}
+            {% endblock %}
+            </div>
+        </div>
+    </main>
+</body>
