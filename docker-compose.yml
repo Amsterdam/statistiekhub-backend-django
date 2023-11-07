@@ -6,6 +6,8 @@ x-app: &base-app
     target: app
   depends_on:
     - database
+    - rabbitmq
+    - celery
   volumes:
     - ./src:/src
     - ./tests:/tests
@@ -27,8 +29,24 @@ services:
       POSTGRES_USER: statistiek_hub
       POSTGRES_PASSWORD: insecure
     #command: postgres -c datestyle='iso, dmy'
-    networks:
-      - backend
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: 'rabbitmq'
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  celery:
+    build:
+      context: . 
+    depends_on:
+      - database
+      - rabbitmq
+    volumes:
+      - ./src:/src      
+    command:  celery -A main worker -l info
+    restart: always
 
   app:
     <<: *base-app
@@ -37,7 +55,7 @@ services:
       DEBUG: false
       DJANGO_SETTINGS_MODULE: main.settings
     image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}:${VERSION:-latest}
-    command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
+    command: python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
 
   dev:
     <<: *base-app
@@ -51,8 +69,6 @@ services:
       DEBUG: "True"
     image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}-dev:${VERSION:-latest}
     command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
-    networks:
-      - backend
 
   test:
     <<: *base-app
@@ -62,9 +78,4 @@ services:
       <<: *base-app-env
       DJANGO_SETTINGS_MODULE: "main.settings"
       DEBUG: "True"
-    networks:
-      - backend
 
-networks:
-  backend:
-    name: amsterdam-statistiek_hub

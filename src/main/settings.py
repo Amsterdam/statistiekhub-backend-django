@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "statistiek_hub",
     "referentie_tabellen",
     "import_export",
+    "import_export_celery",
     "leaflet",
 ]
 
@@ -58,7 +59,41 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
+
+
+CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq"
+IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
+
+def resource_observation():
+    from statistiek_hub.resources.observation_resource import ObservationResource
+
+    return ObservationResource
+
+
+def resource_spatialdimension():
+    from statistiek_hub.resources.spatial_dimension_resource import (
+        SpatialDimensionResource,
+    )
+
+    return SpatialDimensionResource
+
+
+IMPORT_EXPORT_CELERY_MODELS = {
+    "Observation": {
+        "app_label": "statistiek_hub",
+        "model_name": "Observation",
+        "resource": resource_observation,
+    },
+    "SpatialDimension": {
+        "app_label": "statistiek_hub",
+        "model_name": "SpatialDimension",
+        "resource": resource_spatialdimension,
+    },
+}
+
+IMPORT_EXPORT_CELERY_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 ROOT_URLCONF = "main.urls"
 BASE_URL = os.getenv("BASE_URL", "")
@@ -156,14 +191,6 @@ CACHES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "django_cache",
-    }
-}
-
-
 FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 
 LOGGING = {
@@ -171,13 +198,19 @@ LOGGING = {
     "disable_existing_loggers": False,
     "handlers": {
         "console": {
-            "level": "INFO",
             "class": "logging.StreamHandler",
         },
     },
-    "django": {
+    "root": {
         "handlers": ["console"],
-        "level": "DEBUG",
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
     },
 }
 

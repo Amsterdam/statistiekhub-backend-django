@@ -114,6 +114,7 @@ venv.bak/
 # Local settings that should never be committed
 docker-compose.override.yml
 .pre-commit-config.yaml
+src/media/
 
 # macos
 .DS_Store

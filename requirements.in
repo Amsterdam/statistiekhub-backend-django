@@ -8,3 +8,5 @@ django-leaflet
 psycopg2-binary
 python-dateutil
 pandas
+celery
+django-author

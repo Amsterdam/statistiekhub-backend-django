@@ -19,24 +19,25 @@ def convert_to_datetime(date: str = None) -> datetime:
         "%Y-%m-%d %H:%M:%S.%f",
         "%d/%m/%y %H:%M",
     ]
-    try:
-        for format in formats_allowed:
-            try:
-                _date = datetime.strptime(date, format)
-                break
-            except ValueError:
-                pass
 
-        return _date
-    except UnboundLocalError:
+    _date = None
+
+    for format in formats_allowed:
+        try:
+            _date = datetime.strptime(date, format)
+            break
+        except ValueError:
+            pass
+
+    if _date == None:
+        # probeer O&S aanlever-format
+
         # remove date notation
         replace_list = ["-", "/"]
         for i in replace_list:
             date = date.replace(i, "")
 
-        # O&S aanlever-format
         try:
-            print(f"print date o&s format: {date}")
             year = int(date[0:4])
             month = int(date[4:6])
             day = int(date[6:8])
@@ -45,12 +46,12 @@ def convert_to_datetime(date: str = None) -> datetime:
                 month if month != 0 else month + 1,
                 day if day != 0 else day + 1,
             )
-
-            return _date
-        except ValueError:
+        except:
             raise ValueError(
-                f"verkeerd datumformat: {date}, toegestane formats zijn {formats_allowed}"
+                f"verkeerd datumformat voor {date}, toegestane formats zijn {formats_allowed}"
             )
+
+    return _date
 
 
 def add_timedelta(date: datetime, delta: str = None):
