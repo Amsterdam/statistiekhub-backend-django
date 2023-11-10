@@ -21,6 +21,10 @@ class Measure(TimeStampMixin):
     definition_uk = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     calculation = models.CharField(max_length=100, blank=True, null=True)
+    sensitive = models.BooleanField(
+        default=False,
+        help_text="gevoeligedata - afronden en groepsonthulling toepassen",
+    )
     unit = models.ForeignKey(Unit, models.RESTRICT)
     decimals = models.IntegerField(default=0)
     source = models.CharField(max_length=100)

@@ -6,7 +6,7 @@ from referentie_tabellen.models import SpatialDimensionType
 
 class SpatialDimension(models.Model):
     id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
     code = models.CharField(max_length=100)
     type = models.ForeignKey(SpatialDimensionType, on_delete=models.RESTRICT)
     source_id = models.CharField(max_length=100, blank=True, null=True)
