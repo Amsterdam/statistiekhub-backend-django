@@ -16,6 +16,7 @@ from statistiek_hub.utils.datetime import (
     convert_to_datetime,
 )
 from statistiek_hub.utils.resource_checkPK import SimpleError, check_exists_in_model
+from statistiek_hub.utils.check_import_fields import check_missing_import_fields
 from statistiek_hub.utils.timer import timeit
 from statistiek_hub.validations import get_instance
 
@@ -101,9 +102,8 @@ class ObservationResource(ModelResource):
 
         errors = {}
 
-        # check column_names
-        list_a = dataset.headers
-        list_b = expected_headers = [
+        # check column_names importfile
+        expected = [
             "measure",
             "spatial_code",
             "spatial_type",
@@ -112,11 +112,11 @@ class ObservationResource(ModelResource):
             "temporal_date",
             "value",
         ]
-        diff = list(set(list_b) - set(list_a))
-        if len(diff) > 0:
-            errors[
-                "column_names"
-            ] = f"Missing column(s) {diff}. Mandatory fields are: {expected_headers}"
+
+        error = check_missing_import_fields(fields=dataset.headers, expected=expected )
+        if error:
+            errors["column_names"] = error
+
         else:
             # load querysets into pandas df
             dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name")))

@@ -5,6 +5,7 @@ from import_export.widgets import ForeignKeyWidget
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.utils.resource_checkPK import SimpleError
+from statistiek_hub.utils.check_import_fields import check_missing_import_fields
 
 
 class FilterResource(ModelResource):
@@ -28,19 +29,17 @@ class FilterResource(ModelResource):
 
         errors = {}
 
-        # check column_names
-        list_a = dataset.headers
-        list_b = expected_headers = [
+        # check column_names importfile
+        expected = [
             "measure",
             "basemeasure",
             "lessthan",
             "value_new",
         ]
-        diff = list(set(list_b) - set(list_a))
-        if len(diff) > 0:
-            errors[
-                "column_names"
-            ] = f"Missing column(s) {diff}. Mandatory fields are: {expected_headers}"
+
+        error = check_missing_import_fields(fields=dataset.headers, expected=expected )
+        if error:
+            errors["column_names"] = error
         else:
             #     # check measure_names exist
             #     error = check_exists_in_model(dataset=dataset, model=Measure, column="measure", field="name")
