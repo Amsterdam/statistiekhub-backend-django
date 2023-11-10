@@ -1,10 +1,10 @@
 from django.contrib import admin
-from import_export.admin import ImportMixin
 from leaflet.admin import LeafletGeoAdminMixin
 
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.resources.spatial_dimension_resource import SpatialDimensionResource
-from statistiek_hub.utils.formatters import GEOJSON
+
+from .import_export_formats_mixin import ImportExportFormatsMixin
 
 
 class SourceDateFilter(admin.SimpleListFilter):
@@ -31,7 +31,7 @@ class SourceDateFilter(admin.SimpleListFilter):
             return queryset
 
 
-class SpatialDimensionAdmin(ImportMixin, LeafletGeoAdminMixin, admin.ModelAdmin):
+class SpatialDimensionAdmin(ImportExportFormatsMixin, LeafletGeoAdminMixin, admin.ModelAdmin):
     list_display = (
         "code",
         "name",
@@ -43,12 +43,6 @@ class SpatialDimensionAdmin(ImportMixin, LeafletGeoAdminMixin, admin.ModelAdmin)
     ordering = ("id",)
     modifiable = False  # Make the leaflet map read-only
     resource_class = SpatialDimensionResource
-
-    def get_import_formats(self):
-        """
-        Returns GEOJSON import formats.
-        """
-        return [GEOJSON]
 
     # This will help you to disbale add functionality
     def has_add_permission(self, request):

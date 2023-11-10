@@ -1,12 +1,11 @@
 from django.contrib import admin
-from import_export.admin import ImportExportMixin
 
 from statistiek_hub.resources.observation_resource import ObservationResource
 
 from .import_export_formats_mixin import ImportExportFormatsMixin
 
 
-class ObservationAdmin(ImportExportFormatsMixin, ImportExportMixin, admin.ModelAdmin):
+class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     list_display = (
         "id",
         "measure",
