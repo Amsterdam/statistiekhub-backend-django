@@ -4,6 +4,7 @@ from .modeladmins.filter_admin import FilterAdmin
 from .modeladmins.measure_admin import MeasureAdmin
 from .modeladmins.observation_admin import ObservationAdmin
 from .modeladmins.spatial_dimension_admin import SpatialDimensionAdmin
+from .modeladmins.temporal_dimension_admin import TemporalDimensionAdmin
 from .models.dimension import Dimension
 from .models.dimension_group import DimensionGroup
 from .models.filter import Filter
@@ -21,20 +22,12 @@ from .models.topic_set import TopicSet
 admin.site.register(Measure, MeasureAdmin)
 admin.site.register(Observation, ObservationAdmin)
 admin.site.register(SpatialDimension, SpatialDimensionAdmin)
+admin.site.register(TemporalDimension, TemporalDimensionAdmin)
 
 admin.site.register(Filter, FilterAdmin)
 
 
 # display admin
-@admin.register(TemporalDimension)
-class TemporalDimensionAdmin(admin.ModelAdmin):
-    readonly_fields = ("enddate",)
-
-    list_display = ("name", "id")
-    list_filter = ("type",)
-    ordering = ("id",)
-
-
 @admin.register(Dimension)
 class DimensionAdmin(admin.ModelAdmin):
     list_display = ("name", "code", "id")
