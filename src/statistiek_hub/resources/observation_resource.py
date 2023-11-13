@@ -9,6 +9,7 @@ from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
+from statistiek_hub.utils.check_import_fields import check_missing_import_fields
 from statistiek_hub.utils.converter import convert_str
 from statistiek_hub.utils.datetime import (
     add_timedelta,
@@ -16,8 +17,6 @@ from statistiek_hub.utils.datetime import (
     convert_to_datetime,
 )
 from statistiek_hub.utils.resource_checkPK import SimpleError, check_exists_in_model
-from statistiek_hub.utils.check_import_fields import check_missing_import_fields
-from statistiek_hub.utils.timer import timeit
 from statistiek_hub.validations import get_instance
 
 CHUNKSIZE = 5000
@@ -96,7 +95,6 @@ class ObservationResource(ModelResource):
         widget=TemporalForeignKeyWidget(TemporalDimension, field="name"),
     )
 
-    @timeit
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
         # check main error's first on Dataset (instead of row by row)
 
@@ -217,7 +215,6 @@ class ObservationResource(ModelResource):
                 if check[key]["dfmodel"].empty:
                     errors[key] = ValueError(f"Model voor {key} is leeg")
                 else:
-                    print("--------------------key", key)
                     error = check_exists_in_model(**check[key])
                     if error:
                         errors[key] = error

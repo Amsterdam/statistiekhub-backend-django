@@ -3,11 +3,10 @@ from import_export.fields import Field
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 
-from statistiek_hub.utils.datetime import convert_to_datetime
-from statistiek_hub.utils.check_import_fields import check_missing_import_fields
-
 from referentie_tabellen.models import TemporalDimensionType
 from statistiek_hub.models.temporal_dimension import TemporalDimension
+from statistiek_hub.utils.check_import_fields import check_missing_import_fields
+from statistiek_hub.utils.datetime import convert_to_datetime
 
 
 class TemporalDimensionResource(ModelResource):

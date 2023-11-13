@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from statistiek_hub.resources.temporal_dimension_resource import TemporalDimensionResource
+from statistiek_hub.resources.temporal_dimension_resource import (
+    TemporalDimensionResource,
+)
 
 from .import_export_formats_mixin import ImportExportFormatsMixin
 
