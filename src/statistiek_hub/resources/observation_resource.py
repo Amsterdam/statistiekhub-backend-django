@@ -9,14 +9,13 @@ from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
-from statistiek_hub.utils.check_import_fields import check_missing_import_fields
+from statistiek_hub.utils.check_functions import SimpleError, check_exists_in_model
 from statistiek_hub.utils.converter import convert_str
 from statistiek_hub.utils.datetime import (
     add_timedelta,
     convert_to_date,
     convert_to_datetime,
 )
-from statistiek_hub.utils.resource_checkPK import SimpleError, check_exists_in_model
 from statistiek_hub.validations import get_instance
 
 CHUNKSIZE = 5000
@@ -111,7 +110,7 @@ class ObservationResource(ModelResource):
             "value",
         ]
 
-        error = check_missing_import_fields(fields=dataset.headers, expected=expected )
+        error = check_missing_fields(fields=dataset.headers, expected=expected )
         if error:
             errors["column_names"] = error
 

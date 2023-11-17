@@ -4,7 +4,10 @@ import pytest
 from pandas import DataFrame
 from tablib import Dataset
 
-from statistiek_hub.utils.resource_checkPK import check_exists_in_model
+from src.statistiek_hub.utils.check_functions import (
+    check_exists_in_model,
+    check_missing_fields,
+)
 
 dataset = Dataset()
 dataset.append(
@@ -64,10 +67,10 @@ testinput = [
 ]
 
 
-class TestCheckPK:
+class TestCheck_functions:
     @pytest.mark.parametrize("test_input", testinput)
-    def test_resource_checkPK(self, test_input: dict):
-        """Value with format in formats_allowed can be converted to datetime format"""
+    def test_check_exists_in_model(self, test_input: dict):
+        """check if values from import (dataset[column]) exists in a model field"""
 
         error = check_exists_in_model(
             test_input["dataset"],
@@ -80,3 +83,17 @@ class TestCheckPK:
             error = error[0:10]
 
         assert error == test_input["expected"]
+
+
+    @pytest.mark.parametrize("test_input, test_expected, test_result", [(dataset.headers, {"spatial_code", "spatial_type", "spatial_date",}, False)])
+    def test_check_missing_fields(self, test_input, test_expected, test_result):
+        """check all expected items exist in fields: return False"""
+        assert  check_missing_fields(test_input, test_expected) == test_result
+
+    @pytest.mark.parametrize("test_input, test_expected, test_result", [(dataset.headers, {"test_field", "spatial_type", "spatial_date",}, "Missing column(s) ['test_field'].")])
+    def test_check_missing_fields_found(self, test_input, test_expected, test_result):
+        """ check not all expected items exist in fields: return error with printed list with missing items 
+        return error string message """
+
+        result = check_missing_fields(test_input, test_expected)
+        assert result[0:33] == test_result

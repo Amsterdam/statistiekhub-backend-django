@@ -5,7 +5,7 @@ from import_export.widgets import ForeignKeyWidget
 
 from referentie_tabellen.models import TemporalDimensionType
 from statistiek_hub.models.temporal_dimension import TemporalDimension
-from statistiek_hub.utils.check_import_fields import check_missing_import_fields
+from statistiek_hub.utils.check_functions import check_missing_fields
 from statistiek_hub.utils.datetime import convert_to_datetime
 
 
@@ -21,7 +21,7 @@ class TemporalDimensionResource(ModelResource):
         # check column_names importfile
         expected = ["type", "startdate"]
 
-        error = check_missing_import_fields(fields=dataset.headers, expected=expected )
+        error = check_missing_fields(fields=dataset.headers, expected=expected )
         if error:
             # to speed validation -> if errors empty dataset so no row's will be checked
             del dataset[0 : len(dataset)]

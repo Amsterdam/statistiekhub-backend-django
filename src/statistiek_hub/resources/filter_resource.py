@@ -4,8 +4,7 @@ from import_export.widgets import ForeignKeyWidget
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
-from statistiek_hub.utils.check_import_fields import check_missing_import_fields
-from statistiek_hub.utils.resource_checkPK import SimpleError
+from statistiek_hub.utils.check_functions import SimpleError, check_missing_fields
 
 
 class FilterResource(ModelResource):
@@ -37,7 +36,7 @@ class FilterResource(ModelResource):
             "value_new",
         ]
 
-        error = check_missing_import_fields(fields=dataset.headers, expected=expected )
+        error = check_missing_fields(fields=dataset.headers, expected=expected )
         if error:
             errors["column_names"] = error
         else:
