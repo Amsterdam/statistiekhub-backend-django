@@ -9,14 +9,13 @@ from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
+from statistiek_hub.utils.check_functions import SimpleError, check_exists_in_model
 from statistiek_hub.utils.converter import convert_str
 from statistiek_hub.utils.datetime import (
     add_timedelta,
     convert_to_date,
     convert_to_datetime,
 )
-from statistiek_hub.utils.resource_checkPK import SimpleError, check_exists_in_model
-from statistiek_hub.utils.timer import timeit
 from statistiek_hub.validations import get_instance
 
 CHUNKSIZE = 5000
@@ -95,15 +94,13 @@ class ObservationResource(ModelResource):
         widget=TemporalForeignKeyWidget(TemporalDimension, field="name"),
     )
 
-    @timeit
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
         # check main error's first on Dataset (instead of row by row)
 
         errors = {}
 
-        # check column_names
-        list_a = dataset.headers
-        list_b = expected_headers = [
+        # check column_names importfile
+        expected = [
             "measure",
             "spatial_code",
             "spatial_type",
@@ -112,11 +109,11 @@ class ObservationResource(ModelResource):
             "temporal_date",
             "value",
         ]
-        diff = list(set(list_b) - set(list_a))
-        if len(diff) > 0:
-            errors[
-                "column_names"
-            ] = f"Missing column(s) {diff}. Mandatory fields are: {expected_headers}"
+
+        error = check_missing_fields(fields=dataset.headers, expected=expected )
+        if error:
+            errors["column_names"] = error
+
         else:
             # load querysets into pandas df
             dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name")))
@@ -217,7 +214,6 @@ class ObservationResource(ModelResource):
                 if check[key]["dfmodel"].empty:
                     errors[key] = ValueError(f"Model voor {key} is leeg")
                 else:
-                    print("--------------------key", key)
                     error = check_exists_in_model(**check[key])
                     if error:
                         errors[key] = error

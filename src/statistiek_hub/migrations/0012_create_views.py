@@ -12,7 +12,7 @@ from statistiek_hub.view_tabellen.view_publish_product import vw_publish_product
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("statistiek_hub", "0002_db_functions"),
+        ("statistiek_hub", "0005_measure_sensitive_alter_spatialdimension_name"),
     ]
 
     operations = [

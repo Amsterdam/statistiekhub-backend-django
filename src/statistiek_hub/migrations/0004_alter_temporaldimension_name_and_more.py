@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("statistiek_hub", "0009_alter_measure_deprecated_date_and_more"),
+        ("statistiek_hub", "0003_alter_measure_deprecated_date_and_more"),
     ]
 
     operations = [

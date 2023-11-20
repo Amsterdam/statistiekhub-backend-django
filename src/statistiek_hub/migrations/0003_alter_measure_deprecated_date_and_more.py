@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("statistiek_hub", "0003_create_views"),
+        ("statistiek_hub", "0002_db_functions"),
     ]
 
     operations = [

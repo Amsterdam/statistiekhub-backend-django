@@ -15,7 +15,10 @@ class SpatialDimensionResource(ModelResource):
     )
 
     def before_import_row(self, row, row_number, **kwargs):
-        row["geom"] = GEOSGeometry(str(row["geometry"]))
+        if row["geom"]== "":
+            row["geom"]=None
+        else:
+            row["geom"] = GEOSGeometry(row["geom"], srid=28992)
 
     class Meta:
         model = SpatialDimension

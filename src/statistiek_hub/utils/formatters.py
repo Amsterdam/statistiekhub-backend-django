@@ -75,7 +75,8 @@ class GEOJSON(base_formats.TablibFormat):
             geometry["crs"] = crs
             tmp_list.append(str(geometry))
 
-        df_properties["geometry"] = tmp_list
+        # json-field "geometry" is saved in tablib-field "geom"
+        df_properties["geom"] = tmp_list
 
         _dset = tablib.Dataset()
         _dset.dict = df_properties.to_dict(orient="records")

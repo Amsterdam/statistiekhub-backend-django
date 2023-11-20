@@ -1,5 +1,4 @@
 from django.contrib import admin
-from import_export.admin import ImportExportMixin
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.resources.measure_resource import MeasureResource
@@ -13,7 +12,7 @@ class FilterInline(admin.TabularInline):
     extra = 0  # <=== For remove empty fields from admin view
 
 
-class MeasureAdmin(ImportExportFormatsMixin, ImportExportMixin, admin.ModelAdmin):
+class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     list_display = (
         "name",
         "label",
