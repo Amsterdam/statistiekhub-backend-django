@@ -3,3 +3,23 @@ profile = "black"
 
 [tool.autoflake]
 ignore_init_module_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-s --cov --cov-config /pyproject.toml --disable-pytest-warnings "
+
+[tool.coverage.run]
+source = ["/src"]
+omit = [
+    "/tests",
+    "/src/main",
+    "/src/manage.py",
+    "*/urls.py",
+    "*/apps.py",
+    "*/models.py",
+]
+
+[tool.coverage.report]
+fail_under = 50  # Bring to 80% when we have more tests
+skip_covered = true
+show_missing = true
+sort = "Cover"
