@@ -60,7 +60,7 @@ WORKDIR /tests
 ADD tests .
 COPY pyproject.toml /.
 
-# ENV COVERAGE_FILE=/tmp/.coverage
+ENV COVERAGE_FILE=/tmp/.coverage
 ENV PYTHONPATH=/src
 # ENV USE_JWKS_TEST_KEY=True
 

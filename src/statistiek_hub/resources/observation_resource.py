@@ -9,7 +9,11 @@ from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
-from statistiek_hub.utils.check_functions import SimpleError, check_exists_in_model
+from statistiek_hub.utils.check_functions import (
+    SimpleError,
+    check_exists_in_model,
+    check_missing_fields,
+)
 from statistiek_hub.utils.converter import convert_str
 from statistiek_hub.utils.datetime import (
     add_timedelta,
