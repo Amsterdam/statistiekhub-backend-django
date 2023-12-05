@@ -1,10 +1,13 @@
+import pandas as pd
+
 from import_export.fields import Field
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
+from django.core.exceptions import ValidationError
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
-from statistiek_hub.utils.check_functions import SimpleError, check_missing_fields
+from statistiek_hub.utils.check_functions import SimpleError, check_missing_fields, check_exists_in_model
 
 
 class FilterResource(ModelResource):
@@ -14,25 +17,14 @@ class FilterResource(ModelResource):
         widget=ForeignKeyWidget(Measure, field="name"),
     )
 
-    basemeasure = Field(
-        column_name="basemeasure",
-        attribute="basemeasure",
-        widget=ForeignKeyWidget(Measure, field="name"),
-    )
-
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
         # check main error's first on Dataset (instead of row by row)
-
-        print(dataset.headers)
-        print(dataset[0:10])
-
         errors = {}
 
-        # check column_names importfile
+        #column_names importfile
         expected = [
             "measure",
-            "basemeasure",
-            "lessthan",
+            "rule",
             "value_new",
         ]
 
@@ -40,21 +32,16 @@ class FilterResource(ModelResource):
         if error:
             errors["column_names"] = error
         else:
-            #     # check measure_names exist
-            #     error = check_exists_in_model(dataset=dataset, model=Measure, column="measure", field="name")
-            #     if error:
-            #         errors["measure_names"] = error
+            dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name")))
+            error = check_exists_in_model(dataset=dataset, dfmodel=dfmeasure, column=["measure"], field=["name"])
 
-            #     # check basemeasure_names exist
-            #     error = check_exists_in_model(dataset=dataset, model=Measure, column="basemeasure", field="name")
-            #     if error:
-            #         errors["basemeasure_names"] = error
-
-            # if errors:
-            #     # to speed validation -> if errors empty dataset so no row's will be checked
-            #     del dataset[0 : len(dataset)]
-            #     raise ValidationError(errors)
-            pass
+            if error:
+                errors["measure_names"] = error
+        print(errors)
+        if errors:
+        # to speed validation -> if errors empty dataset so no row's will be checked
+            del dataset[0 : len(dataset)]
+            raise ValidationError(errors)
 
     @classmethod
     def get_error_result_class(self):
@@ -69,5 +56,5 @@ class FilterResource(ModelResource):
         skip_unchanged = True
         report_skipped = True
         exclude = ("id",)
-        fields = ("measure", "basemeasure", "lessthan", "value_new")
-        import_id_fields = ("measure", "basemeasure")
+        fields = ("measure", "rule", "value_new")
+        import_id_fields = ("measure", "rule")
