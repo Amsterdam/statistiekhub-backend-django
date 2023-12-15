@@ -6,7 +6,7 @@ function_calculate_observation = """
                 (
                     p_measure	varchar
                 )
-                    returns setof observation -- returns query result
+                    returns setof statistiek_hub_observation -- returns query result
 --                    returns text -- returns query statement
                 as
                 $$
