@@ -36,7 +36,7 @@ function_calculate_observation = """
                     -----------------------------------
 
                     select	id into p_measure_id
-                    from	measure
+                    from	statistiek_hub_measure
                     where	name = p_measure
                     ;
 
@@ -46,7 +46,7 @@ function_calculate_observation = """
                     ---------------------------------------------------------------------------
 
                     select	regexp_split_to_array(calculation, '\s+') into  p_calculation
-                    from	measure
+                    from	statistiek_hub_measure
                     where	name = p_measure
                     ;
 
@@ -97,10 +97,10 @@ function_calculate_observation = """
                                                         select	o.spatialdimension_id
                                                         , 		o.temporaldimension_id
                                                         , 		o.value
-                                                        from	observation o
-                                                        join	measure m on o.measure_id = m.id
-                                                        join	spatialdimension s on o.spatialdimension_id = s.id
-                                                        join	temporaldimension t on o.temporaldimension_id = t.id
+                                                        from	statistiek_hub_observation o
+                                                        join	statistiek_hub_measure m on o.measure_id = m.id
+                                                        join	statistiek_hub_spatialdimension s on o.spatialdimension_id = s.id
+                                                        join	statistiek_hub_temporaldimension t on o.temporaldimension_id = t.id
                                                         where	1=1
 														and		m.name =
                                                 '

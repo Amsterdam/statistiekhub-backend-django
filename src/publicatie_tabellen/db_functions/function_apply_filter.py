@@ -38,7 +38,7 @@ function_apply_filter = """
                     --------------------------------------------------------------------
 
                     select	regexp_split_to_array(rule, '\s+') into p_rule
-                    from	filter
+                    from	statistiek_hub_filter
                     where	measure_id = p_measure_id
                     ;
 
@@ -47,7 +47,7 @@ function_apply_filter = """
                     --------------------------------------------------
 
                     select	value_new into p_replacement_value
-                    from	filter
+                    from	statistiek_hub_filter
                     where	measure_id = p_measure_id
                     ;
 
@@ -98,8 +98,8 @@ function_apply_filter = """
                                                         select	o.value
 														,		o.temporaldimension_id
 														,		o.spatialdimension_id
-                                                        from	observation o
-														join	measure m on o.measure_id = m.id
+                                                        from	statistiek_hub_observation o
+														join	statistiek_hub_measure m on o.measure_id = m.id
                                                         where	1=1
 														and		o.spatialdimension_id = ' || p_spatialdimension_id || '
 														and		o.temporaldimension_id = ' || p_temporaldimension_id || '

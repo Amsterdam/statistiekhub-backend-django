@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "statistiek_hub",
     "referentie_tabellen",
+    "publicatie_tabellen",
     "import_export",
     "import_export_celery",
     "leaflet",

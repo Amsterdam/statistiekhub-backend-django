@@ -23,7 +23,7 @@ function_round_observation = """
                     ---------------------------------------------------
 
                     select	decimals into p_decimals
-                    from	measure
+                    from	statistiek_hub_measure
                     where	id = p_measure_id
                     ;
 
