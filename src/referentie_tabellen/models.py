@@ -10,10 +10,6 @@ class Unit(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    class Meta:
-        managed = True
-        db_table = "unit"
-
 
 class Theme(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -25,10 +21,6 @@ class Theme(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    class Meta:
-        managed = True
-        db_table = "theme"
-
 
 class SpatialDimensionType(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -39,10 +31,6 @@ class SpatialDimensionType(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    class Meta:
-        managed = True
-        db_table = "spatialdimensiontype"
-
 
 class TemporalDimensionType(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -51,6 +39,3 @@ class TemporalDimensionType(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    class Meta:
-        managed = True
-        db_table = "temporaldimensiontype"

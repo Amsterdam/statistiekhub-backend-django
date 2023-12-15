@@ -38,10 +38,6 @@ class Measure(TimeStampMixin):
     deprecated_date = models.DateField(blank=True, null=True)
     deprecated_reason = models.TextField(blank=True, null=True, help_text="toelichting")
 
-    class Meta:
-        managed = True
-        db_table = "measure"
-
     def __str__(self):
         return f"{self.name}"
 
