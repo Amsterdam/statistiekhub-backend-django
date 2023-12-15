@@ -5,7 +5,6 @@ from referentie_tabellen.models import SpatialDimensionType
 
 
 class SpatialDimension(models.Model):
-
     class Meta:
         unique_together = [["code", "type", "source_date"]]
 

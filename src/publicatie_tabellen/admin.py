@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.http.request import HttpRequest
 
 from publicatie_tabellen.models import (
     PublicationMeasure,
@@ -9,13 +8,12 @@ from publicatie_tabellen.models import (
 
 
 class NoAddDeleteChangePermission(admin.ModelAdmin):
-
     def has_add_permission(self, request) -> bool:
         return False
 
-    #def has_delete_permission(self, request, obj=None) -> bool:
+    def has_delete_permission(self, request, obj=None) -> bool:
         return False
-    
+
     def has_change_permission(self, request, obj=None) -> bool:
         return False
 
@@ -36,4 +34,3 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
 class PublicationStatisticAdmin(NoAddDeleteChangePermission):
     list_display = ("id",)
     ordering = ("id",)
-

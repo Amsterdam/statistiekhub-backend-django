@@ -67,6 +67,7 @@ MIDDLEWARE = [
 CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq"
 IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
 
+
 def resource_observation():
     from statistiek_hub.resources.observation_resource import ObservationResource
 

@@ -17,11 +17,10 @@ class TemporalDimensionResource(ModelResource):
     )
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
-
         # check column_names importfile
         expected = ["type", "startdate"]
 
-        error = check_missing_fields(fields=dataset.headers, expected=expected )
+        error = check_missing_fields(fields=dataset.headers, expected=expected)
         if error:
             # to speed validation -> if errors empty dataset so no row's will be checked
             del dataset[0 : len(dataset)]
@@ -33,7 +32,6 @@ class TemporalDimensionResource(ModelResource):
             header="startdate",
         )
 
-    
     class Meta:
         model = TemporalDimension
         exclude = ("id",)

@@ -1,13 +1,16 @@
 import pandas as pd
-
+from django.core.exceptions import ValidationError
 from import_export.fields import Field
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
-from django.core.exceptions import ValidationError
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
-from statistiek_hub.utils.check_functions import SimpleError, check_missing_fields, check_exists_in_model
+from statistiek_hub.utils.check_functions import (
+    SimpleError,
+    check_exists_in_model,
+    check_missing_fields,
+)
 
 
 class FilterResource(ModelResource):
@@ -21,25 +24,27 @@ class FilterResource(ModelResource):
         # check main error's first on Dataset (instead of row by row)
         errors = {}
 
-        #column_names importfile
+        # column_names importfile
         expected = [
             "measure",
             "rule",
             "value_new",
         ]
 
-        error = check_missing_fields(fields=dataset.headers, expected=expected )
+        error = check_missing_fields(fields=dataset.headers, expected=expected)
         if error:
             errors["column_names"] = error
         else:
             dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name")))
-            error = check_exists_in_model(dataset=dataset, dfmodel=dfmeasure, column=["measure"], field=["name"])
+            error = check_exists_in_model(
+                dataset=dataset, dfmodel=dfmeasure, column=["measure"], field=["name"]
+            )
 
             if error:
                 errors["measure_names"] = error
         print(errors)
         if errors:
-        # to speed validation -> if errors empty dataset so no row's will be checked
+            # to speed validation -> if errors empty dataset so no row's will be checked
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
 

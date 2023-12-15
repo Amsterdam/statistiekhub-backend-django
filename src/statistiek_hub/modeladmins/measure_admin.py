@@ -21,7 +21,14 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
         "deprecated",
         "owner",
     )
-    list_filter = ("theme", "unit", "sensitive", "deprecated", "created_at", "updated_at")
+    list_filter = (
+        "theme",
+        "unit",
+        "sensitive",
+        "deprecated",
+        "created_at",
+        "updated_at",
+    )
     resource_classes = [MeasureResource]
     readonly_fields = [
         "owner",

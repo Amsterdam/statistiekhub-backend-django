@@ -10,16 +10,14 @@ from .time_stamp_mixin import TimeStampMixin
 
 
 class Observation(TimeStampMixin):
-
     class Meta:
         unique_together = [["measure", "spatialdimension", "temporaldimension"]]
-        
+
     id = models.BigAutoField(primary_key=True)
     measure = models.ForeignKey(Measure, on_delete=models.CASCADE)
     value = models.FloatField()
     temporaldimension = models.ForeignKey(TemporalDimension, on_delete=models.RESTRICT)
     spatialdimension = models.ForeignKey(SpatialDimension, on_delete=models.RESTRICT)
-
 
     @classmethod
     def add_error(cls, errors, new_errors):

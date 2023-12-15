@@ -5,7 +5,7 @@ from statistiek_hub.utils.formatters import GEOJSON, SCSV
 
 
 class ImportExportFormatsMixin(ImportExportMixin, ExportActionModelAdmin):
-    """overwrites the standard get_import_formats and get_export_formats from the ImoprtExportMixin """
+    """overwrites the standard get_import_formats and get_export_formats from the ImoprtExportMixin"""
 
     def get_import_formats(self):
         """Returns available import formats."""

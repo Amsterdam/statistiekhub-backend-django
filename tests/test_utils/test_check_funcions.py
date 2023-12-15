@@ -84,16 +84,41 @@ class TestCheck_functions:
 
         assert error == test_input["expected"]
 
-
-    @pytest.mark.parametrize("test_input, test_expected, test_result", [(dataset.headers, {"spatial_code", "spatial_type", "spatial_date",}, False)])
+    @pytest.mark.parametrize(
+        "test_input, test_expected, test_result",
+        [
+            (
+                dataset.headers,
+                {
+                    "spatial_code",
+                    "spatial_type",
+                    "spatial_date",
+                },
+                False,
+            )
+        ],
+    )
     def test_check_missing_fields(self, test_input, test_expected, test_result):
         """check all expected items exist in fields: return False"""
-        assert  check_missing_fields(test_input, test_expected) == test_result
+        assert check_missing_fields(test_input, test_expected) == test_result
 
-    @pytest.mark.parametrize("test_input, test_expected, test_result", [(dataset.headers, {"test_field", "spatial_type", "spatial_date",}, "Missing column(s) ['test_field'].")])
+    @pytest.mark.parametrize(
+        "test_input, test_expected, test_result",
+        [
+            (
+                dataset.headers,
+                {
+                    "test_field",
+                    "spatial_type",
+                    "spatial_date",
+                },
+                "Missing column(s) ['test_field'].",
+            )
+        ],
+    )
     def test_check_missing_fields_found(self, test_input, test_expected, test_result):
-        """ check not all expected items exist in fields: return error with printed list with missing items 
-        return error string message """
+        """check not all expected items exist in fields: return error with printed list with missing items
+        return error string message"""
 
         result = check_missing_fields(test_input, test_expected)
         assert result[0:33] == test_result

@@ -7,7 +7,6 @@ from statistiek_hub.utils.datetime import add_timedelta
 
 
 class TemporalDimension(models.Model):
-    
     class Meta:
         constraints = [
             models.UniqueConstraint(
