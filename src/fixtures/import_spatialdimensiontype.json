@@ -89,7 +89,7 @@
     {
         "model": "referentie_tabellen.spatialdimensiontype",
         "fields": {
-            "name": "27 gebied",
+            "name": "27-gebied",
             "description": "Grenzen van de '27 gebied' indeling in Amsterdam",
             "source": "Onderzoek en Statistiek, gemeente Amsterdam"
         }
