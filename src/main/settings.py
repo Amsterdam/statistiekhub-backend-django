@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "statistiek_hub",
     "referentie_tabellen",
+    "publicatie_tabellen",
     "import_export",
     "import_export_celery",
     "leaflet",
@@ -65,6 +66,7 @@ MIDDLEWARE = [
 
 CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq"
 IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
+
 
 def resource_observation():
     from statistiek_hub.resources.observation_resource import ObservationResource

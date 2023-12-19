@@ -114,7 +114,7 @@ class ObservationResource(ModelResource):
             "value",
         ]
 
-        error = check_missing_fields(fields=dataset.headers, expected=expected )
+        error = check_missing_fields(fields=dataset.headers, expected=expected)
         if error:
             errors["column_names"] = error
 

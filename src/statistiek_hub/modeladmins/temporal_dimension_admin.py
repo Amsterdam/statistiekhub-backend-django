@@ -14,4 +14,3 @@ class TemporalDimensionAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     list_filter = ("type",)
     ordering = ("id",)
     resource_class = TemporalDimensionResource
-

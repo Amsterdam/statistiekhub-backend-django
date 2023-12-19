@@ -8,8 +8,6 @@ from statistiek_hub.utils.datetime import add_timedelta
 
 class TemporalDimension(models.Model):
     class Meta:
-        managed = True
-        db_table = "temporaldimension"
         constraints = [
             models.UniqueConstraint(
                 fields=["type", "startdate"], name="unique_temporaldim"

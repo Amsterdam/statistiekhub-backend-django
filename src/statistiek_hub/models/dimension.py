@@ -14,7 +14,3 @@ class Dimension(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-
-    class Meta:
-        managed = True
-        db_table = "dimension"

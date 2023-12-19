@@ -5,6 +5,9 @@ from referentie_tabellen.models import SpatialDimensionType
 
 
 class SpatialDimension(models.Model):
+    class Meta:
+        unique_together = [["code", "type", "source_date"]]
+
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
     code = models.CharField(max_length=100)
@@ -16,8 +19,3 @@ class SpatialDimension(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-
-    class Meta:
-        managed = True
-        db_table = "spatialdimension"
-        unique_together = [["code", "type", "source_date"]]

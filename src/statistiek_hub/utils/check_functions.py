@@ -43,20 +43,20 @@ def check_exists_in_model(
     return error
 
 
-def check_missing_fields( fields: list, expected:list):
+def check_missing_fields(fields: list, expected: list):
     """check if all expected items exist in fields
 
-    Returns 
+    Returns
     ----------
     if not all expected items exist in fields:
-    Returned: error message with missings  
+    Returned: error message with missings
     if all exists:
     Returned: false
     """
 
     # check list items
     _diff = set(expected) - set(fields)
-    
+
     if _diff:
         error = f"Missing column(s) {list(_diff)}. Mandatory fields are: {expected}"
     else:

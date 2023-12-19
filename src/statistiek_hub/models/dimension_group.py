@@ -11,7 +11,3 @@ class DimensionGroup(models.Model):
 
     def __str__(self):
         return f"{self.dimensionkey}:{self.name}"
-
-    class Meta:
-        managed = True
-        db_table = "dimensiongroup"

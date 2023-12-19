@@ -15,8 +15,8 @@ class SpatialDimensionResource(ModelResource):
     )
 
     def before_import_row(self, row, row_number, **kwargs):
-        if row["geom"]== "":
-            row["geom"]=None
+        if row["geom"] == "":
+            row["geom"] = None
         else:
             row["geom"] = GEOSGeometry(row["geom"], srid=28992)
 

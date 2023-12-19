@@ -2,8 +2,7 @@ version: "3.5"
 
 x-app: &base-app
   build:
-    context: .
-    target: app
+    context: .  
   depends_on:
     - database
     - rabbitmq
@@ -17,13 +16,15 @@ x-app: &base-app
     SECRET_KEY: "insecure"
     AUTHORIZATION_TOKEN: "auth-token"
     GET_AUTHORIZATION_TOKEN: "get-auth-token"
+  env_file: &envfile
+      - .dev.env   
   entrypoint: /deploy/wait-for-it.sh database:5432 --
 
 services:
   database:
     image: postgis/postgis:11-3.3 #postgis/postgis:15-3.3
     ports:
-      - "5408:5432"
+      - "5432:5432"
     environment:
       POSTGRES_DB: statistiek_hub
       POSTGRES_USER: statistiek_hub
@@ -33,6 +34,8 @@ services:
   rabbitmq:
     image: rabbitmq:management
     container_name: 'rabbitmq'
+    ports:
+      - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -40,6 +43,7 @@ services:
   celery:
     build:
       context: . 
+    env_file: *envfile
     depends_on:
       - database
       - rabbitmq
@@ -50,7 +54,9 @@ services:
 
   app:
     <<: *base-app
-    #env_file: .acc.env
+    build:
+      target: app 
+    env_file: *envfile
     environment:
       DEBUG: false
       DJANGO_SETTINGS_MODULE: main.settings

@@ -31,7 +31,9 @@ class SourceDateFilter(admin.SimpleListFilter):
             return queryset
 
 
-class SpatialDimensionAdmin(ImportExportFormatsMixin, LeafletGeoAdminMixin, admin.ModelAdmin):
+class SpatialDimensionAdmin(
+    ImportExportFormatsMixin, LeafletGeoAdminMixin, admin.ModelAdmin
+):
     list_display = (
         "code",
         "name",

@@ -49,8 +49,6 @@ class GEOJSON(base_formats.TablibFormat):
         """
         Create tablib.dataset from geojson.
         """
-        print("------------------------------- in create dataset geojson")
-
         data = json.load(tablib.utils.normalize_input(in_stream))
 
         try:
