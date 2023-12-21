@@ -26,6 +26,10 @@ function_publish_observations = """
 							m.name as measure
 					from 	public.statistiek_hub_measure m
 					join	public.statistiek_hub_observation o on m.id = o.measure_id -- select only measures with observations
+					where	case
+							when p_measure is null then 1=1
+							else m.name = p_measure
+							end
 					order
 					by 		1
 
@@ -35,7 +39,7 @@ function_publish_observations = """
 					-- fill supplied observations
 					--
 
-					insert into public.publication_observations
+					insert into public.publicatie_tabellen_publicationobservation
 					(
 					spatialdimensiontype,
 					spatialdimensiondate,
@@ -69,7 +73,7 @@ function_publish_observations = """
 							,		o.measure_id -- required to apply filter
 							,		o.temporaldimension_id -- required to apply filter
 							,		o.spatialdimension_id -- required to apply filter
-							from	public.observation o
+							from	public.statistiek_hub_observation o
 							join	public.statistiek_hub_measure m on o.measure_id = m.id
 							join	public.statistiek_hub_spatialdimension s on o.spatialdimension_id = s.id
 							join	public.referentie_tabellen_spatialdimensiontype st on s.type_id = st.id
@@ -78,17 +82,17 @@ function_publish_observations = """
 							) as foo
 					where	1=1
 					and 	foo.measure = p_record.measure
-					and		not exists	( 
-										-- no duplicates
-										select	null
-										from	public.publication_observations x
-										where	foo.spatialdimensiontype = x.spatialdimensiontype
-										and		foo.spatialdimensiondate = x.spatialdimensiondate
-										and		foo.spatialdimensioncode = x.spatialdimensioncode
-										and		foo.temporaldimensiontype = x.temporaldimensiontype
-										and		foo.temporaldimensionstartdate = x.temporaldimensionstartdate 
-										and		foo.measure = x.measure
-										)
+--					and		not exists	( 
+--										-- no duplicates
+--										select	null
+--										from	public.publicatie_tabellen_publicationobservation x
+--										where	foo.spatialdimensiontype = x.spatialdimensiontype
+--										and		foo.spatialdimensiondate = x.spatialdimensiondate
+--										and		foo.spatialdimensioncode = x.spatialdimensioncode
+--										and		foo.temporaldimensiontype = x.temporaldimensiontype
+--										and		foo.temporaldimensionstartdate = x.temporaldimensionstartdate 
+--										and		foo.measure = x.measure
+--										)
 					;
 
 
@@ -97,7 +101,7 @@ function_publish_observations = """
 					-- fill calculated observations
 					--
 					
-					insert into public.publication_observations
+					insert into public.publicatie_tabellen_publicationobservation
 					(
 					spatialdimensiontype,
 					spatialdimensiondate,
@@ -159,17 +163,17 @@ function_publish_observations = """
 												and		o.spatialdimension_id = x.spatialdimension_id
 												and		o.temporaldimension_id = x.temporaldimension_id
 												)
-							and		not exists	( 
-												-- no duplicates
-												select	null
-												from	public.publicatie_tabellen_publication_observation x
-												where	st.name = x.spatialdimensiontype
-												and		s.source_date = x.spatialdimensiondate
-												and		s.code = x.spatialdimensioncode
-												and		tt.name = x.temporaldimensiontype
-												and		t.startdate = x.temporaldimensionstartdate 
-												and		m.name = x.measure
-												)
+--							and		not exists	( 
+--												-- no duplicates
+--												select	null
+--												from	public.publicatie_tabellen_publicationobservation x
+--												where	st.name = x.spatialdimensiontype
+--												and		s.source_date = x.spatialdimensiondate
+--												and		s.code = x.spatialdimensioncode
+--												and		tt.name = x.temporaldimensiontype
+--												and		t.startdate = x.temporaldimensionstartdate 
+--												and		m.name = x.measure
+--												)
 							) as foo
 							;
 
@@ -179,7 +183,7 @@ function_publish_observations = """
 					-- fill missing spatial dimension / temporal dimension with null value
 					--
 						
-					insert into public.publication_observations
+					insert into public.publicatie_tabellen_publicationobservation
 					(
 					spatialdimensiontype,
 					spatialdimensiondate,
@@ -202,7 +206,7 @@ function_publish_observations = """
 										,		temporaldimensionenddate 
 										,		measure 
 										,		coalesce(value, 999) as value -- tric in case supplied or calculated value is null to avoid second null value to be added
-										from	publicatie_tabellen_publication_observation
+										from	public.publicatie_tabellen_publicationobservation
 										where	1=1
 										and 	measure = p_record.measure
 										),
@@ -265,17 +269,17 @@ function_publish_observations = """
 										and s.temporaldimensionstartdate = m.temporaldimensionstartdate
 										and s.measure = m.measure
 					where	1=1
-					and		not exists	( 
-										-- no duplicates
-										select	null
-										from	public.publicatie_tabellen_publication_observation x
-										where	s.spatialdimensiontype = x.spatialdimensiontype
-										and		s.spatialdimensiondate = x.spatialdimensiondate
-										and		s.spatialdimensioncode = x.spatialdimensioncode
-										and		s.temporaldimensiontype = x.temporaldimensiontype
-										and		s.temporaldimensionstartdate = x.temporaldimensionstartdate 
-										and		s.measure = x.measure
-										)
+--					and		not exists	( 
+--										-- no duplicates
+--										select	null
+--										from	public.publicatie_tabellen_publicationobservation x
+--										where	s.spatialdimensiontype = x.spatialdimensiontype
+--										and		s.spatialdimensiondate = x.spatialdimensiondate
+--										and		s.spatialdimensioncode = x.spatialdimensioncode
+--										and		s.temporaldimensiontype = x.temporaldimensiontype
+--										and		s.temporaldimensionstartdate = x.temporaldimensionstartdate 
+--										and		s.measure = x.measure
+--										)
 					;
 						
 				end loop;
