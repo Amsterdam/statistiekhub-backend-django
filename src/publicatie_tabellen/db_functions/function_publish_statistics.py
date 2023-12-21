@@ -1,5 +1,5 @@
 function_publish_statistics = """
-				create or replace function public.publicatie_tabellen_publish_statistics
+create or replace function public.publicatie_tabellen_publish_statistics
 				---------------------------------------------------------------------------------------
 				-- GOAL: function to fill table with average and standarddeviation, ready to publish --
 				---------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ function_publish_statistics = """
 
 				begin
 
-				insert into public.publicatie_tabellen_publication_statistics
+				insert into public.publicatie_tabellen_publicationstatistic
 				(
 				spatialdimensiondate,
 				temporaldimensiontype,
@@ -89,7 +89,7 @@ function_publish_statistics = """
 								, 		measure_id
 								, 		spatialdimension_id
 								, 		temporaldimension_id
-								from	public.observation
+								from	public.statistiek_hub_observation
 								union all
 								-- calculated observations
 								select	x.value
@@ -98,7 +98,7 @@ function_publish_statistics = """
 								,		x.temporaldimension_id
 								from	(
 										select	(public.calculate_observation(name)).*
-										from	measure
+										from	public.statistiek_hub_measure
 										where	nullif(calculation, '') is not null
 										order
 										by		3, 5, 4
@@ -106,9 +106,9 @@ function_publish_statistics = """
 								) o
 						join	public.statistiek_hub_measure m on o.measure_id = m.id
 						join	public.statistiek_hub_spatialdimension s on o.spatialdimension_id = s.id
-						join	public.statistiek_hub_spatialdimensiontype st on s.type_id = st.id
+						join	public.referentie_tabellen_spatialdimensiontype st on s.type_id = st.id
 						join	public.statistiek_hub_temporaldimension t on o.temporaldimension_id = t.id
-						join	public.statistiek_hub_temporaldimensiontype tt on t.type_id = tt.id
+						join	public.referentie_tabellen_temporaldimensiontype tt on t.type_id = tt.id
 						),
 				gem as	(
 						select	obs.*
@@ -220,7 +220,7 @@ function_publish_statistics = """
 				and		not exists	( 
 									-- no duplicates
 									select	null
-									from	public.publication_statistics x
+									from	public.publicatie_tabellen_publicationstatistic x
 									where	g.spatialdimensiondate = x.spatialdimensiondate
 									and		g.temporaldimensiontype = x.temporaldimensiontype
 									and		g.temporaldimensionstartdate = x.temporaldimensionstartdate 

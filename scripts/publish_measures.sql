@@ -1,0 +1,1 @@
+select  public.publicatie_tabellen_publish_measures();
