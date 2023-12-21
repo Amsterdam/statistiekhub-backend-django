@@ -35,17 +35,19 @@ echo " -------------------- "
 echo " publish observations "
 echo " -------------------- "
 
-#$execute_sql -c "\copy (select distinct name as measure from public.statistiek_hub_measure order by 1) to STDOUT;" > $measure_list # list all measures
-#
-#while read measure || [[ -n $measure ]]; do
-#echo $measure
-#$execute_sql -f $p_current_dir/publish_observations.sql -v p_measure="'$measure'"
-#done < $measure_list
-#rm $p_current_dir/measures.txt
+$execute_sql -c "truncate table publicatie_tabellen_publicationobservation" # empty table
+
+$execute_sql -c "\copy (select distinct name as measure from public.statistiek_hub_measure order by 1) to STDOUT;" > $measure_list # list all measures
+
+while read measure || [[ -n $measure ]]; do
+echo $measure
+$execute_sql -f $p_current_dir/publish_observations.sql -v p_measure="'$measure'"
+done < $measure_list
+rm $p_current_dir/measures.txt
 
 
 echo " ------------------ "
 echo " publish statistics "
 echo " ------------------ "
 
-#$execute_sql -f $p_current_dir/publish_statistics.sql
+$execute_sql -f $p_current_dir/publish_statistics.sql
