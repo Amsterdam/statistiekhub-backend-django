@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-from django.core.exceptions import ValidationError
 from model_bakery import baker
 
 from referentie_tabellen.models import TemporalDimensionType
