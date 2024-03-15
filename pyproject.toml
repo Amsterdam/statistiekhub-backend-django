@@ -11,8 +11,10 @@ addopts = "-s --cov --cov-config /pyproject.toml --disable-pytest-warnings "
 source = ["/src"]
 omit = [
     "/tests",
-    "/src/main",
+    "/src/main/wsgi.py",
+    "/src/main/settings.py",
     "/src/manage.py",
+    "/src/main/asgi.py",    
     "*/urls.py",
     "*/apps.py",
     "*/models.py",
