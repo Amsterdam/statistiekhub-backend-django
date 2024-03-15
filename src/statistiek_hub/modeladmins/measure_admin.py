@@ -1,4 +1,5 @@
 from django.contrib import admin
+from import_export.tmp_storages import CacheStorage
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.resources.measure_resource import MeasureResource
@@ -13,6 +14,7 @@ class FilterInline(admin.TabularInline):
 
 
 class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
+    tmp_storage_class = CacheStorage     
     list_display = (
         "name",
         "label",

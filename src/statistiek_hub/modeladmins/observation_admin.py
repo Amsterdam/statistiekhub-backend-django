@@ -1,4 +1,5 @@
 from django.contrib import admin
+from import_export.tmp_storages import CacheStorage
 
 from statistiek_hub.resources.observation_resource import ObservationResource
 
@@ -6,6 +7,7 @@ from .import_export_formats_mixin import ImportExportFormatsMixin
 
 
 class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
+    tmp_storage_class = CacheStorage
     list_display = (
         "id",
         "measure",
