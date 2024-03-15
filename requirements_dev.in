@@ -13,6 +13,7 @@ pip-tools
 isort
 autoflake
 black
-pytest
+pytest<8  # 8 breaks pytest-django with error on /root/__init__.py
 pytest-cov
 pytest-django
+model-bakery

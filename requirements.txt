@@ -10,7 +10,7 @@ asgiref==3.7.2
     # via django
 billiard==4.2.0
     # via celery
-celery==5.3.5
+celery==5.3.6
     # via -r requirements.in
 click==8.1.7
     # via
@@ -36,36 +36,36 @@ django==4.1.13
     #   django-leaflet
 django-author==1.2.0
     # via -r requirements.in
-django-db-views==0.1.5
+django-db-views==0.1.6
     # via -r requirements.in
-django-import-export==3.3.3
+django-import-export==3.3.7
     # via -r requirements.in
-django-leaflet==0.29.0
+django-leaflet==0.29.1
     # via -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-kombu==5.3.4
+kombu==5.3.5
     # via celery
 markuppy==1.14
     # via tablib
-numpy==1.26.2
+numpy==1.26.4
     # via pandas
 odfpy==1.4.1
     # via tablib
 openpyxl==3.1.2
     # via tablib
-pandas==2.1.3
+pandas==2.2.1
     # via -r requirements.in
-prompt-toolkit==3.0.41
+prompt-toolkit==3.0.43
     # via click-repl
 psycopg2-binary==2.9.9
     # via -r requirements.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   -r requirements.in
     #   celery
     #   pandas
-pytz==2023.3.post1
+pytz==2024.1
     # via pandas
 pyyaml==6.0.1
     # via tablib
@@ -79,9 +79,9 @@ sqlparse==0.4.4
     # via django
 tablib[html,ods,xls,xlsx,yaml]==3.5.0
     # via django-import-export
-typing-extensions==4.8.0
+typing-extensions==4.10.0
     # via asgiref
-tzdata==2023.3
+tzdata==2024.1
     # via
     #   celery
     #   pandas
@@ -90,7 +90,7 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
-wcwidth==0.2.10
+wcwidth==0.2.13
     # via prompt-toolkit
 xlrd==2.0.1
     # via tablib

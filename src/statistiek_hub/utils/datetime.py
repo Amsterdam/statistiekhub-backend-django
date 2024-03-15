@@ -58,19 +58,19 @@ def add_timedelta(date: datetime, delta: str = None):
     """Add timedelta to datetime"""
 
     delta_date = None
-    delta = str(delta)
-    if delta == "Dag":
-        delta_date = date + relativedelta(days=+1)
-    elif delta == "Week":
-        delta_date = date + relativedelta(weeks=+1)
-    elif delta == "Maand":
-        delta_date = date + relativedelta(months=+1)
-    elif delta == "Kwartaal":
-        delta_date = date + relativedelta(months=+3)
-    elif delta == "Jaar":
-        delta_date = date + relativedelta(years=+1)
-    elif delta == "Peildatum":
-        delta_date = date
+    match str(delta):
+        case "Dag":
+            delta_date = date + relativedelta(days=+1)
+        case  "Week":
+            delta_date = date + relativedelta(weeks=+1)
+        case  "Maand":
+            delta_date = date + relativedelta(months=+1)
+        case  "Kwartaal":
+            delta_date = date + relativedelta(months=+3)
+        case  "Jaar":
+            delta_date = date + relativedelta(years=+1)
+        case  "Peildatum":
+            delta_date = date
 
     return delta_date
 

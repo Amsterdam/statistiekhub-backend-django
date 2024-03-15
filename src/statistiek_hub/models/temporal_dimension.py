@@ -22,6 +22,7 @@ class TemporalDimension(models.Model):
         return f"{self.name}"
 
     def save(self, *args, **kwargs):
+        # calculate enddate
         self.enddate = add_timedelta(self.startdate, self.type)
 
         # set year
