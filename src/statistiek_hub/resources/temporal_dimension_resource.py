@@ -6,7 +6,7 @@ from import_export.widgets import ForeignKeyWidget
 from referentie_tabellen.models import TemporalDimensionType
 from statistiek_hub.models.temporal_dimension import TemporalDimension
 from statistiek_hub.utils.check_functions import check_missing_fields
-from statistiek_hub.utils.datetime import convert_to_datetime
+from statistiek_hub.utils.datetime import convert_to_date
 
 
 class TemporalDimensionResource(ModelResource):
@@ -28,7 +28,7 @@ class TemporalDimensionResource(ModelResource):
 
         # omzetten naar datum veld
         dataset.append_col(
-            tuple([convert_to_datetime(x) for x in dataset["startdate"]]),
+            tuple([convert_to_date(x) for x in dataset["startdate"]]),
             header="startdate",
         )
 

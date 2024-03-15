@@ -148,7 +148,7 @@ class ObservationResource(ModelResource):
                 header="source_date",
             )
             dataset.append_col(
-                tuple([convert_to_datetime(x) for x in dataset["temporal_date"]]),
+                tuple([convert_to_date(x) for x in dataset["temporal_date"]]),
                 header="start_date",
             )
 

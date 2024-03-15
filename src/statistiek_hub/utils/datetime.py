@@ -86,3 +86,12 @@ def convert_to_date(date: str = None) -> datetime.date:
         _date = _date
 
     return _date
+
+
+def set_year(date:  datetime.date) -> int:
+    """ return year from date with custom mapping for 31-12 dates"""
+
+    if date.day == 31 and date.month == 12:
+        return (date.year +  1)
+    else:
+        return date.year
