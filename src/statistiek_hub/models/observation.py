@@ -11,7 +11,9 @@ from .time_stamp_mixin import TimeStampMixin
 
 class Observation(TimeStampMixin):
     class Meta:
-        unique_together = [["measure", "spatialdimension", "temporaldimension"]]
+        indexes = [
+            models.Index("measure", "spatialdimension", "temporaldimension", name='unique_observation_idx'),
+        ]
 
     id = models.BigAutoField(primary_key=True)
     measure = models.ForeignKey(Measure, on_delete=models.CASCADE)

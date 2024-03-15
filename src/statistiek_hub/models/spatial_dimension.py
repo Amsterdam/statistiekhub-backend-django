@@ -6,7 +6,9 @@ from referentie_tabellen.models import SpatialDimensionType
 
 class SpatialDimension(models.Model):
     class Meta:
-        unique_together = [["code", "type", "source_date"]]
+        indexes = [
+            models.Index("code", "type", "source_date", name='unique_spatialdimension_idx'),
+        ]
 
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
