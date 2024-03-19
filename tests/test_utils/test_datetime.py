@@ -6,6 +6,7 @@ from statistiek_hub.utils.datetime import (
     add_timedelta,
     convert_to_date,
     convert_to_datetime,
+    set_year,
 )
 
 
@@ -116,3 +117,19 @@ class TestDatetime:
         with pytest.raises(ValueError) as e:
             convert_to_date(test_input)
         assert str(e.value)[0:8] == expected
+
+    @pytest.mark.parametrize(
+        "test_input, expected",
+        [
+            (
+                datetime.date(2022, 2, 20),
+                2022,
+            ),
+            (
+                datetime.date(2023, 12, 31),
+                2024,
+            ),
+        ],
+    )
+    def test_set_year(self, test_input, expected):
+        assert set_year(test_input) == expected

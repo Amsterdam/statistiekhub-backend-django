@@ -1,4 +1,5 @@
 from django.contrib import admin
+from import_export.tmp_storages import CacheStorage
 from leaflet.admin import LeafletGeoAdminMixin
 
 from statistiek_hub.models.spatial_dimension import SpatialDimension
@@ -34,6 +35,7 @@ class SourceDateFilter(admin.SimpleListFilter):
 class SpatialDimensionAdmin(
     ImportExportFormatsMixin, LeafletGeoAdminMixin, admin.ModelAdmin
 ):
+    tmp_storage_class = CacheStorage    
     list_display = (
         "code",
         "name",

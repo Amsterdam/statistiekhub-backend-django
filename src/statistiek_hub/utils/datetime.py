@@ -58,19 +58,19 @@ def add_timedelta(date: datetime, delta: str = None):
     """Add timedelta to datetime"""
 
     delta_date = None
-    delta = str(delta)
-    if delta == "Dag":
-        delta_date = date + relativedelta(days=+1)
-    elif delta == "Week":
-        delta_date = date + relativedelta(weeks=+1)
-    elif delta == "Maand":
-        delta_date = date + relativedelta(months=+1)
-    elif delta == "Kwartaal":
-        delta_date = date + relativedelta(months=+3)
-    elif delta == "Jaar":
-        delta_date = date + relativedelta(years=+1)
-    elif delta == "Peildatum":
-        delta_date = date
+    match str(delta):
+        case "Dag":
+            delta_date = date + relativedelta(days=+1)
+        case  "Week":
+            delta_date = date + relativedelta(weeks=+1)
+        case  "Maand":
+            delta_date = date + relativedelta(months=+1)
+        case  "Kwartaal":
+            delta_date = date + relativedelta(months=+3)
+        case  "Jaar":
+            delta_date = date + relativedelta(years=+1)
+        case  "Peildatum":
+            delta_date = date
 
     return delta_date
 
@@ -86,3 +86,12 @@ def convert_to_date(date: str = None) -> datetime.date:
         _date = _date
 
     return _date
+
+
+def set_year(date:  datetime.date) -> int:
+    """ return year from date with custom mapping for 31-12 dates"""
+
+    if date.day == 31 and date.month == 12:
+        return (date.year +  1)
+    else:
+        return date.year

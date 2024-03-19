@@ -24,7 +24,7 @@ services:
   database:
     image: postgis/postgis:11-3.3 #postgis/postgis:15-3.3
     ports:
-      - "5432:5432"
+      - "5432"
     environment:
       POSTGRES_DB: statistiek_hub
       POSTGRES_USER: statistiek_hub

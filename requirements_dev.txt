@@ -12,17 +12,17 @@ asgiref==3.7.2
     # via
     #   -r ./requirements.txt
     #   django
-autoflake==2.2.1
+autoflake==2.3.1
     # via -r requirements_dev.in
 billiard==4.2.0
     # via
     #   -r ./requirements.txt
     #   celery
-black==23.11.0
+black==24.2.0
     # via -r requirements_dev.in
-build==1.0.3
+build==1.1.1
     # via pip-tools
-celery==5.3.5
+celery==5.3.6
     # via -r ./requirements.txt
 click==8.1.7
     # via
@@ -45,7 +45,7 @@ click-repl==0.3.0
     # via
     #   -r ./requirements.txt
     #   celery
-coverage[toml]==7.3.2
+coverage[toml]==7.4.4
     # via pytest-cov
 defusedxml==0.7.1
     # via
@@ -61,25 +61,26 @@ django==4.1.13
     #   django-db-views
     #   django-import-export
     #   django-leaflet
+    #   model-bakery
 django-author==1.2.0
     # via -r ./requirements.txt
-django-db-views==0.1.5
+django-db-views==0.1.6
     # via -r ./requirements.txt
-django-import-export==3.3.3
+django-import-export==3.3.7
     # via -r ./requirements.txt
-django-leaflet==0.29.0
+django-leaflet==0.29.1
     # via -r ./requirements.txt
 et-xmlfile==1.1.0
     # via
     #   -r ./requirements.txt
     #   openpyxl
-exceptiongroup==1.1.3
+exceptiongroup==1.2.0
     # via pytest
 iniconfig==2.0.0
     # via pytest
-isort==5.12.0
+isort==5.13.2
     # via -r requirements_dev.in
-kombu==5.3.4
+kombu==5.3.5
     # via
     #   -r ./requirements.txt
     #   celery
@@ -87,9 +88,11 @@ markuppy==1.14
     # via
     #   -r ./requirements.txt
     #   tablib
+model-bakery==1.17.0
+    # via -r requirements_dev.in
 mypy-extensions==1.0.0
     # via black
-numpy==1.26.2
+numpy==1.26.4
     # via
     #   -r ./requirements.txt
     #   pandas
@@ -101,46 +104,48 @@ openpyxl==3.1.2
     # via
     #   -r ./requirements.txt
     #   tablib
-packaging==23.2
+packaging==24.0
     # via
     #   black
     #   build
     #   pytest
-pandas==2.1.3
+pandas==2.2.1
     # via -r ./requirements.txt
-pathspec==0.11.2
+pathspec==0.12.1
     # via black
-pip-tools==7.3.0
+pip-tools==7.4.1
     # via -r requirements_dev.in
-platformdirs==4.0.0
+platformdirs==4.2.0
     # via black
-pluggy==1.3.0
+pluggy==1.4.0
     # via pytest
-prompt-toolkit==3.0.41
+prompt-toolkit==3.0.43
     # via
     #   -r ./requirements.txt
     #   click-repl
 psycopg2-binary==2.9.9
     # via -r ./requirements.txt
-pyflakes==3.1.0
+pyflakes==3.2.0
     # via autoflake
 pyproject-hooks==1.0.0
-    # via build
-pytest==7.4.3
+    # via
+    #   build
+    #   pip-tools
+pytest==7.4.4
     # via
     #   -r requirements_dev.in
     #   pytest-cov
     #   pytest-django
 pytest-cov==4.1.0
     # via -r requirements_dev.in
-pytest-django==4.7.0
+pytest-django==4.8.0
     # via -r requirements_dev.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   -r ./requirements.txt
     #   celery
     #   pandas
-pytz==2023.3.post1
+pytz==2024.1
     # via
     #   -r ./requirements.txt
     #   pandas
@@ -174,12 +179,12 @@ tomli==2.0.1
     #   pip-tools
     #   pyproject-hooks
     #   pytest
-typing-extensions==4.8.0
+typing-extensions==4.10.0
     # via
     #   -r ./requirements.txt
     #   asgiref
     #   black
-tzdata==2023.3
+tzdata==2024.1
     # via
     #   -r ./requirements.txt
     #   celery
@@ -190,11 +195,11 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
-wcwidth==0.2.10
+wcwidth==0.2.13
     # via
     #   -r ./requirements.txt
     #   prompt-toolkit
-wheel==0.41.3
+wheel==0.43.0
     # via pip-tools
 xlrd==2.0.1
     # via
@@ -206,7 +211,7 @@ xlwt==1.3.0
     #   tablib
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==23.3.1
+pip==24.0
     # via pip-tools
-setuptools==68.2.2
+setuptools==69.2.0
     # via pip-tools
