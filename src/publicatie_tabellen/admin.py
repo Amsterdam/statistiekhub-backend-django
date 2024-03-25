@@ -1,13 +1,16 @@
 from django.contrib import admin, messages
-from django.urls import path
-from django.http import HttpResponseRedirect
 from django.db import connection
+from django.db.models import F
+from django.http import HttpResponseRedirect
+from django.urls import path
 
 from publicatie_tabellen.models import (
     PublicationMeasure,
     PublicationObservation,
     PublicationStatistic,
 )
+from statistiek_hub.models.measure import Measure
+from statistiek_hub.utils.truncate_model import truncate
 
 
 class NoAddDeleteChangePermission(admin.ModelAdmin):
@@ -53,20 +56,53 @@ class PublicationStatisticAdmin(NoAddDeleteChangePermission):
     ordering = ("id",)
 
 
+def copy_queryset(queryset, copy_to_model):
+    """ copy queryset into the copy_to_model"""
+    new_item_list = []
+
+    for item_obj in queryset:
+        new_item_list.append(item_obj)
+
+    copy_to_model.objects.bulk_create(new_item_list)  
+
+
 def publish_function(model):
     """
     runs the table function for publication:
     truncate table first and than runs function/query
     """
 
-    truncate = f""" TRUNCATE TABLE {model._meta.db_table} RESTART IDENTITY; """
-
     match model._meta.model_name:
         case "publicationmeasure":
-            raw_query = truncate + """ select public.publicatie_tabellen_publish_measures();"""
+            queryset = Measure.objects.select_related().all()\
+                .defer("created_at", "updated_at", "owner_id", "id")\
+                .annotate(theme_uk=F('theme__name_uk'), 
+                          unit_code=F('unit__code'), 
+                          unit_symbol=F('unit__symbol')
+                          )
 
-        case "publicationstatstics":
-            raw_query = truncate + """ select  public.publicatie_tabellen_publish_statistics();"""
+            try:
+                truncate(PublicationMeasure)
+                copy_queryset(queryset, PublicationMeasure)
+                return (f"All records for {model._meta.model_name} are imported", messages.SUCCESS)
+            except: # error
+                return (f"something went wrong; WARNING table is not updated!", messages.ERROR)
+
+
+        case "publicationstatistic":
+            truncate(PublicationStatistic)
+            raw_query =  """ select  public.publicatie_tabellen_publish_statistics();"""
+
+
+        case "publicationobservation":
+            measure_list = Measure.objects.filter(unit__name__in=["percentage",]).values_list('name', flat=True)
+            print(measure_list)
+            query = ""
+            for measure in ["BEVTOTAAL"]: #measure_list:
+                query += f""" select  public.publicatie_tabellen_publish_observations({measure});"""
+            print(query)
+
+            raw_query = query
 
     try:
         print(raw_query)
@@ -76,6 +112,8 @@ def publish_function(model):
     except:
         # error
         result = (f"something went wrong", messages.ERROR)
-    
+
     return result
         
+
+      
