@@ -96,6 +96,7 @@ function_calculate_observation = """
                                                 ' as	(
                                                         select	o.spatialdimension_id
                                                         , 		o.temporaldimension_id
+                                                        ,       t.year
                                                         , 		o.value
                                                         from	statistiek_hub_observation o
                                                         join	statistiek_hub_measure m on o.measure_id = m.id
@@ -121,7 +122,7 @@ function_calculate_observation = """
 
 		                                if j like '[%' then -- date restriction
 
-	                                	p_stmt_with := 	p_stmt_with || ' when extract(year from t.startdate) ' || replace(replace(replace(j, '[', 'between '), '-', ' and '), ']', '') || ' then ';
+	                                	p_stmt_with := 	p_stmt_with || ' when t.year ' || replace(replace(replace(j, '[', 'between '), '-', ' and '), ']', '') || ' then ';
 
 	                                	else
 
@@ -151,7 +152,7 @@ function_calculate_observation = """
 
                                     p_stmt_join := 	p_stmt_join || 'join	var' || p_number ||
                                                     ' on var' || p_number || '.spatialdimension_id = var' || p_number -1 || '.spatialdimension_id and var' ||
-                                                    p_number || '.temporaldimension_id = var' || p_number -1 || '.temporaldimension_id '
+                                                    p_number || '.year = var' || p_number -1 || '.year '
                                                     ;
 
                                 end if;
@@ -208,11 +209,11 @@ function_calculate_observation = """
                         p_stmt_select :=	'
                                             select	now() as created_at
                                             ,       now() as update_at
-                                            ,       row_number() over () as local_id
+                                            ,       cast(row_number() over () as integer) as id
                                             ,       ' || p_stmt_value || ' as value
                                             ,		cast(' || p_measure_id || ' as bigint) as measure_id
-                                            ,		var1.spatialdimension_id
-                                            ,		var1.temporaldimension_id
+                                            ,		cast(var1.spatialdimension_id as bigint) as spatialdimension_id
+                                            ,		cast(var1.temporaldimension_id as bigint) as temporaldimension_id
                                             from	var1
                                             '
                                             ;
