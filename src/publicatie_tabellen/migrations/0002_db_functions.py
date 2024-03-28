@@ -27,10 +27,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(function_calculate_observation),
-        migrations.RunSQL(function_round_observation),
-        migrations.RunSQL(function_apply_filter),
-        migrations.RunSQL(function_publish_measures),
-        migrations.RunSQL(function_publish_observations),
-        migrations.RunSQL(function_publish_statistics),
+        migrations.RunSQL(function_calculate_observation, ('DROP FUNCTION public.calculate_observation;')),
+        migrations.RunSQL(function_round_observation, ('DROP FUNCTION public.round_observation;')),
+        migrations.RunSQL(function_apply_filter, ('DROP FUNCTION public.apply_filter;')),
+        migrations.RunSQL(function_publish_measures, ('DROP FUNCTION public.publicatie_tabellen_publish_measures;')),
+        migrations.RunSQL(function_publish_observations, ('DROP FUNCTION public.publicatie_tabellen_publish_observations;')),
+        migrations.RunSQL(function_publish_statistics, ('DROP FUNCTION public.publicatie_tabellen_publish_statistics;')),
     ]

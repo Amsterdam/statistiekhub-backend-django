@@ -1,5 +1,5 @@
 function_publish_measures = """
-				create or replace function public.publicatie_tabellen_publish_measures
+create or replace function public.publicatie_tabellen_publish_measures
 				------------------------------------------------------------------
 				-- GOAL: function to fill table with measures, ready to publish --
 				------------------------------------------------------------------
@@ -30,7 +30,7 @@ function_publish_measures = """
 					-- fill supplied measures
 					--
 
-					insert into public.publication_measures
+					insert into public.publicatie_tabellen_publicationmeasure
 					(
 					name,
 					label,
@@ -47,6 +47,7 @@ function_publish_measures = """
 					decimals,
 					sensitive,
 					parent,
+					extra_attr,
 					deprecated,
 					deprecated_date,
 					deprecated_reason
@@ -68,6 +69,7 @@ function_publish_measures = """
 							,		m.decimals
 							,		m.sensitive
 							,		nullif(p.name, '') as parent
+							,       m.extra_attr
 							,		m.deprecated
 							,		m.deprecated_date
 							,		nullif(m.deprecated_reason, '') as deprecated_reason
@@ -82,7 +84,7 @@ function_publish_measures = """
 					and		not exists	( 
 										-- no duplicates
 										select	null
-										from	public.publication_tabellen_publication_measures x
+										from	public.publicatie_tabellen_publicationmeasure x
 										where	foo.name = x.name
 										)
 					;
