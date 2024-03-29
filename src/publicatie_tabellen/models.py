@@ -35,18 +35,19 @@ class PublicationObservation(models.Model):
     temporaldimensiontype = models.CharField(max_length=50)
     temporaldimensionstartdate = models.DateField()
     temporaldimensionenddate = models.DateField()
+    temporaldimensionyear = models.PositiveIntegerField()
     measure = models.CharField(max_length=50)
     value = models.FloatField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name}"     
 
 
 class PublicationStatistic(models.Model):
     spatialdimensiondate = models.DateField()
     temporaldimensiontype = models.CharField(max_length=50)
     temporaldimensionstartdate = models.DateField()
-    temporaldimensionyear= models.IntegerField()
+    temporaldimensionyear= models.PositiveIntegerField()
     measure = models.CharField(max_length=50)
     average = models.FloatField()
     standarddeviation = models.FloatField()
