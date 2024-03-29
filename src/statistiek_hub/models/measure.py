@@ -59,13 +59,13 @@ class Measure(TimeStampMixin):
 
         self.name = self.name.upper()
 
-        if self.unit:
-            if self.unit.code:
-                self.add_error(
-                    errors, {"name": check_code_in_name(self.unit.code, self.name)}
-                )
-            else:
-                pass
+        # if self.unit:
+        #     if self.unit.code:
+        #         self.add_error(
+        #             errors, {"name": check_code_in_name(self.unit.code, self.name)}
+        #         )
+        #     else:
+        #         pass
 
         if self.dimension:
             if self.dimension.code:
