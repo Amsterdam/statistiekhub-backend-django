@@ -11,3 +11,5 @@ class Filter(models.Model):
 
     def __str__(self):
         return f"{self.measure}"
+
+    #TODO validate the rule -> bestaat measure, bv is measure een aantal (met percentages als basis is raar?) hoe om te gaan met OR en AND?
