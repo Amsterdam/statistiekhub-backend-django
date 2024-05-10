@@ -40,7 +40,7 @@ class PublicationObservation(models.Model):
     value = models.FloatField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name}"     
+        return f"{self.measure}"     
 
 
 class PublicationStatistic(models.Model):
@@ -49,10 +49,10 @@ class PublicationStatistic(models.Model):
     temporaldimensionstartdate = models.DateField()
     temporaldimensionyear= models.PositiveIntegerField()
     measure = models.CharField(max_length=50)
-    average = models.FloatField()
-    standarddeviation = models.FloatField()
+    average = models.DecimalField(max_digits=19, decimal_places=3)
+    standarddeviation = models.DecimalField(max_digits=19, decimal_places=3)
     source = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.measure}"
 

@@ -34,8 +34,12 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = (
 )  # max upload size; 20MB (instead of the default 2.5MB)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
 
-# Application definition
 
+#TMP: import-export settings -> for speed up
+IMPORT_EXPORT_SKIP_ADMIN_LOG = True
+IMPORT_EXPORT_SKIP_ADMIN_CONFIRM = True
+
+# Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

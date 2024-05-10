@@ -9,6 +9,11 @@ class TemporalDimension(models.Model):
         indexes = [
             models.Index("type", "startdate", name='unique_temporaldimension_idx'),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                name='duplicate_tempdim_constraint',
+                fields=["type", "startdate"],)
+        ]
 
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=50, editable=False)
