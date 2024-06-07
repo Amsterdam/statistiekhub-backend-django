@@ -38,25 +38,56 @@ class PublishFunction:
                 self.publishmeasure()
 
             case "publicationstatistic":
-                #truncate(PublicationStatistic)
-                #raw_query =  """ select  public.publicatie_tabellen_publish_statistics();"""
                 self.publishstatistic()
                 print(self.result)
 
             case "publicationobservation":
+                self.fill_observationcalculated()
                 self.publishobservation()
                 print(self.result)
 
-        # try:
-        #     print(raw_query)
-        #     with connection.cursor() as cursor:
-        #         cursor.execute(raw_query, {})
-        #     result = (f"All records for {self.model._meta.model_name} are imported", messages.SUCCESS)
-        # except:
-        #     # error
-        #     result = (f"something went wrong", messages.ERROR)
 
-        # return result
+    def fill_observationcalculated(self):
+
+        # get calculation measures -> select from observations otherwise they can not exist
+        qsmeasurecalc = Measure.objects.exclude(calculation = '')
+        print('----------lengte-qsmeasurecalc:', len(qsmeasurecalc))
+
+        truncate(ObservationCalculated)
+        for measure in qsmeasurecalc:
+            print('---measure', measure)
+            raw_query =  f"select (public.calculate_observation ({measure.id}, '{measure.calculation}')).*"
+            print(raw_query)
+
+            with connection.cursor() as cursor:
+                cursor.execute(raw_query)
+                measure_calcobs = cursor.fetchall()
+            print( measure_calcobs )
+
+            def _transform_results(results: list) -> list:
+                """
+                Transform the query results into
+                list of ObservationCalculated objects
+                :param results: list of tuples returned from query"""
+
+                new_item_list = []
+                for row in results:
+                    new_item_list.append( ObservationCalculated(measure_id=row[4],
+                                          value= row[3],
+                                          spatialdimension_id = row[5],
+                                          temporaldimension_id = row[6],
+                                          ))
+                return new_item_list
+
+            ObservationCalculated.objects.bulk_create(_transform_results(measure_calcobs)) 
+
+            #result = (f"All records for calculated observations are imported", messages.SUCCESS)
+            # except:
+            #     # error
+            #     result = (f"something went wrong", messages.ERROR)
+
+        # print('------------result', result)
+
 
     @staticmethod
     def _copy_queryset(queryset, copy_to_model):
@@ -115,11 +146,10 @@ class PublishFunction:
         # else
         return observation.value_new
 
-    def publishobservation(self):
-        "select observations and change value"
-
+    def _get_qs_obs_publishobservation(self, obsmodel) -> QuerySet:
+        """ get queryset from obsmodel specificly for publishobservations"""
         # select observations
-        qsobservation = Observation.objects.select_related('measure', 'spatialdimension', 'temporaldimension', 'measure__unit', 'spatialdimension__type','temporaldimension__type').all()\
+        obs = Observation.objects.select_related('measure', 'spatialdimension', 'temporaldimension', 'measure__unit', 'spatialdimension__type','temporaldimension__type').all()\
                     .annotate(spatialdimensiontype=F('spatialdimension__type__name'), 
                             spatialdimensiondate=F('spatialdimension__source_date'), 
                             spatialdimensioncode=F('spatialdimension__code'), 
@@ -134,7 +164,25 @@ class PublishFunction:
                             value_org= F('value'),
                             value_new = Round('value', precision='measure__decimals')
                             ).defer("created_at", "updated_at")
-        
+        return obs
+
+    def publishobservation(self):
+        "select observations and change value"
+
+
+        # select observations
+        qsobservation = self._get_qs_obs_publishobservation(Observation)
+        self.fill_observationcalculated()
+        qscalcobs = self._get_qs_obs_publishobservation(ObservationCalculated)
+        print('-----------qscalcobs', qscalcobs)
+
+        #-- set queryset observations into dataframe # qsobservation._fields
+        df_obs = pd.DataFrame(list(qsobservation.values()), columns=qsobservation._fields)
+        df_calc =pd.DataFrame(list(qscalcobs.values()), columns=qscalcobs._fields)
+        print('------------- df obs', df_obs.head())
+        print('------------- df calc', df_calc.head())
+        df = pd.concat([df_obs, df_calc], ignore_index=True)
+
         # select filters
         qsfilter = Filter.objects.all().values()
 
@@ -149,6 +197,8 @@ class PublishFunction:
 
             # check if filter needs to be applied
             if msfilter := qsfilter.filter(measure = obj.measure):
+                #print('-----msfilter', msfilter)
+                
                 # possibility of multiple filter-rules
                 value = obj.value
                 for msf in msfilter:
@@ -212,14 +262,17 @@ class PublishFunction:
         print('-----------qscalcobs', qscalcobs)
         if not qscalcobs:
             print('ObservationCalculated is not yet filled')
-
+            self.fill_observationcalculated()
+            qscalcobs = self._get_qs_obs_publishstatistic(ObservationCalculated)
+        print('-----------qscalcobs', qscalcobs)   
         print('--- qsobservation', len(qsobservation))
 
-        #-- get qsobservation into dataframe # qsobservation._fields
-        df = pd.DataFrame(list(qsobservation.values()), columns=qsobservation._fields)
-        print('-----df', df.head())
-        print('-----df', df.columns)
-        print('-----df', len(df))
+        #-- set queryset observations into dataframe # qsobservation._fields
+        df_obs = pd.DataFrame(list(qsobservation.values()), columns=qsobservation._fields)
+        df_calc =pd.DataFrame(list(qscalcobs.values()), columns=qscalcobs._fields)
+        print('------------- df obs', df_obs.head())
+        print('------------- df calc', df_calc.head())
+        df = pd.concat([df_obs, df_calc], ignore_index=True)
 
         # qsmin = bevtotaal + wvoorrbag voor wijk en ggw-gebied
         qsmin = Observation.objects.select_related('measure', 'spatialdimension', 'temporaldimension')\
@@ -236,11 +289,7 @@ class PublishFunction:
                     .defer("created_at", "updated_at")\
                     .distinct()
 
-        #-- get qstotaal into dataframe
         dfmin = pd.DataFrame(list(qsmin.values()), columns=qsmin._fields)
-        print('-----df_min', dfmin.head())
-        print('-----df_min', dfmin.columns)
-        print('-----df_min', len(dfmin))
 
         print('-----------------------------------------------------')
         print('aanmaken df met gemiddelde')
@@ -252,14 +301,9 @@ class PublishFunction:
                                "temporaldimensionyear", 
                                "measure_id", "measure_name", "value",]]\
                             .rename(columns={'value':'average'}).dropna(subset=['average'])
-        
-        print('-----df_mean', df_mean.head())
-        print('-----df_mean', len(df_mean))
 
         #TODO wat te doen met variabelen die geen std hebben omdat geen wijk en/of 22 gebied?
         
-        print('remove value observation if sd_minimum_bevtotaal or sd_minimum_wvoorbag condition is not met')
-
         df_wijk_ggw = df[df['spatialdimensiontypename'].isin(['Wijk','GGW-gebied'])]\
                             [[ "spatialdimensiondate",
                                "spatialdimensiontypename", 
@@ -270,21 +314,21 @@ class PublishFunction:
                                "sd_minimum_bevtotaal",
                                "sd_minimum_wvoorbag",
                                "measure_id", "measure_name", "value",]]
-                                  
-        print('-----df_wijk_ggw', df_wijk_ggw.head())
-        print('-----df_wijk_ggw', len(df_wijk_ggw))
+                        
+        print('remove value observation if sd_minimum_bevtotaal or sd_minimum_wvoorbag condition is not met')
 
         def sd_minimum_check(var, var_check, sd_var):
-    
+            print('-----var check', var_check)
+
             # get the values of bevtotaal or wvoorrbag
             _bbga_var_check= dfmin[(dfmin['measure_name'] == var)][["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode", "value"]] 
         
             _hulp = sd_var.join(_bbga_var_check.rename(columns={"value": 'varc'})\
                                 .set_index(["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"]),\
-                                      on=["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"], how='left')
+                                      on=["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"], how='left')\
+                                        .replace({None: np.nan})
             #'value' vervangen door onbekend als te klein
-            print(_hulp[_hulp[var_check].notna()][['measure_name', 'varc', var_check]])
-            _hulp.loc[(_hulp['varc'] < _hulp[var_check]), "value"] = None
+            _hulp.loc[(_hulp['varc'] < _hulp[var_check]), "value"] = np.nan
     
             return _hulp.drop('varc', axis=1)
     
@@ -292,12 +336,6 @@ class PublishFunction:
         _hulp2 = sd_minimum_check('WVOORRBAG', 'sd_minimum_wvoorbag', _hulp)
     
         df_wijk_ggw = _hulp2
-        print('-----df_wijk_ggw', df_wijk_ggw.head())
-        print('-----df_wijk_ggw', len(df_wijk_ggw))
-
-
-        print('---------------tot hier')
-        print('---------------bereken sd')
 
         def sd_berekening(_hulptwee):
             df = _hulptwee.dropna(subset=['value']).copy()
@@ -330,10 +368,10 @@ class PublishFunction:
         _hulp3 = sd_berekening(_hulp2)
     
         dfstatistic = df_mean.join(_hulp3.set_index(["temporaldimensionyear","measure_id"]), on=["temporaldimensionyear", "measure_id"], how='left').replace({np.nan: None})
+        measure_no_sd = dfstatistic[dfstatistic['standarddeviation'].isna()]['measure_name'].values
         # if there is no standarddeviation -> remove record
         dfstatistic.dropna(subset=['standarddeviation'], inplace=True)
 
-        print('--------df_statistic', dfstatistic.head())
         # gemiddelde en std afronden op 3 decimalen -> set on the model field
         
         try:
@@ -349,6 +387,6 @@ class PublishFunction:
                                          source=row["source"]
                                          ) for _, row in dfstatistic.iterrows()
                 ])
-            self.result = (f"All records for {self.model._meta.model_name} are imported", messages.SUCCESS)
+            self.result = (f"All records for {self.model._meta.model_name} are imported, WARNING Not included: no standarddeviation for {measure_no_sd}", messages.SUCCESS)
         except: # error
             self.result = (f"something went wrong; WARNING table is not updated!", messages.ERROR)

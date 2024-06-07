@@ -59,6 +59,7 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         "measure",
         "value",
         "temporaldimensiontype",
+        "temporaldimensionyear",
         "spatialdimensiontype",
         "spatialdimensioncode",
     )
