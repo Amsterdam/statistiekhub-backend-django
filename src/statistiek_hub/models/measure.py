@@ -16,11 +16,11 @@ class Measure(TimeStampMixin):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)
-    label_uk = models.CharField(max_length=75, blank=True, null=True)
+    label_uk = models.CharField(max_length=75, blank=True, default='')
     definition = models.TextField()
-    definition_uk = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    calculation = models.CharField(max_length=100, blank=True, null=True)
+    definition_uk = models.TextField(blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    calculation = models.CharField(max_length=100, blank=True, default='')
     sensitive = models.BooleanField(
         default=False,
         help_text="gevoeligedata - afronden en groepsonthulling toepassen",
@@ -36,7 +36,7 @@ class Measure(TimeStampMixin):
     )
     deprecated = models.BooleanField(default=False, help_text="vervallen")
     deprecated_date = models.DateField(blank=True, null=True)
-    deprecated_reason = models.TextField(blank=True, null=True, help_text="toelichting")
+    deprecated_reason = models.TextField(blank=True, default='', help_text="toelichting")
 
     def __str__(self):
         return f"{self.name}"
@@ -59,13 +59,13 @@ class Measure(TimeStampMixin):
 
         self.name = self.name.upper()
 
-        if self.unit:
-            if self.unit.code:
-                self.add_error(
-                    errors, {"name": check_code_in_name(self.unit.code, self.name)}
-                )
-            else:
-                pass
+        # if self.unit:
+        #     if self.unit.code:
+        #         self.add_error(
+        #             errors, {"name": check_code_in_name(self.unit.code, self.name)}
+        #         )
+        #     else:
+        #         pass
 
         if self.dimension:
             if self.dimension.code:

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from import_export.tmp_storages import CacheStorage
 
+from statistiek_hub.models.observation import ObservationCalculated
 from statistiek_hub.resources.observation_resource import ObservationResource
 
 from .import_export_formats_mixin import ImportExportFormatsMixin
@@ -25,4 +26,36 @@ class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     search_help_text = "search on measure name"
     search_fields = ["measure__name"]
 
+    raw_id_fields = ("measure", "temporaldimension", "spatialdimension")
     resource_classes = [ObservationResource]
+
+
+@admin.register(ObservationCalculated)
+class ObservationCalculatedAdmin(admin.ModelAdmin):
+    tmp_storage_class = CacheStorage
+    list_display = (
+        "id",
+        "measure",
+        "value",
+        "temporaldimension",
+        "spatialdimension",
+        "created_at",
+        "updated_at",
+    )
+
+    list_filter = (
+        ("temporaldimension__type", admin.RelatedOnlyFieldListFilter),
+        ("spatialdimension__type", admin.RelatedOnlyFieldListFilter),
+    )
+    search_help_text = "search on measure name"
+    search_fields = ["measure__name"]
+    ordering = ("measure",)
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False

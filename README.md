@@ -112,7 +112,7 @@ Test your development environment on [localhost:8000/admin](http://localhost:800
 
 5. Login on http://127.0.0.1:80/admin/ or just http://127.0.0.1/admin/
 
-6. If it asks for admin user, make one with:
+6. If it asks for admin user, go to the terminal of the backend docker container:
 
    ```bash
    docker compose -f docker-compose-acc.yml run --rm app sh -c "python manage.py createsuperuser"

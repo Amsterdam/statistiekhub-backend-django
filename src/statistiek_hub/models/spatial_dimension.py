@@ -9,7 +9,11 @@ class SpatialDimension(models.Model):
         indexes = [
             models.Index("code", "type", "source_date", name='unique_spatialdimension_idx'),
         ]
-
+        constraints = [
+            models.UniqueConstraint(
+                name='duplicate_specdim_constraint',
+                fields=["code", "type", "source_date"],)
+        ]
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
     code = models.CharField(max_length=100)
@@ -20,4 +24,4 @@ class SpatialDimension(models.Model):
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} - {self.source_date}"
