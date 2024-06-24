@@ -2,7 +2,6 @@ from django.db import models
 
 
 class PublicationMeasure(models.Model):
-    id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)
     label_uk = models.CharField(max_length=75, blank=True, null=True)
@@ -29,30 +28,31 @@ class PublicationMeasure(models.Model):
 
 
 class PublicationObservation(models.Model):
-    id = models.BigAutoField(primary_key=True)
     spatialdimensiontype = models.CharField(max_length=50)
     spatialdimensiondate = models.DateField()
     spatialdimensioncode = models.CharField(max_length=100)
     spatialdimensionname = models.CharField(max_length=100, blank=True, null=True)
     temporaldimensiontype = models.CharField(max_length=50)
-    temporaldimensionstartdate = models.DateTimeField()
-    temporaldimensionenddate = models.DateTimeField()
+    temporaldimensionstartdate = models.DateField()
+    temporaldimensionenddate = models.DateField()
+    temporaldimensionyear = models.PositiveIntegerField()
     measure = models.CharField(max_length=50)
     value = models.FloatField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.measure}"     
 
 
 class PublicationStatistic(models.Model):
-    id = models.BigAutoField(primary_key=True)
     spatialdimensiondate = models.DateField()
     temporaldimensiontype = models.CharField(max_length=50)
-    temporaldimensionstartdate = models.DateTimeField()
+    temporaldimensionstartdate = models.DateField()
+    temporaldimensionyear= models.PositiveIntegerField()
     measure = models.CharField(max_length=50)
-    average = models.FloatField()
-    standarddeviation = models.FloatField()
+    average = models.DecimalField(max_digits=19, decimal_places=3)
+    standarddeviation = models.DecimalField(max_digits=19, decimal_places=3)
     source = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.measure}"
+
