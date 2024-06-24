@@ -105,5 +105,23 @@
       "code": "1000",
       "symbol": "/1.000 inwoners"
     }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 13,
+    "fields": {
+      "name": "per ha",
+      "code": null,
+      "symbol": "/ha"
+    }
+  },
+  {
+    "model": "referentie_tabellen.unit",
+    "pk": 14,
+    "fields": {
+      "name": "per m2",
+      "code": null,
+      "symbol": "/m2"
+    }
   }
 ]
