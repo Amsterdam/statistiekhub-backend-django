@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
+import json
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -195,27 +196,41 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 
+# Django Logging settings
+base_log_fmt = {"time": "%(asctime)s", "name": "%(name)s", "level": "%(levelname)s"}
+log_fmt = base_log_fmt.copy()
+log_fmt["message"] = "%(message)s"
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "json": {"format": json.dumps(log_fmt)},
+    },
     "handlers": {
         "console": {
+            "level": "INFO",
             "class": "logging.StreamHandler",
+            "formatter": "json",
         },
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
-    },
+    "root": {"level": "INFO", "handlers": ["console"]},
     "loggers": {
+        "django.db": {
+            "handlers": ["console"],
+            "level": "ERROR",
+        },
         "django": {
             "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "level": "ERROR",
+        },
+        "publicatie_tabellen": {
+            "level": "INFO",
+            "handlers": ["console"],
             "propagate": False,
         },
-    },
 }
-
+}
 
 # TODO: leaflet lijkt alleen te werken met CRS WebMercator. Misschien is mogelijk SRID/CRS om te zetten naar RD 28992?
 LEAFLET_CONFIG = {
