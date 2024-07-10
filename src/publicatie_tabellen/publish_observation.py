@@ -105,29 +105,24 @@ def publishobservation() -> tuple:
     # select observations
     qsobservation = _get_qs_publishobservation(Observation)
     qscalcobs = _get_qs_publishobservation(ObservationCalculated)
-    print('-----------qscalcobs', qscalcobs)
 
     #-- set queryset observations into dataframe
     df_obs = convert_queryset_into_dataframe(qsobservation)
     df_calc = convert_queryset_into_dataframe(qscalcobs)
     df = pd.concat([df_obs, df_calc], ignore_index=True)
-    # TODO weg alleen voor testen
-    df['value_org'] = df['value']
-    df['value_new'] = df['value']
 
     # get all measures
     qsmeasure = Measure.objects.all()
+    measure_no_data = []
 
     truncate(PublicationObservation)
     for measure in qsmeasure:
-        if not (measure.name == 'BEVMIGONB_P'):
-            continue
-        print('---measure', measure)
-
         # select measure df
         mdf = df[df['measure_id']==measure.id].copy()
-        print(mdf[['measure_name', 'measure_id', 'unit', 'decimals', 'sensitive', 'value', 'value_new', 'value_org', 'spatialdimension_id', 'temporaldimension_id' ]])
-
+        if len(mdf)==0:
+            measure_no_data.append(measure.name)
+            continue
+        
         if hasattr(measure,"filter"):        
             dfobs = _get_df_with_filterrule(measure)
 
@@ -136,32 +131,29 @@ def publishobservation() -> tuple:
                     on=['measure_id', 'spatialdimension_id', 'temporaldimension_id'],
                     how='left',
                     suffixes=("_x", None))
-            print(mdf)
             mdf.drop("value_x" ,axis=1 ,inplace=True)
 
-            logger.info("filterrule applied")
-            print(mdf[['measure_name', 'measure_id', 'unit', 'decimals', 'sensitive', 'value', 'value_new', 'value_org', 'spatialdimension_id', 'temporaldimension_id' ]])
+            logger.info(f"filterrule {measure.filter.rule} applied")
 
         if  measure.sensitive:
-            mdf["value_new"]= mdf.apply(lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1)  
+            mdf["value"]= mdf.apply(lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1)  
             logger.info("sensitiverules applied")
-            print(mdf[['measure_name', 'measure_id', 'unit', 'decimals', 'sensitive', 'value', 'value_new', 'value_org', 'spatialdimension_id', 'temporaldimension_id' ]])
 
         # apply decimalen
-        mdf["value"]= mdf.apply(lambda x: round(x.value_new, x.decimals), axis=1) 
-        logger.info("decimals set") 
-        print(mdf[['measure_name', 'measure_id', 'unit', 'decimals', 'sensitive', 'value', 'value_new', 'value_org', 'spatialdimension_id', 'temporaldimension_id' ]])
+        mdf["value"]= mdf.apply(lambda x: round(x.value, x.decimals), axis=1) 
+        logger.info("decimals are set") 
 
         # set np.nan to None for postgres db -> OR TODO remove nan values from mdf because not necessary
         mdf['value'] = mdf['value'].replace(np.nan, None)
         mdf.rename(columns={"measure_name": "measure"}, inplace=True)
         # save measure df in Publishobservation
+        # REMARK: saving an int(= zero decimal) into a floatfield will add a .0 to the int.
         copy_dataframe(mdf, PublicationObservation)
 
     try:
-        return (f"All records for publish-observation are imported", messages.SUCCESS)
+        extra =  f", WARNING Not included: there aren't any observations for measure's: {measure_no_data}" if len(measure_no_data) > 0 else ''
+        return (f"All records for publication-observation are imported{extra}", messages.SUCCESS)
     except:
-        print(f'------------{measure} niet aanwezig in data')
         return (f"something went wrong; WARNING table is not updated!", messages.ERROR) 
 
     

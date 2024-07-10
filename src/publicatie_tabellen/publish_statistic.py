@@ -182,6 +182,7 @@ def publishstatistic() -> tuple:
     try:
         truncate(PublicationStatistic)
         copy_dataframe(dfstatistic, PublicationStatistic)
-        return (f"All records for publish-statistic are imported, WARNING Not included: no standarddeviation for {measure_no_sd}", messages.SUCCESS)
+        extra =  f", WARNING Not included: no standarddeviation for {measure_no_sd}" if len(measure_no_sd) > 0 else ''
+        return (f"All records for publication-statistic are imported{extra}", messages.SUCCESS)
     except: # error
         return (f"something went wrong; WARNING table is not updated!", messages.ERROR)

@@ -31,6 +31,6 @@ def publishmeasure() -> tuple:
     try:
         truncate(PublicationMeasure)
         copy_queryset(qsmeasure, PublicationMeasure)
-        return (f"All records for publish-measure are imported", messages.SUCCESS)
+        return (f"All records for publication-measure are imported", messages.SUCCESS)
     except: # error
         return (f"something went wrong; WARNING table is not updated!", messages.ERROR)
