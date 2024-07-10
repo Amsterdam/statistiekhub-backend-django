@@ -1,6 +1,7 @@
 # Statistiekhub-backend-django
 
-This repository is for the backend django part of the statistiek-hub.
+This repository is for the backend django part of the statistiek-hub:
+a Management module for publishing statistics from the Research and Statistics Department of the municipality of Amsterdam
 
 ## Install instructions
 
@@ -78,54 +79,3 @@ See the Makefile in this project for the description of relevant commands.
    ```
 
 Test your development environment on [localhost:8000/admin](http://localhost:8000/admin).
-
-### Acceptance environment
-
-1. Rename `.example.env` to `.acc.env`:
-
-   ```bash
-   mv .example.env .acc.env
-   ```
-
-2. Replace example variable values with proper remote database values:
-
-   ```conf
-   DB_HOST=<remote_url>
-   DB_PORT=5432
-   DB_NAME=<postgre_database_name>
-   DB_SCHEMA=<postgre_database_schema>
-   DB_USER=<postgre_database_user>
-   DB_PASS=<postgre_database_password>
-   ```
-
-3. Build Docker images:
-
-   ```bash
-   make build
-   ```
-
-4. Launch Django localy with the remote database:
-
-   ```bash
-   make app
-   ```
-
-5. Login on http://127.0.0.1:80/admin/ or just http://127.0.0.1/admin/
-
-6. If it asks for admin user, go to the terminal of the backend docker container:
-
-   ```bash
-   docker compose -f docker-compose-acc.yml run --rm app sh -c "python manage.py createsuperuser"
-   ```
-   
-### Known issues
-
-1. If you encounter a problem with the cache table, go to the terminal of the backend docker container
-   ```bash
-   python manage.py createcachetable
-   ```
-
-2. If you encounter a problem with the postgresql database, which mapped to the ip-adres / port
-   ```bash
-   sudo service postgresql stop
-   ```
