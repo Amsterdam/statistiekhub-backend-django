@@ -84,6 +84,7 @@ function_calculate_observation = """
                                                 ' as	(
                                                         select	o.spatialdimension_id
                                                         , 		o.temporaldimension_id
+                                                        ,       t.year
                                                         , 		o.value
                                                         from	statistiek_hub_observation o
                                                         join	statistiek_hub_measure m on o.measure_id = m.id
@@ -139,7 +140,7 @@ function_calculate_observation = """
 
                                     p_stmt_join := 	p_stmt_join || 'join	var' || p_number ||
                                                     ' on var' || p_number || '.spatialdimension_id = var' || p_number -1 || '.spatialdimension_id and var' ||
-                                                    p_number || '.temporaldimension_id = var' || p_number -1 || '.temporaldimension_id '
+                                                    p_number || '.year = var' || p_number -1 || '.year '
                                                     ;
 
                                 end if;
@@ -210,9 +211,7 @@ function_calculate_observation = """
                         -- construct 'order by' sql-statement --
                         --------------------------------------
 
-                        p_stmt_order :=	'
-                                        order by 2, 4, 3
-                                        '
+                        p_stmt_order :=	'order by 2, 4, 3'
                                         ;
 
 

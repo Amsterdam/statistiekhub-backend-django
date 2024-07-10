@@ -15,6 +15,7 @@ create or replace function public.apply_filter
 
                 declare
 
+                    p_measure           varchar;
                     p_rule				varchar[];
                     p_total				integer;
                     p_value_new			float;
@@ -26,11 +27,35 @@ create or replace function public.apply_filter
                     p_stmt				text;
                     p_stmt_select		text default '';
                     p_stmt_with			text default '';
+                    p_stmt_with_base    text default ' as	(
+                                                        select	o.spatialdimension_id
+                                                        , 		o.temporaldimension_id
+                                                        , 		o.value
+                                                        from	(
+																select measure_id, spatialdimension_id, temporaldimension_id, value from statistiek_hub_observation
+																union all
+																select measure_id, spatialdimension_id, temporaldimension_id, value from statistiek_hub_observationcalculated
+																) o
+                                                        join	statistiek_hub_measure m on o.measure_id = m.id
+                                                        join	statistiek_hub_spatialdimension s on o.spatialdimension_id = s.id
+                                                        join	statistiek_hub_temporaldimension t on o.temporaldimension_id = t.id
+                                                        where	1=1
+														and		m.name =
+                                                ';
                     p_stmt_join			text default '';
                     p_stmt_value		text default '';
                     p_stmt_order		text default '';
 
                 begin
+
+                    --------------------------------------
+                    -- get measure name from measure_id --
+                    --------------------------------------
+
+                    select  name into p_measure
+                    from    statistiek_hub_measure
+                    where   id = p_measure_id;
+
 
                     -------------------------------------
                     -- split rule on spaces into array --
@@ -51,11 +76,20 @@ create or replace function public.apply_filter
                     ;
 
 
-                    -------------------------------------------------------------------
-                    -- loop through rule elements; only if rule contains any measure --
-                    -------------------------------------------------------------------
-
                     if p_total > 0 then
+
+                    
+                        --------------------------------------------------
+                        -- start 'with' statement with supplied measure --
+                        --------------------------------------------------
+
+                        p_number := 0;
+                        p_stmt_with := 'with var' || p_number || p_stmt_with_base || '''' || p_measure || ''')';
+
+                        
+                        -------------------------------------------------------------------
+                        -- loop through rule elements; only if rule contains any measure --
+                        -------------------------------------------------------------------
 
                         foreach i in array p_rule loop -- start loop rule
 
@@ -68,52 +102,20 @@ create or replace function public.apply_filter
                                 -- construct 'with' sql-statements for each individual measure --
                                 -----------------------------------------------------------------
 
-                                if p_number = 1 then
-
-                                    p_stmt_with := 'with ';
-
-                                end if;
-
-                                if p_number > 1 then
-
-                                    p_stmt_with := p_stmt_with || ', ';
-
-                                end if;
-
-                                p_stmt_with := 	p_stmt_with || 'var' || p_number ||
-                                                ' as	(
-                                                        select	o.spatialdimension_id
-                                                        , 		o.temporaldimension_id
-                                                        , 		o.value
-                                                        from	(
-																select measure_id, spatialdimension_id, temporaldimension_id, value from statistiek_hub_observation
-																union all
-																select measure_id, spatialdimension_id, temporaldimension_id, value from statistiek_hub_observationcalculated
-																) o
-                                                        join	statistiek_hub_measure m on o.measure_id = m.id
-                                                        join	statistiek_hub_spatialdimension s on o.spatialdimension_id = s.id
-                                                        join	statistiek_hub_temporaldimension t on o.temporaldimension_id = t.id
-                                                        where	1=1
-														and		m.name =
-                                                '
-														;
-								
-								p_stmt_with := 	p_stmt_with || '''' || right(i, length(i) - 1) || ''''; -- measure
-                                p_stmt_with := 	p_stmt_with || ') '; -- close with-statement
+                                p_stmt_with := p_stmt_with || ', ';
+                                p_stmt_with := p_stmt_with || 'var' || p_number || p_stmt_with_base;								
+								p_stmt_with := p_stmt_with || '''' || right(i, length(i) - 1) || ''''; -- measure
+                                p_stmt_with := p_stmt_with || ') '; -- close with-statement
 
 
                                 -----------------------------------------------------------------
                                 -- construct 'join' sql-statements for each individual measure --
                                 -----------------------------------------------------------------
 
-                                if p_number > 1 then
-
-                                    p_stmt_join := 	p_stmt_join || 'join	var' || p_number ||
-                                                    ' on var' || p_number || '.spatialdimension_id = var' || p_number -1 || '.spatialdimension_id and var' ||
-                                                    p_number || '.temporaldimension_id = var' || p_number -1 || '.temporaldimension_id '
-                                                    ;
-
-                                end if;
+                                p_stmt_join := 	p_stmt_join || 'join	var' || p_number ||
+                                                ' on var' || p_number || '.spatialdimension_id = var' || p_number -1 || '.spatialdimension_id and var' ||
+                                                p_number || '.temporaldimension_id = var' || p_number -1 || '.temporaldimension_id '
+                                                ;
 
 
                                 -----------------------------------------------------------------------------
@@ -140,7 +142,7 @@ create or replace function public.apply_filter
 		                        p_bracket_number := p_bracket_number - 1; -- count closing brackets
 
 		                       	if p_bracket_number = 0 then
-		                          	p_stmt_value := p_stmt_value || i || ' then ' || coalesce(p_replacement_value::varchar, 'null') || ' else cast(var' || p_number || '.value as float) end';
+		                          	p_stmt_value := p_stmt_value || i || ' then ' || coalesce(p_replacement_value::varchar, 'null') || ' else cast(var0.value as float) end';
 		                        end if;
 
 
@@ -173,7 +175,7 @@ create or replace function public.apply_filter
                                             ,		cast(' || p_measure_id || ' as bigint) as measure_id
                                             ,		var1.spatialdimension_id
                                             ,		var1.temporaldimension_id
-                                            from	var1
+                                            from	var0
                                             '
                                             ;
 
