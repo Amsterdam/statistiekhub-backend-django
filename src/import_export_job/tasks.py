@@ -2,8 +2,8 @@
 import logging
 import os
 
-from celery import shared_task
-from celery.utils.log import get_task_logger
+#from celery import shared_task
+#from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -17,10 +17,8 @@ from .utils import DEFAULT_FORMATS
 
 logger = logging.getLogger(__name__)
 
-log = get_task_logger(__name__)
 
-
-importables = getattr(settings, "IMPORT_EXPORT_CELERY_MODELS", {})
+importables = getattr(settings, "IMPORT_EXPORT_JOB_MODELS", {})
 
 
 def change_job_status(job, direction, job_status, dry_run=False):
@@ -112,7 +110,7 @@ def _run_import_job(import_job, dry_run=True):
 
     if dry_run:
         context = {"result": result, "skip_diff": skip_diff}
-        content = render_to_string("import_export_celery/change_summary.html", context)
+        content = render_to_string("import_export_job/change_summary.html", context)
         import_job.change_summary.delete()
         import_job.change_summary.save(
             os.path.split(import_job.file.name)[1] + ".html",
@@ -124,7 +122,6 @@ def _run_import_job(import_job, dry_run=True):
     import_job.save()
 
 
-@shared_task(bind=False)
 def run_import_job(pk, dry_run=True):
     log.info(f"Importing {pk} dry-run {dry_run}")
     import_job = models.ImportJob.objects.get(pk=pk)

@@ -2,9 +2,6 @@
 instead of installing from pypy django-import-export-celery
 copied django-app from https://github.com/auto-mat/django-import-export-celery 
 
-added the following requirements to requirements.txt:
-django-author
-
 Adjustments to original code:
 - Changed the admin to only IMPORT -> removed ALL export code
 - removed export-job because not used
