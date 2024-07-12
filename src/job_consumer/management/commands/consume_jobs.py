@@ -1,7 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from zip_consumer.queue_zip_consumer import AzureJobQueueConsumer
+from job_consumer.queue_job_consumer import AzureJobQueueConsumer
 
 logger = logging.getLogger(__name__)
 

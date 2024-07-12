@@ -6,19 +6,9 @@ import time
 import timeout_decorator
 from django.conf import settings
 from django.template.loader import render_to_string
-from src.job_consumer.utils_azure_que import get_queue_client
+from job_consumer.utils_azure_que import get_queue_client
 
-# from auth_mail import authentication, mailing
-# from iiif import image_server
-# from iiif.metadata import get_metadata
-# from main import utils
-# from main.utils_azure_storage import (
-#     create_storage_account_temp_url,
-#     get_blob_from_storage_account,
-#     get_queue_client,
-#     remove_blob_from_storage_account,
-#     store_file_on_storage_account,
-# )
+from import_export_job.tasks import run_import_job
 from job_consumer import job_tools
 
 logger = logging.getLogger(__name__)
@@ -50,6 +40,7 @@ class AzureJobQueueConsumer:
     def run(self):
         while True:
             count = self.get_queue_length()
+            print(f'---------------------{count}')
             message_iterator = None
 
             if self.end_at_empty_queue:
@@ -76,78 +67,18 @@ class AzureJobQueueConsumer:
                 self.process_message(message)
                 self.queue_client.delete_message(message.id, message.pop_receipt)
 
-#     @timeout_decorator.timeout(MESSAGE_VISIBILITY_TIMEOUT)
-#     def process_message(self, message):
+    @timeout_decorator.timeout(MESSAGE_VISIBILITY_TIMEOUT)
+    def process_message(self, message):
 
-#         logger.info("Started process_message")
+        logger.info("Started process_message")
 
-#         job = json.loads(message.content)
-#         if not job["version"] == self.MESSAGE_VERSION_NAME:
-#             return
+        print('-----------', message.content)
+        job = json.loads(message.content)
+        if not job["version"] == self.MESSAGE_VERSION_NAME:
+            return
 
-#         # Get the job from the storage account
-#         job_blob_name = job["data"]
-#         blob_client, blob = get_blob_from_storage_account(
-#             settings.STORAGE_ACCOUNT_CONTAINER_ZIP_QUEUE_JOBS_NAME, job_blob_name
-#         )
-#         record = json.loads(blob)
-
-#         # Prepare folder and report.txt file for downloads
-#         (
-#             zipjob_uuid,
-#             tmp_folder_path,
-#             info_txt_contents,
-#         ) = image_server.prepare_zip_downloads()
-
-#         # Get metadata and files from image servers
-#         metadata_cache = {}
-#         for iiif_url, image_info in record["urls"].items():
-#             fail_reason = None
-#             metadata, metadata_cache = get_metadata(
-#                 image_info["url_info"],
-#                 iiif_url,
-#                 metadata_cache,
-#             )
-#             try:
-#                 authentication.check_file_access_in_metadata(
-#                     metadata, image_info["url_info"], record["scope"]
-#                 )
-#                 authentication.check_restricted_file(metadata, image_info["url_info"])
-#             except utils.ImmediateHttpResponse as e:
-#                 fail_reason = e.response.content.decode("utf-8")
-
-#             info_txt_contents = image_server.download_file_for_zip(
-#                 iiif_url,
-#                 info_txt_contents,
-#                 image_info["url_info"],
-#                 fail_reason,
-#                 metadata,
-#                 None,  # TODO: Remove parameter because not needed anymore (was: record["request_meta"])
-#                 tmp_folder_path,
-#             )
-#         # Store the info_file_along_with_the_image_files
-#         zip_tools.save_file_to_folder(tmp_folder_path, "report.txt", info_txt_contents)
-
-#         # Zip all files together
-#         zip_file_path = zip_tools.create_local_zip_file(zipjob_uuid, tmp_folder_path)
-#         zip_file_name = os.path.basename(zip_file_path)
-
-#         blob_client, blob_service_client = store_file_on_storage_account(
-#             settings.STORAGE_ACCOUNT_CONTAINER_NAME, zip_file_path, zip_file_name
-#         )
-
-#         temp_zip_download_url = create_storage_account_temp_url(
-#             blob_client, blob_service_client
-#         )
-
-#         email_subject = "Downloadlink Bouw- en omgevingdossiers"
-#         email_body = render_to_string(
-#             "download_zip.html", {"temp_zip_download_url": temp_zip_download_url}
-#         )
-
-#         mailing.send_email(record["email_address"], email_subject, email_body)
-
-#         remove_blob_from_storage_account(
-#             settings.STORAGE_ACCOUNT_CONTAINER_ZIP_QUEUE_JOBS_NAME, job_blob_name
-#         )
-#         zip_tools.cleanup_local_files(zip_file_path, tmp_folder_path)
+        # Run task
+        try: 
+            run_import_job(job["key"], job["dry_run"])
+        except:
+            raise Exception("Failed ")

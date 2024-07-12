@@ -77,6 +77,7 @@ LOCAL_APPS = [
     "referentie_tabellen",
     "publicatie_tabellen",
     "import_export_job",
+    "job_consumer",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -195,10 +196,11 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
 if os.getenv("AZURITE_STORAGE_CONNECTION_STRING"):
     print('---------------in azurite storage')
     # create container slechts eenmalig
-    # from azure.storage.blob import BlobServiceClient
-    # blob_service_client = BlobServiceClient.from_connection_string(os.getenv("AZURITE_STORAGE_CONNECTION_STRING"))
-    # container_client = blob_service_client.get_container_client("django")
-    # container_client.create_container()
+    from azure.storage.blob import BlobServiceClient
+    blob_service_client = BlobServiceClient.from_connection_string(os.getenv("AZURITE_STORAGE_CONNECTION_STRING"))
+    container_client = blob_service_client.get_container_client("django")
+    if not container_client.exists():
+        container_client.create_container()
     #connect django
     STORAGE_AZURE = {
         "default": {

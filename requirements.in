@@ -9,6 +9,7 @@ django-storages[azure]
 psycopg2-binary
 python-dateutil
 pandas
+timeout-decorator
 
 # Azure
 azure-cli

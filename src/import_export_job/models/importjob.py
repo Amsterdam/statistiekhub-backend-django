@@ -123,4 +123,6 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
                     )
                 )
 
+        #TODO remove job from queue if exists
+
         ImportJob.objects.filter(id=instance.id).delete()
