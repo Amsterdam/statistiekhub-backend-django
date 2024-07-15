@@ -9,7 +9,7 @@ from publicatie_tabellen.publish_observation import (
     _apply_sensitive_rules,
     _get_df_with_filterrule,
 )
-from referentie_tabellen.models import TemporalDimensionType, Theme, Unit
+from referentie_tabellen.models import TemporalDimensionType, Unit
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
@@ -17,15 +17,13 @@ from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
 
 
-@pytest.fixture(scope = "function")
+@pytest.fixture
 def fill_ref_tabellen() -> dict:
     unit = baker.make(Unit, name="aantal")
-    theme = baker.make(Theme)
-
     tempdimtype = baker.make(TemporalDimensionType,  name="Peildatum")
     temp = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
     spatial = baker.make(SpatialDimension)
-    return {'unit': unit, 'theme': theme, 'temp': temp, 'spatial': spatial}
+    return {'unit': unit,'temp': temp, 'spatial': spatial}
 
 
 @pytest.mark.parametrize(
@@ -60,12 +58,11 @@ def test_get_df_with_filterrule(fill_ref_tabellen, filter, value_new, var_value,
         return: dataframe with value corrected by filterrule """
     fixture = fill_ref_tabellen
 
-    # make measures
     measure_base = baker.make(Measure, name='BASE', unit=fixture['unit'])
     measure_var = baker.make(Measure, name='VAR', unit=fixture['unit'])
-    # set filter
+
     filter_var = baker.make(Filter, measure=measure_var, rule = filter, value_new=value_new)
-    # make observations
+
     obs_base = baker.make(Observation, measure=measure_base, temporaldimension=fixture['temp'] , spatialdimension=fixture['spatial'] ,value=base_value)
     obs_var = baker.make(Observation, measure=measure_var, temporaldimension=fixture['temp']  , spatialdimension=fixture['spatial'] , value=var_value)
     
@@ -73,7 +70,6 @@ def test_get_df_with_filterrule(fill_ref_tabellen, filter, value_new, var_value,
 
     assert dftest['value'].tolist() == expected
 
-    # remove db objects
     measure_base.delete()
     measure_var.delete()
     filter_var.delete()

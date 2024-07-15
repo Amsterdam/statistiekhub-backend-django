@@ -17,7 +17,6 @@ from publicatie_tabellen.utils import convert_queryset_into_dataframe
 from referentie_tabellen.models import (
     SpatialDimensionType,
     TemporalDimensionType,
-    Theme,
     Unit,
 )
 from statistiek_hub.models.measure import Measure
@@ -29,15 +28,11 @@ from statistiek_hub.models.temporal_dimension import TemporalDimension
 @pytest.fixture
 def fill_ref_tabellen() -> dict:
     unit = baker.make(Unit, name="aantal")
-    theme = baker.make(Theme)
 
     tempdimtype = baker.make(TemporalDimensionType,  name="Peildatum")
     temppeildatum = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
     tempdimtypejaar = baker.make(TemporalDimensionType,  name="Jaar")
     tempjaar = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtypejaar)
-
-    temp2_startdate = datetime.date(2024, 1, 1)
-    temp2 = baker.make(TemporalDimension, startdate=temp2_startdate, type=tempdimtype)
 
     spatialdimtypewijk = baker.make(SpatialDimensionType,  name="Wijk")
     spatialdimtypeggw = baker.make(SpatialDimensionType,  name="GGW-gebied")
@@ -48,11 +43,8 @@ def fill_ref_tabellen() -> dict:
     spatialgem = baker.make(SpatialDimension, type=spatialdimtypegem )
     spatialbuurt = baker.make(SpatialDimension, type=spatialdimtypebuurt )
     return {'unit': unit,
-            'theme': theme,
             'temppeildatum': temppeildatum,
             'tempjaar': tempjaar,
-            'temp2': temp2,
-            'temp2_startdate': temp2_startdate, 
             'spatialwijk': spatialwijk,
             'spatialggw': spatialggw,
             'spatialgem': spatialgem,
@@ -72,7 +64,6 @@ def fill_bev_won_obs(fill_ref_tabellen):
     obswon2 = baker.make(Observation, measure=measurewon, temporaldimension=fixture['temppeildatum'] , spatialdimension=fixture['spatialggw'] ,value=1000)
     obswon3 = baker.make(Observation, measure=measurewon, temporaldimension=fixture['temppeildatum'] , spatialdimension=fixture['spatialgem'] ,value=1000)
     obswon4 = baker.make(Observation, measure=measurewon, temporaldimension=fixture['tempjaar'] , spatialdimension=fixture['spatialgem'] ,value=1000)
-
 
 
 @pytest.mark.parametrize(
@@ -99,7 +90,6 @@ def test_get_qs_publishstatistic(fill_ref_tabellen, extra_attr, tempdim, spatial
     if len(dfobs) > 0:
         assert dfobs['spatialdimensiontypename'].unique()[0] in ['Wijk','GGW-gebied', 'Gemeente']
 
-    # remove db objects
     measure.delete()
     obs.delete()
 
@@ -151,7 +141,6 @@ def test_set_small_regions_to_nan_if_minimum(fill_bev_won_obs, fill_ref_tabellen
     fixture = fill_bev_won_obs
     f_ref_tabellen = fill_ref_tabellen
 
-    #extra_attr = {"BBGA_sd_minimum_wvoor_bag": 1000, "BBGA_sd_minimum_bev_totaal": 1000,}
     measurevar = baker.make(Measure, name='VAR', unit=f_ref_tabellen['unit'], extra_attr= extra_attr )
     obsvar = baker.make(Observation, measure=measurevar, temporaldimension=f_ref_tabellen['temppeildatum'] , spatialdimension=f_ref_tabellen[spatial], value=10)
 
@@ -163,6 +152,5 @@ def test_set_small_regions_to_nan_if_minimum(fill_bev_won_obs, fill_ref_tabellen
     df_result = _set_small_regions_to_nan_if_minimum(dfmin, var_min, dfwijkggw)
     assert np.testing.assert_equal(df_result[df_result['measure_name']=='VAR']['value'].values[0], expected) is None
 
-    # remove db objects
     measurevar.delete()
     obsvar.delete()
