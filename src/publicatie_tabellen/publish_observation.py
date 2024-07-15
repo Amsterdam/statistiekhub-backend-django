@@ -55,21 +55,16 @@ def _apply_sensitive_rules(value, unit):
 
         case 'percentage':
             # afronden naar 90%
-
             if value >= 90:
                 return 90
-    # else
+
     return value
 
 def _get_df_with_filterrule(measure: Measure) -> pd.DataFrame:
     """ apply sql db_function public.apply_filter on measure 
-        return: dataframe with value corrected by filterrule """
-    
-    if pd.isna(measure.filter.value_new):
-        value_new = 'Null'
-    else:
-        value_new = measure.filter.value_new
+        return: dataframe with value corrected by filterrule """ 
 
+    value_new = 'Null' if pd.isna(measure.filter.value_new) else measure.filter.value_new
     raw_query =  f"select (public.apply_filter ({measure.id}, '{measure.filter.rule}', {value_new} )).*" 
 
     with connection.cursor() as cursor:
@@ -80,11 +75,8 @@ def _get_df_with_filterrule(measure: Measure) -> pd.DataFrame:
         """ Transform the query results into a pandas Dataframe
         return: dataframe returned from apply_filter query"""
 
-        # Create DataFrame
         _df = pd.DataFrame(results, columns=['created_at', 'update_at', 'id', 'value', 'measure_id', 'spatialdimension_id', 'temporaldimension_id'])
-        # drop colums
         _df.drop(['created_at', 'update_at', 'id'], axis=1, inplace=True)
-
         return _df
 
     dfobs = _transform_results_to_df(measure_obs)
@@ -102,22 +94,18 @@ def publishobservation() -> tuple:
     return: tuple(string, django.contrib.messages)
     """
 
-    # select observations
     qsobservation = _get_qs_publishobservation(Observation)
     qscalcobs = _get_qs_publishobservation(ObservationCalculated)
 
-    #-- set queryset observations into dataframe
     df_obs = convert_queryset_into_dataframe(qsobservation)
     df_calc = convert_queryset_into_dataframe(qscalcobs)
     df = pd.concat([df_obs, df_calc], ignore_index=True)
 
-    # get all measures
+    truncate(PublicationObservation)
     qsmeasure = Measure.objects.all()
     measure_no_data = []
 
-    truncate(PublicationObservation)
     for measure in qsmeasure:
-        # select measure df
         mdf = df[df['measure_id']==measure.id].copy()
         if len(mdf)==0:
             measure_no_data.append(measure.name)
@@ -139,21 +127,16 @@ def publishobservation() -> tuple:
             mdf["value"]= mdf.apply(lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1)  
             logger.info("sensitiverules applied")
 
-        # apply decimalen
         mdf["value"]= mdf.apply(lambda x: round(x.value, x.decimals), axis=1) 
         logger.info("decimals are set") 
 
         # set np.nan to None for postgres db -> OR TODO remove nan values from mdf because not necessary
         mdf['value'] = mdf['value'].replace(np.nan, None)
         mdf.rename(columns={"measure_name": "measure"}, inplace=True)
-        # save measure df in Publishobservation
         # REMARK: saving an int(= zero decimal) into a floatfield will add a .0 to the int.
         copy_dataframe(mdf, PublicationObservation)
 
-    try:
-        extra =  f", WARNING Not included: there aren't any observations for measure's: {measure_no_data}" if len(measure_no_data) > 0 else ''
-        return (f"All records for publication-observation are imported{extra}", messages.SUCCESS)
-    except:
-        return (f"something went wrong; WARNING table is not updated!", messages.ERROR) 
+    extra =  f", WARNING Not included: there aren't any observations for measure's: {measure_no_data}" if len(measure_no_data) > 0 else ''
+    return (f"All records for publication-observation are imported{extra}", messages.SUCCESS)
 
     
