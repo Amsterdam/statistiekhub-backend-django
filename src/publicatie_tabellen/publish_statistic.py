@@ -28,7 +28,7 @@ def _get_qs_publishstatistic(obsmodel) -> QuerySet:
                         temporaldimensionstartdate = F('temporaldimension__startdate'),
                         temporaldimensionyear = F('temporaldimension__year'),
                         sd_minimum_bevtotaal = Coalesce(F('measure__extra_attr__BBGA_sd_minimum_bev_totaal'), Value(None)),
-                        sd_minimum_wvoorbag = Coalesce(F('measure__extra_attr__BBGA_sd_minimum_wvoor_bag'), Value(None)),
+                        sd_minimum_wvoorrbag = Coalesce(F('measure__extra_attr__BBGA_sd_minimum_wvoor_bag'), Value(None)),
                         measure_name = F('measure__name')
                         )\
                     .order_by('measure', 'temporaldimensionyear','temporaldimensionstartdate')\
@@ -81,18 +81,14 @@ def _select_df_wijk_ggw(df: pd.DataFrame) -> pd.DataFrame:
                             "temporaldimensionstartdate",
                             "temporaldimensionyear",
                             "sd_minimum_bevtotaal",
-                            "sd_minimum_wvoorbag",
+                            "sd_minimum_wvoorrbag",
                             "measure_id", "measure_name", "value",]].copy()
     return df_wijk_ggw
 
 
 def _set_small_regions_to_nan_if_minimum(dfmin: pd.DataFrame, var_min: str, dataframe: pd.DataFrame) -> pd.DataFrame:
     """ set region value to np.nan if var_min is less than minimum_value :
-        remove value observation if sd_minimum_bevtotaal or sd_minimum_wvoorbag condition is not met """
-
-    match var_min:
-        case 'BEVTOTAAL': minimum_value = 'sd_minimum_bevtotaal'
-        case 'WVOORRBAG': minimum_value = 'sd_minimum_wvoorbag'
+        remove value observation if sd_minimum_bevtotaal or sd_minimum_wvoorrbag condition is not met """
 
     # get the values of bevtotaal or wvoorrbag
     _df_var_min= dfmin[(dfmin['measure_name'] == var_min)][["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode", "value"]] 
@@ -104,7 +100,9 @@ def _set_small_regions_to_nan_if_minimum(dfmin: pd.DataFrame, var_min: str, data
                         .set_index(["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"]),\
                                 on=["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"], how='left')\
                                 .replace({None: np.nan})
+    
     #'value' vervangen door onbekend als te klein
+    minimum_value = f"sd_minimum_{var_min.lower()}"
     hulp.loc[(hulp['varc'] < hulp[minimum_value]), "value"] = np.nan
 
     return hulp.drop('varc', axis=1)
