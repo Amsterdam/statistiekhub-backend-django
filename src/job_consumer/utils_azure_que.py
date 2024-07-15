@@ -1,6 +1,5 @@
 import logging
 
-from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import WorkloadIdentityCredential
 from azure.storage.queue import QueueClient, QueueServiceClient
 from django.conf import settings
@@ -13,10 +12,10 @@ def get_queue_client():
         queue_service_client = QueueServiceClient.from_connection_string(
             settings.AZURITE_QUEUE_CONNECTION_STRING
         )
-        try:
-            queue_client = queue_service_client.get_queue_client(settings.JOB_QUEUE_NAME)
-        except ResourceNotFoundError:
-            queue_client.create_queue(settings.JOB_QUEUE_NAME)
+        # create queue first time
+        #queue_service_client.create_queue(settings.JOB_QUEUE_NAME)
+        queue_client = queue_service_client.get_queue_client(settings.JOB_QUEUE_NAME)
+
     else:
         credentials = WorkloadIdentityCredential()
         queue_client = QueueClient(

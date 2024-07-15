@@ -94,7 +94,7 @@ def importjob_post_save(sender, instance, **kwargs):
             partial(
                 store_job_in_queue,
                  job_pk=instance.pk,
-                 dry_run=getattr(settings, "IMPORT_DRY_RUN_FIRST_TIME", True),
+                 dry_run= getattr(settings, "IMPORT_DRY_RUN_FIRST_TIME", True),
             )
         )
 

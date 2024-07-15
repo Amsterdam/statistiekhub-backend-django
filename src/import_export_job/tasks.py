@@ -96,27 +96,18 @@ def _run_import_job(import_job, dry_run=True):
     result = resource.import_data(dataset, dry_run=dry_run)
     change_job_status(import_job, "import", "4/5 Generating import summary", dry_run)
 
-    for error in result.base_errors:
-        import_job.errors += f"\n{error.error}\n{error.traceback}\n"
+    if result.base_errors or result.row_errors():
+        import_job.errors = "ERRORS zie change_summary"
 
-    for line, errors in result.row_errors():
-        for error in errors:
-            import_job.errors += _("Line: %s - %s\n\t%s\n%s") % (
-                line,
-                error.error,
-                ",".join(str(s) for s in error.row.values()),
-                error.traceback,
-            )
-
-    if dry_run:
-        context = {"result": result, "skip_diff": skip_diff}
-        content = render_to_string("import_export_job/change_summary.html", context)
-        import_job.change_summary.delete()
-        import_job.change_summary.save(
-            os.path.split(import_job.file.name)[1] + ".html",
-            ContentFile(content.encode("utf-8")),
-        )
-    else:
+    # save import summary
+    context = {"result": result, "skip_diff": skip_diff}
+    content = render_to_string("import_export_job/change_summary.html", context)
+    import_job.change_summary.delete()
+    import_job.change_summary.save(
+        os.path.split(import_job.file.name)[1] + ".html",
+        ContentFile(content.encode("utf-8")),
+    )
+    if not dry_run:
         import_job.imported = timezone.now()
     change_job_status(import_job, "import", "5/5 Import job finished", dry_run)
     import_job.save()

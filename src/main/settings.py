@@ -196,8 +196,7 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     STORAGES |= STORAGE_AZURE #update storages with storage_azure
 
 if os.getenv("AZURITE_STORAGE_CONNECTION_STRING"):
-    print('---------------in azurite storage')
-    # create container slechts eenmalig
+    # create container if not exists
     from azure.storage.blob import BlobServiceClient
     blob_service_client = BlobServiceClient.from_connection_string(os.getenv("AZURITE_STORAGE_CONNECTION_STRING"))
     container_client = blob_service_client.get_container_client("django")
@@ -219,7 +218,7 @@ if os.getenv("AZURITE_STORAGE_CONNECTION_STRING"):
 AZURITE_QUEUE_CONNECTION_STRING = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
 QUEUE_ACCOUNT_URL = os.getenv("QUEUE_ACCOUNT_URL")
 JOB_QUEUE_NAME = "job-queue"
-
+IMPORT_DRY_RUN_FIRST_TIME = False
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

@@ -40,7 +40,6 @@ class AzureJobQueueConsumer:
     def run(self):
         while True:
             count = self.get_queue_length()
-            print(f'---------------------{count}')
             message_iterator = None
 
             if self.end_at_empty_queue:
@@ -72,7 +71,6 @@ class AzureJobQueueConsumer:
 
         logger.info("Started process_message")
 
-        print('-----------', message.content)
         job = json.loads(message.content)
         if not job["version"] == self.MESSAGE_VERSION_NAME:
             return
