@@ -68,6 +68,7 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
                     "description",
                     "parent",
                     "dimension",
+                    "sensitive",
                 ),
             },
         ),

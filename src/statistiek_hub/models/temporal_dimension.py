@@ -7,7 +7,13 @@ from statistiek_hub.utils.datetime import add_timedelta, set_year
 class TemporalDimension(models.Model):
     class Meta:
         indexes = [
-            models.Index("type", "startdate", name='unique_temporaldimension_idx'),
+            models.Index("type", "startdate", name="unique_temporaldimension_idx"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                name="duplicate_tempdim_constraint",
+                fields=["type", "startdate"],
+            )
         ]
 
     id = models.BigAutoField(primary_key=True)

@@ -9,10 +9,13 @@ from .import_export_formats_mixin import ImportExportFormatsMixin
 
 
 class TemporalDimensionAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
-    tmp_storage_class = CacheStorage     
+    tmp_storage_class = CacheStorage
     readonly_fields = ("enddate", "year")
 
-    list_display = ("name", "year", )
-    list_filter = ("type",  "year")
-    ordering = ("-year", )
+    list_display = (
+        "name",
+        "year",
+    )
+    list_filter = ("type", "year")
+    ordering = ("-year",)
     resource_class = TemporalDimensionResource

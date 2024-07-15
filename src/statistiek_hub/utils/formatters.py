@@ -20,8 +20,7 @@ class SCSV(base_formats.CSV):
         delimiter = csv.Sniffer().sniff(in_stream, delimiters=";,").delimiter
         if delimiter != ";":
             raise ValidationError(
-                f"CSV format is using `{delimiter}` delimiter,"
-                + " but it should be `;` delimiter"
+                f"file is using `{delimiter}` delimiter, but semicolon_csv format is with `;` delimiter"
             )
         kwargs["delimiter"] = delimiter
         kwargs["format"] = "csv"
@@ -49,7 +48,11 @@ class GEOJSON(base_formats.TablibFormat):
         """
         Create tablib.dataset from geojson.
         """
-        data = json.load(tablib.utils.normalize_input(in_stream))
+
+        if isinstance(in_stream, dict):
+            data = in_stream
+        else:
+            data = json.load(tablib.utils.normalize_input(in_stream))
 
         try:
             crs = data["crs"]

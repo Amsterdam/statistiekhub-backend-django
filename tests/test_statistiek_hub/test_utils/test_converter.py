@@ -11,9 +11,10 @@ class TestConverter:
             ("1", "float", float(1)),
             ("test", "float", "test"),
             ("4", "set", "4"),
+            ("NA", "float", ''),
+            ("12,4", "float", 12.4),
         ],
     )
     def test_convert_str(self, test_input, test_to, expected):
         """Return to:format(value) else return value"""
-
         assert convert_str(test_input, test_to) == expected
