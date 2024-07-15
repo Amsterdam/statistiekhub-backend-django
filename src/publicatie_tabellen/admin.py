@@ -25,7 +25,7 @@ class NoAddDeleteChangePermission(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            path('publish/', self.publish),
+            path("publish/", self.publish),
         ]
         return my_urls + urls
 

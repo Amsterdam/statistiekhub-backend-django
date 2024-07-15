@@ -15,11 +15,7 @@ from statistiek_hub.utils.check_functions import (
     check_missing_fields,
 )
 from statistiek_hub.utils.converter import convert_str
-from statistiek_hub.utils.datetime import (
-    add_timedelta,
-    convert_to_date,
-    convert_to_datetime,
-)
+from statistiek_hub.utils.datetime import add_timedelta, convert_to_date
 from statistiek_hub.validations import get_instance
 
 CHUNKSIZE = 5000

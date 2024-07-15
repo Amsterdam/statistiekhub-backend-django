@@ -16,11 +16,11 @@ class Measure(TimeStampMixin):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)
-    label_uk = models.CharField(max_length=75, blank=True, default='')
+    label_uk = models.CharField(max_length=75, blank=True, default="")
     definition = models.TextField()
-    definition_uk = models.TextField(blank=True, default='')
-    description = models.TextField(blank=True, default='')
-    calculation = models.CharField(max_length=100, blank=True, default='')
+    definition_uk = models.TextField(blank=True, default="")
+    description = models.TextField(blank=True, default="")
+    calculation = models.CharField(max_length=100, blank=True, default="")
     sensitive = models.BooleanField(
         default=False,
         help_text="gevoeligedata - afronden en groepsonthulling toepassen",
@@ -36,7 +36,9 @@ class Measure(TimeStampMixin):
     )
     deprecated = models.BooleanField(default=False, help_text="vervallen")
     deprecated_date = models.DateField(blank=True, null=True)
-    deprecated_reason = models.TextField(blank=True, default='', help_text="toelichting")
+    deprecated_reason = models.TextField(
+        blank=True, default="", help_text="toelichting"
+    )
 
     def __str__(self):
         return f"{self.name}"

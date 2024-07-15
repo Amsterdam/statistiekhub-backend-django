@@ -15,8 +15,12 @@ class ObservationBase(TimeStampMixin):
 
     measure = models.ForeignKey(Measure, related_name="+", on_delete=models.CASCADE)
     value = models.FloatField()
-    temporaldimension = models.ForeignKey(TemporalDimension, related_name="+", on_delete=models.RESTRICT)
-    spatialdimension = models.ForeignKey(SpatialDimension, related_name="+", on_delete=models.RESTRICT)
+    temporaldimension = models.ForeignKey(
+        TemporalDimension, related_name="+", on_delete=models.RESTRICT
+    )
+    spatialdimension = models.ForeignKey(
+        SpatialDimension, related_name="+", on_delete=models.RESTRICT
+    )
 
     @classmethod
     def add_error(cls, errors, new_errors):
@@ -49,32 +53,61 @@ class ObservationBase(TimeStampMixin):
 class Observation(ObservationBase):
     class Meta:
         indexes = [
-            models.Index("measure", "spatialdimension", "temporaldimension", name='unique_observation_idx'),
+            models.Index(
+                "measure",
+                "spatialdimension",
+                "temporaldimension",
+                name="unique_observation_idx",
+            ),
         ]
         constraints = [
             models.UniqueConstraint(
-                name='duplicate_observation_constraint',
-                fields=["measure", "spatialdimension", "temporaldimension"],)
+                name="duplicate_observation_constraint",
+                fields=["measure", "spatialdimension", "temporaldimension"],
+            )
         ]
 
-    measure = models.ForeignKey(Measure, related_name="obs_measure", on_delete=models.CASCADE)
-    temporaldimension = models.ForeignKey(TemporalDimension, related_name="obs_temporaldimension", on_delete=models.RESTRICT)
-    spatialdimension = models.ForeignKey(SpatialDimension, related_name="obs_spatialdimension", on_delete=models.RESTRICT)
+    measure = models.ForeignKey(
+        Measure, related_name="obs_measure", on_delete=models.CASCADE
+    )
+    temporaldimension = models.ForeignKey(
+        TemporalDimension,
+        related_name="obs_temporaldimension",
+        on_delete=models.RESTRICT,
+    )
+    spatialdimension = models.ForeignKey(
+        SpatialDimension, related_name="obs_spatialdimension", on_delete=models.RESTRICT
+    )
 
 
 class ObservationCalculated(ObservationBase):
     class Meta:
         indexes = [
-            models.Index("measure", "spatialdimension", "temporaldimension", name='unique_calc_observation_idx'),
+            models.Index(
+                "measure",
+                "spatialdimension",
+                "temporaldimension",
+                name="unique_calc_observation_idx",
+            ),
         ]
         constraints = [
             models.UniqueConstraint(
-                name='duplicate_calc_observation_constraint',
-                fields=["measure", "spatialdimension", "temporaldimension"],)
+                name="duplicate_calc_observation_constraint",
+                fields=["measure", "spatialdimension", "temporaldimension"],
+            )
         ]
         verbose_name_plural = "observations calculated"
-        
-    measure = models.ForeignKey(Measure, related_name="calc_obs_measure", on_delete=models.CASCADE)
-    temporaldimension = models.ForeignKey(TemporalDimension, related_name="calc_obs_temporaldimension", on_delete=models.RESTRICT)
-    spatialdimension = models.ForeignKey(SpatialDimension, related_name="calc_obs_spatialdimension", on_delete=models.RESTRICT)
 
+    measure = models.ForeignKey(
+        Measure, related_name="calc_obs_measure", on_delete=models.CASCADE
+    )
+    temporaldimension = models.ForeignKey(
+        TemporalDimension,
+        related_name="calc_obs_temporaldimension",
+        on_delete=models.RESTRICT,
+    )
+    spatialdimension = models.ForeignKey(
+        SpatialDimension,
+        related_name="calc_obs_spatialdimension",
+        on_delete=models.RESTRICT,
+    )

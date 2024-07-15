@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-import os
+
 import json
+import os
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -229,7 +230,7 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-}
+    },
 }
 
 # TODO: leaflet lijkt alleen te werken met CRS WebMercator. Misschien is mogelijk SRID/CRS om te zetten naar RD 28992?
