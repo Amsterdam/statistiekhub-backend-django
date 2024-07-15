@@ -6,18 +6,6 @@ from publicatie_tabellen.db_functions.function_apply_filter import function_appl
 from publicatie_tabellen.db_functions.function_calculate_observations import (
     function_calculate_observation,
 )
-# from publicatie_tabellen.db_functions.function_publish_measures import (
-#     function_publish_measures,
-# )
-# from publicatie_tabellen.db_functions.function_publish_observations import (
-#     function_publish_observations,
-# )
-# from publicatie_tabellen.db_functions.function_publish_statistics import (
-#     function_publish_statistics,
-# )
-# from publicatie_tabellen.db_functions.function_round_observation import (
-#     function_round_observation,
-# )
 
 
 class Migration(migrations.Migration):
