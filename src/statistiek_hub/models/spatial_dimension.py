@@ -7,7 +7,15 @@ from referentie_tabellen.models import SpatialDimensionType
 class SpatialDimension(models.Model):
     class Meta:
         indexes = [
-            models.Index("code", "type", "source_date", name='unique_spatialdimension_idx'),
+            models.Index(
+                "code", "type", "source_date", name="unique_spatialdimension_idx"
+            ),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                name="duplicate_specdim_constraint",
+                fields=["code", "type", "source_date"],
+            )
         ]
 
     id = models.BigAutoField(primary_key=True)
@@ -20,4 +28,4 @@ class SpatialDimension(models.Model):
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} - {self.source_date}"

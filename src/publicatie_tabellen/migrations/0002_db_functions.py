@@ -6,18 +6,6 @@ from publicatie_tabellen.db_functions.function_apply_filter import function_appl
 from publicatie_tabellen.db_functions.function_calculate_observations import (
     function_calculate_observation,
 )
-from publicatie_tabellen.db_functions.function_publish_measures import (
-    function_publish_measures,
-)
-from publicatie_tabellen.db_functions.function_publish_observations import (
-    function_publish_observations,
-)
-from publicatie_tabellen.db_functions.function_publish_statistics import (
-    function_publish_statistics,
-)
-from publicatie_tabellen.db_functions.function_round_observation import (
-    function_round_observation,
-)
 
 
 class Migration(migrations.Migration):
@@ -27,10 +15,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(function_calculate_observation),
-        migrations.RunSQL(function_round_observation),
-        migrations.RunSQL(function_apply_filter),
-        migrations.RunSQL(function_publish_measures),
-        migrations.RunSQL(function_publish_observations),
-        migrations.RunSQL(function_publish_statistics),
+        migrations.RunSQL(function_calculate_observation, ('DROP FUNCTION public.calculate_observation;')),
+        migrations.RunSQL(function_apply_filter, ('DROP FUNCTION public.apply_filter;')),
     ]

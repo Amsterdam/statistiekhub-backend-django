@@ -14,17 +14,16 @@ class TestModelSave:
         """cbs_date should result in year+1"""
         tempdimtype = baker.make(TemporalDimensionType,  name="Peildatum")
         cbs_date = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
-        assert TemporalDimension.objects.get(pk=1).year == 2024
+        assert TemporalDimension.objects.first().year == 2024
 
         cbs_date.delete()
-        assert not TemporalDimension.objects.filter(pk=1).exists()
+        assert not TemporalDimension.objects.exists()
 
     @pytest.mark.django_db
     def test_save_measure_name_upper(self):
         """name should be saved upper"""
-        name_upper = baker.make(Measure, name="test")
-        assert Measure.objects.get(pk=1).name == "TEST"
+        name_upper = baker.make(Measure, name="test2")
+        assert Measure.objects.first().name == "TEST2"
 
         name_upper.delete()
-        assert not Measure.objects.filter(pk=1).exists()
-
+        assert not Measure.objects.exists()

@@ -11,7 +11,7 @@ class FilterAdmin(ImportExportFormatsMixin, ImportMixin, admin.ModelAdmin):
         "measure",
         "rule",
         "value_new",
-        "id",
     )
     ordering = ("measure",)
+    raw_id_fields = ("measure",)
     resource_classes = [FilterResource]
