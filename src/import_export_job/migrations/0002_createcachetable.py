@@ -8,7 +8,7 @@ def createcachetable(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("import_export_celery", "0001_initial"),
+        ("import_export_job", "0001_initial"),
     ]
 
     operations = [

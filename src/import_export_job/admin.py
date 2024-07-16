@@ -32,7 +32,7 @@ class ImportJobForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["model"].choices = [
-            (x, x) for x in getattr(settings, "IMPORT_EXPORT_CELERY_MODELS", {}).keys()
+            (x, x) for x in getattr(settings, "IMPORT_EXPORT_JOB_MODELS", {}).keys()
         ]
 
         self.fields["format"].choices = self.instance.get_format_choices()
@@ -49,16 +49,16 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "errors",
         "change_summary",
         "imported",
-        "author",
-        "updated_by",
+        "owner",
+        "updated_at",
     )
     readonly_fields = (
         "job_status_info",
         "change_summary",
         "imported",
         "errors",
-        "author",
-        "updated_by",
+        "owner",
+        "updated_at",
         "processing_initiated",
     )
     exclude = ("job_status",)

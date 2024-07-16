@@ -15,6 +15,12 @@ import os
 from pathlib import Path
 from urllib.parse import urljoin
 
+from azure.identity import DefaultAzureCredential, WorkloadIdentityCredential
+
+from .azure_settings import Azure
+
+azure = Azure()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,7 +43,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = (
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -50,9 +55,33 @@ INSTALLED_APPS = [
     "referentie_tabellen",
     "publicatie_tabellen",
     "import_export",
-    "import_export_celery",
+    "import_export_job",
     "leaflet",
 ]
+
+# Application definition
+DJANGO_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.gis",
+]
+THIRD_PARTY_APPS = [
+    "import_export",
+    "leaflet",
+    "storages",
+]
+LOCAL_APPS = [
+    "statistiek_hub",
+    "referentie_tabellen",
+    "publicatie_tabellen",
+    "import_export_job",
+    "job_consumer",
+]
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -62,29 +91,21 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
 
-
-CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq"
-IMPORT_EXPORT_CELERY_INIT_MODULE = "main.celery"
-
-
+# import_export_job
 def resource_observation():
     from statistiek_hub.resources.observation_resource import ObservationResource
-
     return ObservationResource
-
 
 def resource_spatialdimension():
     from statistiek_hub.resources.spatial_dimension_resource import (
         SpatialDimensionResource,
     )
-
     return SpatialDimensionResource
 
 
-IMPORT_EXPORT_CELERY_MODELS = {
+IMPORT_EXPORT_JOB_MODELS = {
     "Observation": {
         "app_label": "statistiek_hub",
         "model_name": "Observation",
@@ -96,8 +117,6 @@ IMPORT_EXPORT_CELERY_MODELS = {
         "resource": resource_spatialdimension,
     },
 }
-
-IMPORT_EXPORT_CELERY_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 ROOT_URLCONF = "main.urls"
 BASE_URL = os.getenv("BASE_URL", "")
@@ -125,19 +144,62 @@ WSGI_APPLICATION = "main.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DATABASE_HOST = os.getenv("DATABASE_HOST", "database")
+DATABASE_NAME = os.getenv("DATABASE_NAME", "statistiek_hub")
+DATABASE_USER = os.getenv("DATABASE_USER", "statistiek_hub")
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD", "insecure")
+DATABASE_PORT = os.getenv("DATABASE_PORT", "5432")
 SCHEMA = os.getenv("DB_SCHEMA", "public")
+DATABASE_OPTIONS = {"options": f"-c search_path={SCHEMA}", "sslmode": "allow", "connect_timeout": 5}
+
+
+if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
+    DATABASE_PASSWORD = azure.auth.db_password
+    DATABASE_OPTIONS["sslmode"] = "require"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "OPTIONS": {"options": f"-c search_path={SCHEMA}"},
-        "HOST": os.getenv("DB_HOST", "database"),
-        "PORT": os.getenv("DB_PORT", "5432"),
-        "NAME": os.getenv("DB_NAME", "statistiek_hub"),
-        "USER": os.getenv("DB_USER", "statistiek_hub"),
-        "PASSWORD": os.getenv("DB_PASS", "insecure"),
+        "NAME": DATABASE_NAME,
+        "USER": DATABASE_USER,
+        "PASSWORD": DATABASE_PASSWORD,
+        "HOST": DATABASE_HOST,
+        "CONN_MAX_AGE": 60 * 5,
+        "PORT": DATABASE_PORT,
+        "OPTIONS": DATABASE_OPTIONS,
     },
 }
 
+# Django-storages for Django > 4.2
+STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+# -----Azure Storageaccount settings
+if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
+    credential = WorkloadIdentityCredential()
+    STORAGE_AZURE = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "token_credential": credential,
+                "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
+                "azure_container": "django",
+            },
+        },
+    }
+    STORAGES |= STORAGE_AZURE #update storages with storage_azure
+
+# -----Queue
+AZURITE_QUEUE_CONNECTION_STRING = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
+QUEUE_ACCOUNT_URL = os.getenv("QUEUE_ACCOUNT_URL")
+JOB_QUEUE_NAME = "job-queue"
+IMPORT_DRY_RUN_FIRST_TIME = False
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -215,7 +277,10 @@ LOGGING = {
             "formatter": "json",
         },
     },
-    "root": {"level": "INFO", "handlers": ["console"]},
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING" if not DEBUG else "INFO",
+    },
     "loggers": {
         "django.db": {
             "handlers": ["console"],

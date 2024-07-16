@@ -1,27 +1,31 @@
 # Copyright (C) 2019 o.s. Auto*Mat
 
 import logging
+from functools import partial
 
-from author.decorators import with_author
-from django.conf import settings
 from django.db import models, transaction
+from django.contrib.auth.models import User
+
+from django.conf import settings
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from import_export_celery.fields import ImportExportFileField
-from import_export_celery.tasks import run_import_job
-from import_export_celery.utils import DEFAULT_FORMATS
+from import_export_job.utils import DEFAULT_FORMATS
+from job_consumer.job_tools import store_job_in_queue
+
 
 logger = logging.getLogger(__name__)
 
 
-@with_author
 class ImportJob(models.Model):
-    file = ImportExportFileField(
+    updated_at = models.DateTimeField(auto_now=True)
+    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    
+    file = models.FileField(
         verbose_name=_("File to be imported"),
-        upload_to="django-import-export-celery-import-jobs",
+        upload_to="django-import-jobs",
         blank=False,
         null=False,
         max_length=255,
@@ -46,9 +50,9 @@ class ImportJob(models.Model):
         max_length=255,
     )
 
-    change_summary = ImportExportFileField(
+    change_summary = models.FileField(
         verbose_name=_("Summary of changes made by this import"),
-        upload_to="django-import-export-celery-import-change-summaries",
+        upload_to="django-import-job-change-summaries",
         blank=True,
         null=True,
     )
@@ -87,9 +91,10 @@ def importjob_post_save(sender, instance, **kwargs):
         instance.processing_initiated = timezone.now()
         instance.save()
         transaction.on_commit(
-            lambda: run_import_job.delay(
-                instance.pk,
-                dry_run=getattr(settings, "IMPORT_DRY_RUN_FIRST_TIME", True),
+            partial(
+                store_job_in_queue,
+                 job_pk=instance.pk,
+                 dry_run= getattr(settings, "IMPORT_DRY_RUN_FIRST_TIME", True),
             )
         )
 
@@ -117,5 +122,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
                         e
                     )
                 )
+
+        #TODO remove job from queue if exists
 
         ImportJob.objects.filter(id=instance.id).delete()

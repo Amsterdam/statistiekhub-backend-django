@@ -5,8 +5,7 @@ x-app: &base-app
     context: .  
   depends_on:
     - database
-    - rabbitmq
-    - celery
+    - azurite
   volumes:
     - ./src:/src
     - ./tests:/tests
@@ -16,13 +15,15 @@ x-app: &base-app
     SECRET_KEY: "insecure"
     AUTHORIZATION_TOKEN: "auth-token"
     GET_AUTHORIZATION_TOKEN: "get-auth-token"
+    AZURITE_QUEUE_CONNECTION_STRING: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1;'
+
   env_file: &envfile
       - .dev.env   
   entrypoint: /deploy/wait-for-it.sh database:5432 --
 
 services:
   database:
-    image: postgis/postgis:11-3.3 #postgis/postgis:15-3.3
+    image: postgis/postgis:15-3.4
     ports:
       - "5432"
     environment:
@@ -30,27 +31,12 @@ services:
       POSTGRES_USER: statistiek_hub
       POSTGRES_PASSWORD: insecure
     #command: postgres -c datestyle='iso, dmy'
-
-  rabbitmq:
-    image: rabbitmq:management
-    container_name: 'rabbitmq'
+  
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
     ports:
-      - "15672:15672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-
-  celery:
-    build:
-      context: . 
-    env_file: *envfile
-    depends_on:
-      - database
-      - rabbitmq
-    volumes:
-      - ./src:/src      
-    command:  celery -A main worker -l info
-    restart: always
+      - "10000:10000"  # Blob service
+      - "10001:10001"  # Queue service
 
   app:
     <<: *base-app

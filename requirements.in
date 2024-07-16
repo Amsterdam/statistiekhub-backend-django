@@ -1,12 +1,26 @@
 # Define all requirements, only pin when necessary (and if so, add a comment explaining why).
 # See # https://git.datapunt.amsterdam.nl/Datapunt/python-best-practices/blob/master/dependency_management/
 
-django<4.2  # Django 4.2 does not support Postgres 11 anymore
-django-import-export
+django
+django-import-export<4.0
 django-db-views
 django-leaflet
+django-storages[azure]
 psycopg2-binary
 python-dateutil
 pandas
-celery
-django-author
+timeout-decorator
+
+# Azure
+azure-cli
+azure-core
+azure-identity==1.14  # 1.15 leads to incompatible version dependencies right now
+azure-storage-blob
+azure-keyvault
+azure-keyvault-secrets
+azure-storage-queue
+opencensus-ext-django
+opencensus-ext-azure
+opencensus-ext-postgresql
+opencensus-ext-logging
+opencensus-ext-requests
