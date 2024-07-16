@@ -153,7 +153,7 @@ SCHEMA = os.getenv("DB_SCHEMA", "public")
 DATABASE_OPTIONS = {"options": f"-c search_path={SCHEMA}", "sslmode": "allow", "connect_timeout": 5}
 
 
-if "azure.com" in DATABASE_HOST:
+if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     DATABASE_PASSWORD = azure.auth.db_password
     DATABASE_OPTIONS["sslmode"] = "require"
 
