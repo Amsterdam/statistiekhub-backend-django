@@ -195,25 +195,6 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     }
     STORAGES |= STORAGE_AZURE #update storages with storage_azure
 
-if os.getenv("AZURITE_STORAGE_CONNECTION_STRING"):
-    # create container if not exists
-    from azure.storage.blob import BlobServiceClient
-    blob_service_client = BlobServiceClient.from_connection_string(os.getenv("AZURITE_STORAGE_CONNECTION_STRING"))
-    container_client = blob_service_client.get_container_client("django")
-    if not container_client.exists():
-        container_client.create_container()
-    #connect django
-    STORAGE_AZURE = {
-        "default": {
-            "BACKEND": "storages.backends.azure_storage.AzureStorage",
-            "OPTIONS": {
-                "connection_string": os.getenv("AZURITE_STORAGE_CONNECTION_STRING"),
-                "azure_container": "django",
-            },
-        },
-    }
-    STORAGES |= STORAGE_AZURE #update storages with storage_azure
-
 # -----Queue
 AZURITE_QUEUE_CONNECTION_STRING = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
 QUEUE_ACCOUNT_URL = os.getenv("QUEUE_ACCOUNT_URL")
