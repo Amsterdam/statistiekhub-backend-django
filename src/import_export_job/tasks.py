@@ -2,8 +2,6 @@
 import logging
 import os
 
-#from celery import shared_task
-#from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -40,8 +38,7 @@ def get_format(job):
 
 def _run_import_job(import_job, dry_run=True):
     change_job_status(import_job, "import", "1/5 Import started", dry_run)
-    if dry_run:
-        import_job.errors = ""
+    import_job.errors = ""
 
     model_config = ModelConfig(**importables[import_job.model])
 
@@ -107,7 +104,7 @@ def _run_import_job(import_job, dry_run=True):
         os.path.split(import_job.file.name)[1] + ".html",
         ContentFile(content.encode("utf-8")),
     )
-    if not dry_run:
+    if not dry_run and (import_job.errors==""):
         import_job.imported = timezone.now()
     change_job_status(import_job, "import", "5/5 Import job finished", dry_run)
     import_job.save()

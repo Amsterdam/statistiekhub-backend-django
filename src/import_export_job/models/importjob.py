@@ -25,7 +25,7 @@ class ImportJob(models.Model):
     
     file = models.FileField(
         verbose_name=_("File to be imported"),
-        upload_to="django-import-jobs/",
+        upload_to="django-import-jobs",
         blank=False,
         null=False,
         max_length=255,
@@ -52,7 +52,7 @@ class ImportJob(models.Model):
 
     change_summary = models.FileField(
         verbose_name=_("Summary of changes made by this import"),
-        upload_to="django-import-job-change-summaries/",
+        upload_to="django-import-job-change-summaries",
         blank=True,
         null=True,
     )

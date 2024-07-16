@@ -279,8 +279,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "WARNING",
-        "level": "INFO",
+        "level": "WARNING" if not DEBUG else "INFO",
     },
     "loggers": {
         "django.db": {
