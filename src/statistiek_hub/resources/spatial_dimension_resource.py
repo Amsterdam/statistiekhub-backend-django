@@ -14,7 +14,7 @@ class SpatialDimensionResource(ModelResource):
         widget=ForeignKeyWidget(SpatialDimensionType, field="name"),
     )
 
-    def before_import_row(self, row, row_number, **kwargs):
+    def before_import_row(self, row, **kwargs):
         if row["geom"] == "":
             row["geom"] = None
         else:

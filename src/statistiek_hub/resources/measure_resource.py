@@ -76,15 +76,15 @@ class MeasureResource(ModelResource):
         widget=ParentForeignKeyWidget(Measure, field="name"),
     )
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+    def before_import(self, dataset, **kwargs):
         # omzetten naar datum veld
         dataset.append_col(
             tuple([convert_to_date(x) for x in dataset["deprecated_date"]]),
             header="deprecated_date",
         )
-        return super().before_import(dataset, using_transactions, dry_run, **kwargs)
+        return super().before_import(dataset, **kwargs)
 
-    def after_import_instance(self, instance, new, row_number=None, **kwargs):
+    def after_init_instance(self, instance, new, row, **kwargs):
         instance.owner = kwargs["user"]
 
     class Meta:

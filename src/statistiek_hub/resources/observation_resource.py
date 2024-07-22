@@ -10,7 +10,6 @@ from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
 from statistiek_hub.utils.check_functions import (
-    SimpleError,
     check_exists_in_model,
     check_missing_fields,
 )
@@ -94,7 +93,7 @@ class ObservationResource(ModelResource):
         widget=TemporalForeignKeyWidget(TemporalDimension, field="name"),
     )
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+    def before_import(self, dataset, **kwargs):
         # check main error's first on Dataset (instead of row by row)
 
         errors = {}
@@ -222,8 +221,13 @@ class ObservationResource(ModelResource):
             # to speed validation -> if errors empty dataset so no row's will be checked
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
+        
+        # mimic a 'dynamic field' - i.e. append field which exists on
+        # model, but not in dataset
+        dataset.headers.append("spatialdimension")
+        dataset.headers.append("temporaldimension")
 
-    def before_import_row(self, row, row_number, **kwargs):
+    def before_import_row(self, row, **kwargs):
         row["value"] = convert_str(row["value"])
         row["spatialdimension"] = "-"
         row["temporaldimension"] = "-"
@@ -237,13 +241,6 @@ class ObservationResource(ModelResource):
         else:
             return super().skip_row(instance, original, row, import_validation_errors)
 
-    @classmethod
-    def get_error_result_class(self):
-        """
-        Returns a class which has custom formatting of the error.
-        Used here to simplify the trace error
-        """
-        return SimpleError
 
     class Meta:
         model = Observation
