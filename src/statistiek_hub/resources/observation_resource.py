@@ -221,6 +221,11 @@ class ObservationResource(ModelResource):
             # to speed validation -> if errors empty dataset so no row's will be checked
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
+        
+        # mimic a 'dynamic field' - i.e. append field which exists on
+        # model, but not in dataset
+        dataset.headers.append("spatialdimension")
+        dataset.headers.append("temporaldimension")
 
     def before_import_row(self, row, **kwargs):
         row["value"] = convert_str(row["value"])

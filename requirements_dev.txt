@@ -609,12 +609,16 @@ django==5.0.7
     #   opencensus-ext-django
 django-db-views==0.1.8
     # via -r ./requirements.txt
-django-import-export==4.1.1
+django-import-export[xlsx]==4.1.1
     # via -r ./requirements.txt
 django-leaflet==0.30.1
     # via -r ./requirements.txt
 django-storages[azure]==1.14.4
     # via -r ./requirements.txt
+et-xmlfile==1.1.0
+    # via
+    #   -r ./requirements.txt
+    #   openpyxl
 exceptiongroup==1.2.2
     # via pytest
 fabric==3.2.2
@@ -805,6 +809,10 @@ opencensus-ext-postgresql==0.1.3
     # via -r ./requirements.txt
 opencensus-ext-requests==0.8.0
     # via -r ./requirements.txt
+openpyxl==3.1.5
+    # via
+    #   -r ./requirements.txt
+    #   tablib
 packaging==24.1
     # via
     #   -r ./requirements.txt
@@ -989,7 +997,7 @@ sshtunnel==0.1.5
     # via
     #   -r ./requirements.txt
     #   azure-cli
-tablib==3.5.0
+tablib[xlsx]==3.5.0
     # via
     #   -r ./requirements.txt
     #   django-import-export
