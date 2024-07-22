@@ -7,7 +7,6 @@ from import_export.widgets import ForeignKeyWidget
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.utils.check_functions import (
-    SimpleError,
     check_exists_in_model,
     check_missing_fields,
 )
@@ -48,13 +47,6 @@ class FilterResource(ModelResource):
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
 
-    # @classmethod
-    # def get_error_result_class(self):
-    #     """
-    #     Returns a class which has custom formatting of the error.
-    #     Used here to simplify the trace error
-    #     """
-    #     return SimpleError
 
     class Meta:
         model = Filter

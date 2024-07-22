@@ -10,7 +10,6 @@ from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
 from statistiek_hub.utils.check_functions import (
-    SimpleError,
     check_exists_in_model,
     check_missing_fields,
 )
@@ -237,13 +236,6 @@ class ObservationResource(ModelResource):
         else:
             return super().skip_row(instance, original, row, import_validation_errors)
 
-    # @classmethod
-    # def get_error_result_class(self):
-    #     """
-    #     Returns a class which has custom formatting of the error.
-    #     Used here to simplify the trace error
-    #     """
-    #     return SimpleError
 
     class Meta:
         model = Observation
