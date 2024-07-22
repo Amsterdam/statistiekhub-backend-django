@@ -20,7 +20,7 @@ class FilterResource(ModelResource):
         widget=ForeignKeyWidget(Measure, field="name"),
     )
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+    def before_import(self, dataset, **kwargs):
         # check main error's first on Dataset (instead of row by row)
         errors = {}
 
@@ -48,13 +48,13 @@ class FilterResource(ModelResource):
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
 
-    @classmethod
-    def get_error_result_class(self):
-        """
-        Returns a class which has custom formatting of the error.
-        Used here to simplify the trace error
-        """
-        return SimpleError
+    # @classmethod
+    # def get_error_result_class(self):
+    #     """
+    #     Returns a class which has custom formatting of the error.
+    #     Used here to simplify the trace error
+    #     """
+    #     return SimpleError
 
     class Meta:
         model = Filter

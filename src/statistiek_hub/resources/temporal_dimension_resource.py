@@ -16,7 +16,7 @@ class TemporalDimensionResource(ModelResource):
         widget=ForeignKeyWidget(TemporalDimensionType, field="name"),
     )
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+    def before_import(self, dataset, **kwargs):
         # check column_names importfile
         expected = ["type", "startdate"]
 

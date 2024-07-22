@@ -94,7 +94,7 @@ class ObservationResource(ModelResource):
         widget=TemporalForeignKeyWidget(TemporalDimension, field="name"),
     )
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+    def before_import(self, dataset, **kwargs):
         # check main error's first on Dataset (instead of row by row)
 
         errors = {}
@@ -223,7 +223,7 @@ class ObservationResource(ModelResource):
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
 
-    def before_import_row(self, row, row_number, **kwargs):
+    def before_import_row(self, row, **kwargs):
         row["value"] = convert_str(row["value"])
         row["spatialdimension"] = "-"
         row["temporaldimension"] = "-"
@@ -237,13 +237,13 @@ class ObservationResource(ModelResource):
         else:
             return super().skip_row(instance, original, row, import_validation_errors)
 
-    @classmethod
-    def get_error_result_class(self):
-        """
-        Returns a class which has custom formatting of the error.
-        Used here to simplify the trace error
-        """
-        return SimpleError
+    # @classmethod
+    # def get_error_result_class(self):
+    #     """
+    #     Returns a class which has custom formatting of the error.
+    #     Used here to simplify the trace error
+    #     """
+    #     return SimpleError
 
     class Meta:
         model = Observation

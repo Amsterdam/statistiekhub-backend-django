@@ -3,10 +3,10 @@ from pandas import DataFrame
 from tablib import Dataset
 
 
-class SimpleError(Error):
-    def __init__(self, error, traceback=None, row=None):
-        super().__init__(error, traceback=traceback, row=row)
-        self.traceback = ""
+# class SimpleError(Error):
+#     def __init__(self, error, traceback=None, row=None):
+#         super().__init__(error, traceback=traceback, row=row)
+#         self.traceback = ""
 
 
 def check_exists_in_model(
