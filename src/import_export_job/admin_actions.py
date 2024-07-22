@@ -1,7 +1,8 @@
 from django.utils.translation import gettext_lazy as _
 
-from . import tasks
 from job_consumer.job_tools import store_job_in_queue
+
+from . import tasks
 
 
 def run_import_job_action(modeladmin, request, queryset):

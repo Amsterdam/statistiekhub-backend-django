@@ -1,15 +1,12 @@
 import json
 import logging
-import os
 import time
 
 import timeout_decorator
-from django.conf import settings
-from django.template.loader import render_to_string
-from job_consumer.utils_azure_que import get_queue_client
 
 from import_export_job.tasks import run_import_job
 from job_consumer import job_tools
+from job_consumer.utils_azure_que import get_queue_client
 
 logger = logging.getLogger(__name__)
 

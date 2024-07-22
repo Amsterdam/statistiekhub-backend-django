@@ -3,10 +3,9 @@
 import logging
 from functools import partial
 
-from django.db import models, transaction
-from django.contrib.auth.models import User
-
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models, transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -14,7 +13,6 @@ from django.utils.translation import gettext_lazy as _
 
 from import_export_job.utils import DEFAULT_FORMATS
 from job_consumer.job_tools import store_job_in_queue
-
 
 logger = logging.getLogger(__name__)
 
