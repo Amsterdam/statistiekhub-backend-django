@@ -2,7 +2,7 @@
 # See # https://git.datapunt.amsterdam.nl/Datapunt/python-best-practices/blob/master/dependency_management/
 
 django
-django-import-export<4.0
+django-import-export
 django-db-views
 django-leaflet
 django-storages[azure]

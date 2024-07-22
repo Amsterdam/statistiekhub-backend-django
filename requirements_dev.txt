@@ -498,7 +498,7 @@ azure-multiapi-storage==1.2.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-storage-blob==12.20.0
+azure-storage-blob==12.21.0
     # via
     #   -r ./requirements.txt
     #   django-storages
@@ -506,7 +506,7 @@ azure-storage-common==1.4.2
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-storage-queue==12.10.0
+azure-storage-queue==12.11.0
     # via -r ./requirements.txt
 azure-synapse-accesscontrol==0.5.0
     # via
@@ -532,7 +532,7 @@ black==24.4.2
     # via -r requirements_dev.in
 build==1.2.1
     # via pip-tools
-cachetools==5.3.3
+cachetools==5.4.0
     # via
     #   -r ./requirements.txt
     #   google-auth
@@ -565,7 +565,7 @@ colorama==0.4.6
     #   azure-cli
 coverage[toml]==7.6.0
     # via pytest-cov
-cryptography==42.0.8
+cryptography==43.0.0
     # via
     #   -r ./requirements.txt
     #   adal
@@ -584,10 +584,6 @@ decorator==5.1.1
     # via
     #   -r ./requirements.txt
     #   fabric
-defusedxml==0.7.1
-    # via
-    #   -r ./requirements.txt
-    #   odfpy
 deprecated==1.2.14
     # via
     #   -r ./requirements.txt
@@ -613,17 +609,13 @@ django==5.0.7
     #   opencensus-ext-django
 django-db-views==0.1.8
     # via -r ./requirements.txt
-django-import-export==3.3.9
+django-import-export==4.1.1
     # via -r ./requirements.txt
 django-leaflet==0.30.1
     # via -r ./requirements.txt
 django-storages[azure]==1.14.4
     # via -r ./requirements.txt
-et-xmlfile==1.1.0
-    # via
-    #   -r ./requirements.txt
-    #   openpyxl
-exceptiongroup==1.2.1
+exceptiongroup==1.2.2
     # via pytest
 fabric==3.2.2
     # via
@@ -715,10 +707,6 @@ knack==0.11.0
     # via
     #   -r ./requirements.txt
     #   azure-cli-core
-markuppy==1.14
-    # via
-    #   -r ./requirements.txt
-    #   tablib
 model-bakery==1.18.2
     # via -r requirements_dev.in
 msal[broker]==1.28.1
@@ -787,7 +775,7 @@ msrestazure==0.6.4.post1
     #   azure-mgmt-managedservices
 mypy-extensions==1.0.0
     # via black
-numpy==2.0.0
+numpy==2.0.1
     # via
     #   -r ./requirements.txt
     #   pandas
@@ -795,10 +783,6 @@ oauthlib==3.2.2
     # via
     #   -r ./requirements.txt
     #   requests-oauthlib
-odfpy==1.4.1
-    # via
-    #   -r ./requirements.txt
-    #   tablib
 opencensus==0.11.4
     # via
     #   -r ./requirements.txt
@@ -821,10 +805,6 @@ opencensus-ext-postgresql==0.1.3
     # via -r ./requirements.txt
 opencensus-ext-requests==0.8.0
     # via -r ./requirements.txt
-openpyxl==3.1.5
-    # via
-    #   -r ./requirements.txt
-    #   tablib
 packaging==24.1
     # via
     #   -r ./requirements.txt
@@ -855,7 +835,7 @@ platformdirs==4.2.2
     # via black
 pluggy==1.5.0
     # via pytest
-portalocker==2.10.0
+portalocker==2.10.1
     # via
     #   -r ./requirements.txt
     #   azure-cli-telemetry
@@ -919,7 +899,7 @@ pynacl==1.5.0
     #   azure-cli
     #   paramiko
     #   pygithub
-pyopenssl==24.1.0
+pyopenssl==24.2.1
     # via
     #   -r ./requirements.txt
     #   azure-cli-core
@@ -956,7 +936,6 @@ pyyaml==6.0.1
     #   -r ./requirements.txt
     #   knack
     #   pycomposefile
-    #   tablib
 requests[socks]==2.32.3
     # via
     #   -r ./requirements.txt
@@ -1002,7 +981,7 @@ six==1.16.0
     #   msrestazure
     #   opencensus
     #   python-dateutil
-sqlparse==0.5.0
+sqlparse==0.5.1
     # via
     #   -r ./requirements.txt
     #   django
@@ -1010,7 +989,7 @@ sshtunnel==0.1.5
     # via
     #   -r ./requirements.txt
     #   azure-cli
-tablib[html,ods,xls,xlsx,yaml]==3.5.0
+tablib==3.5.0
     # via
     #   -r ./requirements.txt
     #   django-import-export
@@ -1062,14 +1041,6 @@ wrapt==1.16.0
     #   -r ./requirements.txt
     #   deprecated
     #   opencensus-ext-requests
-xlrd==2.0.1
-    # via
-    #   -r ./requirements.txt
-    #   tablib
-xlwt==1.3.0
-    # via
-    #   -r ./requirements.txt
-    #   tablib
 xmltodict==0.13.0
     # via
     #   -r ./requirements.txt
@@ -1078,5 +1049,5 @@ xmltodict==0.13.0
 # The following packages are considered to be unsafe in a requirements file:
 pip==24.1.2
     # via pip-tools
-setuptools==70.3.0
+setuptools==71.1.0
     # via pip-tools
