@@ -3,6 +3,14 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 # field validation
+def check_filter_rule(rule: str) -> ValidationError:
+    """ TODO check rule
+    - validate syntax: spaces, OR AND and brackets
+    - validate measure: bv is measure een aantal (met percentages als basis is raar?)
+    - validate at leas 1 observation of rule measure:
+    """
+    
+    pass
 
 
 def check_value_context(unit_code: str, value: float) -> ValidationError:
