@@ -2,6 +2,7 @@
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
+
 # field validation
 def check_filter_rule(rule: str) -> ValidationError:
     """ TODO check rule
@@ -9,8 +10,7 @@ def check_filter_rule(rule: str) -> ValidationError:
     - validate measure: bv is measure een aantal (met percentages als basis is raar?)
     - validate at leas 1 observation of rule measure:
     """
-    
-    pass
+    isinstance(rule, str) # added ivm linting
 
 
 def check_value_context(unit_code: str, value: float) -> ValidationError:
