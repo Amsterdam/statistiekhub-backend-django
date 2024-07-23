@@ -6,7 +6,7 @@ import timeout_decorator
 
 from import_export_job.tasks import run_import_job
 from job_consumer import job_tools
-from job_consumer.utils_azure_que import get_queue_client
+from job_consumer.utils_azure_queue import get_queue_client
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class AzureJobQueueConsumer:
         self.queue_client = get_queue_client()
         self.end_at_empty_queue = end_at_empty_queue
 
-    def get_queue_length(self):
+    def get_queue_length(self) -> int:
         properties = self.queue_client.get_queue_properties()
         count = properties.approximate_message_count
         return count

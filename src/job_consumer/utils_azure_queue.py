@@ -1,5 +1,6 @@
 import logging
 
+from azure.core.exceptions import ResourceExistsError
 from azure.identity import WorkloadIdentityCredential
 from azure.storage.queue import QueueClient, QueueServiceClient
 from django.conf import settings
@@ -12,8 +13,13 @@ def get_queue_client():
         queue_service_client = QueueServiceClient.from_connection_string(
             settings.AZURITE_QUEUE_CONNECTION_STRING
         )
-        # create queue first time
-        #queue_service_client.create_queue(settings.JOB_QUEUE_NAME)
+
+        # create queue for the first time
+        try:
+            queue_service_client.create_queue(settings.JOB_QUEUE_NAME)
+        except ResourceExistsError:
+            pass
+        
         queue_client = queue_service_client.get_queue_client(settings.JOB_QUEUE_NAME)
 
     else:
