@@ -63,6 +63,10 @@ def test_apply_sensitive_rules(test_value, test_unit, expected):
         ("( $GEENBASE < 8 )", 1, 3, 50, []),
         ("( $BASE < 10 AND $BASE > 5 )", 1, 9, 50, [1.0]),
         ("( $BASE < 10 AND $BASE > 5 )", 1, 3, 50, [50.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 3, 50, [1.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 6, 3, [1.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 6, 50, [50.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 0, 50, [50.0]),
     ],
 )
 @pytest.mark.django_db
