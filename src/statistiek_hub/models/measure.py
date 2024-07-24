@@ -8,10 +8,10 @@ from referentie_tabellen.models import Theme, Unit
 from statistiek_hub.validations import check_code_in_name
 
 from .dimension import Dimension
-from .time_stamp_mixin import TimeStampMixin
+from .model_mixin import AddErrorFuncion, TimeStampMixin
 
 
-class Measure(TimeStampMixin):
+class Measure(TimeStampMixin, AddErrorFuncion):
     owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
@@ -42,19 +42,6 @@ class Measure(TimeStampMixin):
 
     def __str__(self):
         return f"{self.name}"
-
-    @classmethod
-    def add_error(cls, errors, new_errors):
-        for err_code, err_value in new_errors.items():
-            if err_value != None:
-                if err_code in errors.keys():
-                    if isinstance(errors[err_code], ValidationError):
-                        errors.update({err_code: [errors[err_code], err_value]})
-                    elif isinstance(errors[err_code], list):
-                        errors[err_code].append(err_value)
-                else:
-                    errors.update(new_errors)
-        return errors
 
     def clean(self):
         errors = {}

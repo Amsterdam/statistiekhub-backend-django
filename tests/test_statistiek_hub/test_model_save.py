@@ -1,10 +1,13 @@
 import datetime
 
 import pytest
+from django.core.exceptions import ValidationError
 from model_bakery import baker
 
-from referentie_tabellen.models import TemporalDimensionType
+from referentie_tabellen.models import TemporalDimensionType, Unit
 from statistiek_hub.models.measure import Measure
+from statistiek_hub.models.observation import Observation
+from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
 
 
@@ -27,3 +30,27 @@ class TestModelSave:
 
         name_upper.delete()
         assert not Measure.objects.exists()
+
+    @pytest.mark.django_db
+    def test_save_observation_validationerror(self):
+        """ percentage bigger than 200 -> result in validationerror"""
+
+        unit_var = baker.make(Unit, name="percentage", code='P')
+        measure_var = baker.make(Measure, name="VAR", unit=unit_var)
+
+        tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
+        temp = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
+        spatial = baker.make(SpatialDimension)
+
+        # check the specific error message
+        with pytest.raises(ValidationError) as excinfo:
+            baker.make(
+            Observation,
+            measure=measure_var,
+            temporaldimension= temp,
+            spatialdimension= spatial,
+            value=205,
+            )
+        assert 'Percentage is more than 200' in str(excinfo.value)
+
+

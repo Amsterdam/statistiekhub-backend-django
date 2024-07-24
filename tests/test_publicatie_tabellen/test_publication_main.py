@@ -85,3 +85,52 @@ def test_fill_observationcalculated(
     obs_base.delete()
     obs_var1.delete()
     qs_result.delete()
+
+
+@pytest.mark.parametrize(
+    "calculation, base_value, var1_value, expected",
+    [
+        ("( ( $VAR1 / ( $BASE ) ) )", 0, 5, False),
+    ],
+)
+@pytest.mark.django_db
+def test_fill_observationcalculated_divide_by_zero(
+    fill_ref_tabellen, calculation, var1_value, base_value, expected
+):
+    """fill model ObservationCalculated with observations calculated by the calculation-query of the measure"""
+    ficture = fill_ref_tabellen
+
+    measure_calc = baker.make(
+        Measure, name="CALCVAR", calculation=calculation, unit=ficture["unit"]
+    )
+    measure_base = baker.make(Measure, name="BASE", unit=ficture["unit"])
+    measure_var1 = baker.make(Measure, name="VAR1", unit=ficture["unit"])
+
+    obs_base = baker.make(
+        Observation,
+        measure=measure_base,
+        temporaldimension=ficture["temp"],
+        spatialdimension=ficture["spatial"],
+        value=base_value,
+    )
+    obs_var1 = baker.make(
+        Observation,
+        measure=measure_var1,
+        temporaldimension=ficture["temp2"],
+        spatialdimension=ficture["spatial"],
+        value=var1_value,
+    )
+
+    run = PublishFunction()
+    run.fill_observationcalculated()
+
+    qs_result = ObservationCalculated.objects.all()
+
+    assert qs_result.exists() == expected
+
+    measure_calc.delete()
+    measure_base.delete()
+    measure_var1.delete()
+    obs_base.delete()
+    obs_var1.delete()
+

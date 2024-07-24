@@ -1,6 +1,6 @@
 import json
 
-from job_consumer.utils_azure_que import get_queue_client
+from job_consumer.utils_azure_queue import get_queue_client
 
 JOB_MESSAGE_VERSION_NAME = "Statistiek_job_v1"
 

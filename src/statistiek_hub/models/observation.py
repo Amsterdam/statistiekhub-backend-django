@@ -4,12 +4,12 @@ from django.db import models
 from statistiek_hub.validations import check_value_context
 
 from .measure import Measure
+from .model_mixin import AddErrorFuncion, TimeStampMixin
 from .spatial_dimension import SpatialDimension
 from .temporal_dimension import TemporalDimension
-from .time_stamp_mixin import TimeStampMixin
 
 
-class ObservationBase(TimeStampMixin):
+class ObservationBase(TimeStampMixin, AddErrorFuncion):
     class Meta:
         abstract = True
 
@@ -21,19 +21,6 @@ class ObservationBase(TimeStampMixin):
     spatialdimension = models.ForeignKey(
         SpatialDimension, related_name="+", on_delete=models.RESTRICT
     )
-
-    @classmethod
-    def add_error(cls, errors, new_errors):
-        for err_code, err_value in new_errors.items():
-            if err_value != None:
-                if err_code in errors.keys():
-                    if isinstance(errors[err_code], ValidationError):
-                        errors.update({err_code: [errors[err_code], err_value]})
-                    elif isinstance(errors[err_code], list):
-                        errors[err_code].append(err_value)
-                else:
-                    errors.update(new_errors)
-        return errors
 
     def clean(self):
         errors = {}

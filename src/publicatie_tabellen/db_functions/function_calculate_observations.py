@@ -27,6 +27,7 @@ function_calculate_observation = """
                     p_stmt_with			text default '';
                     p_stmt_join			text default '';
                     p_stmt_value		text default '';
+                    p_stmt_where		text default '';
                     p_stmt_order		text default '';
 
                 begin
@@ -206,10 +207,20 @@ function_calculate_observation = """
                                             '
                                             ;
 
+                        --------------------------------------------
+                        -- construct 'where' sql-statement        --
+                        -- rows, divided by zero are not returned --
+                        --------------------------------------------
 
-                        --------------------------------------
+                        p_stmt_where :=	'
+										where ' || p_stmt_value || ' is not null
+										';
+                       
+                       
+                       
+                        ----------------------------------------
                         -- construct 'order by' sql-statement --
-                        --------------------------------------
+                        ----------------------------------------
 
                         p_stmt_order :=	'order by 2, 4, 3'
                                         ;
@@ -219,7 +230,7 @@ function_calculate_observation = """
                         -- combine all separate sql-statements to construct full sql-statement --
                         -------------------------------------------------------------------------
 
-                        p_stmt := p_stmt_with || p_stmt_select || p_stmt_join || p_stmt_order || ';';
+                        p_stmt := p_stmt_with || p_stmt_select || p_stmt_join || p_stmt_where || p_stmt_order || ';';
 
                     end if;
 
