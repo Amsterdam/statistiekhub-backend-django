@@ -158,11 +158,16 @@ def publishobservation() -> tuple:
             )
             logger.info("sensitiverules applied")
 
+        # remove the by filter and sensitive introduced np.nan values
+        mdf.dropna(subset=['value'], inplace=True)
+
+        if len(mdf) == 0:
+            measure_no_data.append(measure.name)
+            continue
+
         mdf["value"] = mdf.apply(lambda x: round(x.value, x.decimals), axis=1)
         logger.info("decimals are set")
 
-        # set np.nan to None for postgres db -> OR TODO remove nan values from mdf because not necessary
-        mdf["value"] = mdf["value"].replace(np.nan, None)
         mdf.rename(columns={"measure_name": "measure"}, inplace=True)
         # REMARK: saving an int(= zero decimal) into a floatfield will add a .0 to the int.
         copy_dataframe(mdf, PublicationObservation)

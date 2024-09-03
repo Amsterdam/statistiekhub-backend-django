@@ -5,9 +5,11 @@ import pandas as pd
 import pytest
 from model_bakery import baker
 
+from publicatie_tabellen.models import PublicationObservation
 from publicatie_tabellen.publish_observation import (
     _apply_sensitive_rules,
     _get_df_with_filterrule,
+    publishobservation,
 )
 from referentie_tabellen.models import TemporalDimensionType, Unit
 from statistiek_hub.models.filter import Filter
@@ -108,3 +110,47 @@ def test_get_df_with_filterrule(
     filter_var.delete()
     obs_base.delete()
     obs_var.delete()
+
+
+@pytest.mark.parametrize(
+    "decimals, base_value, expected",
+    [
+        (0, 50.23, [50.0]),
+        (1, 50.23, [50.2]),
+        (2, 50.236, [50.24]),
+        (2, 50.235, [50.23]),
+        (2, 50.234, [50.23]),
+        (2, 50.2350, [50.23]),
+        (2, 50.2353, [50.24]),
+        (2, 50.2354, [50.24]),
+        (2, 50.2356, [50.24]),
+        (1, np.nan, []),
+        (0, np.nan, []),
+    ],
+)
+@pytest.mark.django_db
+def test_set_decimals(
+    fill_ref_tabellen, decimals, base_value, expected
+):
+    """apply set decimals on the value's of a measure
+    return:  """
+    fixture = fill_ref_tabellen
+
+    unit = baker.make(Unit, name="percentage")
+    measure = baker.make(Measure, name="BASE", unit=unit, decimals=decimals)
+
+    obs = baker.make(
+        Observation,
+        measure=measure,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=base_value,
+    )
+
+    publishobservation()
+
+    result = PublicationObservation.objects.values_list('value', flat = True)
+    assert list(result) == expected
+
+    measure.delete()
+    obs.delete()
