@@ -1,4 +1,4 @@
-FROM python:3.11-bullseye as app
+FROM python:3.11-bullseye AS app
 MAINTAINER datapunt@amsterdam.nl
 
 ENV PYTHONUNBUFFERED 1 \
@@ -36,7 +36,7 @@ USER datapunt
 CMD ["/deploy/docker-run.sh"]
 
 # devserver
-FROM app as dev
+FROM app AS dev
 
 USER root
 WORKDIR /install
@@ -53,7 +53,7 @@ ENV HOME /tmp
 CMD ["python manage.py runserver 0.0.0.0"]
 
 # tests
-FROM dev as tests
+FROM dev AS tests
 
 USER datapunt
 WORKDIR /tests
