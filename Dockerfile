@@ -30,6 +30,7 @@ WORKDIR /src
 
 COPY src .
 COPY deploy /deploy
+RUN python manage.py collectstatic --no-input
 
 USER datapunt
 
