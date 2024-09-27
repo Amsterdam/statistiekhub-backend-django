@@ -1,5 +1,3 @@
-version: "3.5"
-
 x-app: &base-app
   build:
     context: .  
@@ -40,31 +38,33 @@ services:
 
   app:
     <<: *base-app
+    image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-opdrachten/statistiekhub}:${VERSION:-latest}
     build:
+      context: .
       target: app 
-    env_file: *envfile
     environment:
       DEBUG: false
       DJANGO_SETTINGS_MODULE: main.settings
-    image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}:${VERSION:-latest}
-    command: python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
+    command: /deploy/docker-run.sh
 
   dev:
     <<: *base-app
     build:
+      context: .
       target: dev
+    env_file: *envfile
     environment:
       <<: *base-app-env
       DJANGO_SUPERUSER_PASSWORD: "admin"
       DJANGO_SUPERUSER_USERNAME: "admin"
       DJANGO_SUPERUSER_EMAIL: "admin@amsterdam.nl"
       DEBUG: "True"
-    image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-statistiek_hub}-dev:${VERSION:-latest}
-    command:  python manage.py runserver 0.0.0.0:8000 #/deploy/docker-run.sh
+    command:  python manage.py runserver 0.0.0.0:8000
 
   test:
     <<: *base-app
     build:
+      context: .
       target: tests
     environment:
       <<: *base-app-env
