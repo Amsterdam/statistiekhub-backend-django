@@ -14,9 +14,9 @@ x-app: &base-app
     AUTHORIZATION_TOKEN: "auth-token"
     GET_AUTHORIZATION_TOKEN: "get-auth-token"
     AZURITE_QUEUE_CONNECTION_STRING: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1;'
-
-  env_file: &envfile
-      - .dev.env   
+    OIDC_BASE_URL: "https://login.microsoftonline.com/72fca1b1-2c2e-4376-a445-294d80196804"
+    OIDC_RP_CLIENT_ID: 
+    OIDC_RP_CLIENT_SECRET: 
   entrypoint: /deploy/wait-for-it.sh database:5432 --
 
 services:
@@ -52,7 +52,6 @@ services:
     build:
       context: .
       target: dev
-    env_file: *envfile
     environment:
       <<: *base-app-env
       DJANGO_SUPERUSER_PASSWORD: "admin"
@@ -70,4 +69,5 @@ services:
       <<: *base-app-env
       DJANGO_SETTINGS_MODULE: "main.settings"
       DEBUG: "True"
-
+      OIDC_RP_CLIENT_ID: tests
+      OIDC_RP_CLIENT_SECRET: tests
