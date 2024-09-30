@@ -1,4 +1,6 @@
 name: CI Checks
+# This workflow assumes you have a Makefile in the root of your repository with the target "test"
+# The workflow will build the docker image with name "Dockerfile" in the root of the repository
 
 on:
   pull_request:
@@ -8,3 +10,5 @@ jobs:
   linting-and-tests:
     name: Templates
     uses: amsterdam/opdrachten-team-github-workflows/.github/workflows/CI.yml@v1
+    with:
+      check_linting: true  # Requires Makefile target "lint"
