@@ -29,7 +29,6 @@ class TestJobConsumer:
 
         message_iterator = self.queue_client.receive_messages(max_messages=1)
         for message in message_iterator:
-            print(message.content)
             job = json.loads(message.content)
             assert job["key"] == 1
             assert job["dry_run"] == False
