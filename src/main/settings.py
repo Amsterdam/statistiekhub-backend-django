@@ -16,6 +16,7 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from azure.identity import DefaultAzureCredential, WorkloadIdentityCredential
+from azure.storage.queue import QueueClient, QueueServiceClient
 
 from .azure_settings import Azure
 
@@ -222,10 +223,26 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     STORAGES |= STORAGE_AZURE #update storages with storage_azure
 
 # -----Queue
-AZURITE_QUEUE_CONNECTION_STRING = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
-QUEUE_ACCOUNT_URL = os.getenv("QUEUE_ACCOUNT_URL")
 JOB_QUEUE_NAME = "job-queue"
 IMPORT_DRY_RUN_FIRST_TIME = False
+
+if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
+    credentials = WorkloadIdentityCredential()
+    name_storage_account =  os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
+    QUEUE_ACCOUNT_URL = f"https://{name_storage_account}.queue.core.windows.net"
+    QUEUE_CLIENT = QueueClient(
+            credential=credentials,
+            account_url= QUEUE_ACCOUNT_URL,
+            queue_name= JOB_QUEUE_NAME,
+        )  
+elif AZURITE_QUEUE_CONNECTION_STRING := os.getenv("AZURITE_QUEUE_CONNECTION_STRING"): # for local development     
+    queue_service_client = QueueServiceClient.from_connection_string(AZURITE_QUEUE_CONNECTION_STRING)
+    try: # create queue for the first time
+        queue_service_client.create_queue(JOB_QUEUE_NAME)
+    except:
+        pass    
+    QUEUE_CLIENT = queue_service_client.get_queue_client(JOB_QUEUE_NAME)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
