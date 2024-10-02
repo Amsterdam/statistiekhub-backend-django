@@ -48,8 +48,11 @@ class OIDCAuthenticationBackend(mozilla_django_oidc.auth.OIDCAuthenticationBacke
                 match role[16:]:  # match without "environment-app_name-"
                     case "app-admin-maintainers":
                         django_group_name = role[26:]
-                        group = Group.objects.get(name=django_group_name)
-                        user.groups.add(group)
+                        try:
+                            group = Group.objects.get(name=django_group_name)
+                            user.groups.add(group)
+                        except:
+                            pass    
                     case "application-admin":
                         user.is_superuser = True
 
