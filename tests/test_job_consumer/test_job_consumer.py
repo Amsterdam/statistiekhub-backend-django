@@ -6,12 +6,12 @@ from model_bakery import baker
 from import_export_job.models import ImportJob
 from job_consumer.job_tools import store_job_in_queue
 from job_consumer.queue_job_consumer import AzureJobQueueConsumer
-from job_consumer.utils_azure_queue import get_queue_client
+from job_consumer.utils_azure_queue import AzureQue
 
 
 class TestJobConsumer:
 
-    queue_client = get_queue_client()
+    queue_client = AzureQue.get_queue_client()
 
     @staticmethod
     def queue_message_count(queue_client) -> int:
@@ -48,3 +48,11 @@ class TestJobConsumer:
 
         # Test whether the records that were in the queue are correctly removed
         assert self.queue_message_count(self.queue_client) == 0
+
+
+def test_singleton():
+    # Singleton test
+    eerste_instance_1 = AzureQue()
+    eerste_instance_2 = AzureQue()
+    print(eerste_instance_1 is eerste_instance_2)  # Dit zou True moeten printen
+    print(eerste_instance_1.get_queue_client() is eerste_instance_2.get_queue_client())  # Dit zou ook True moeten printen        

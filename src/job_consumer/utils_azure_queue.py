@@ -1,6 +1,6 @@
 import logging
+import os
 
-from azure.core.exceptions import ResourceExistsError
 from azure.identity import WorkloadIdentityCredential
 from azure.storage.queue import QueueClient, QueueServiceClient
 from django.conf import settings
@@ -8,5 +8,48 @@ from django.conf import settings
 log = logging.getLogger(__name__)
 
 
-def get_queue_client():
-    return settings.QUEUE_CLIENT
+class AzureQue:
+    ''' singleton Queue'''
+    _instance = None
+    _client = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(AzureQue, cls).__new__(cls)
+        return cls._instance
+
+    @classmethod
+    def _initialize_client(cls):
+        if cls._client is None:
+            # Maak de connectie met de Azure Queue
+            cls._client = cls._create_azure_queue_client()
+
+    @staticmethod
+    def _create_azure_queue_client():
+        federated_token_file = os.getenv("AZURE_FEDERATED_TOKEN_FILE")
+        if federated_token_file:
+            credentials = WorkloadIdentityCredential()
+            name_storage_account = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
+            queue_client = QueueClient(
+                    credential=credentials,
+                    account_url= f"https://{name_storage_account}.queue.core.windows.net",
+                    queue_name= settings.JOB_QUEUE_NAME,
+                )  
+            
+        elif AZURITE_QUEUE_CONNECTION_STRING := os.getenv("AZURITE_QUEUE_CONNECTION_STRING"): # for local development     
+            queue_service_client = QueueServiceClient.from_connection_string(AZURITE_QUEUE_CONNECTION_STRING)
+            try: # create queue for the first time
+                queue_service_client.create_queue(settings.JOB_QUEUE_NAME)
+            except:
+                pass    
+            queue_client = queue_service_client.get_queue_client(settings.JOB_QUEUE_NAME)
+
+        else:
+            raise Exception("cannot connect to queue")
+
+        return queue_client
+
+    @classmethod
+    def get_queue_client(cls):
+        cls._initialize_client()
+        return cls._client        
