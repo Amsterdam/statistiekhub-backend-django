@@ -50,9 +50,10 @@ class OIDCAuthenticationBackend(mozilla_django_oidc.auth.OIDCAuthenticationBacke
                         django_group_name = role[26:]
                         try:
                             group = Group.objects.get(name=django_group_name)
+                        except Group.DoesNotExist:
+                            pass 
+                        else:
                             user.groups.add(group)
-                        except:
-                            pass    
                     case "application-admin":
                         user.is_superuser = True
 
