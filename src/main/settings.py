@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 from urllib.parse import urljoin
 
-from azure.identity import DefaultAzureCredential, WorkloadIdentityCredential
+from azure.identity import WorkloadIdentityCredential
 
 from .azure_settings import Azure
 
@@ -222,8 +222,6 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     STORAGES |= STORAGE_AZURE #update storages with storage_azure
 
 # -----Queue
-AZURITE_QUEUE_CONNECTION_STRING = os.getenv("AZURITE_QUEUE_CONNECTION_STRING")
-QUEUE_ACCOUNT_URL = os.getenv("QUEUE_ACCOUNT_URL")
 JOB_QUEUE_NAME = "job-queue"
 IMPORT_DRY_RUN_FIRST_TIME = False
 
