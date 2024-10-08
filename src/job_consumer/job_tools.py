@@ -1,6 +1,6 @@
 import json
 
-from job_consumer.utils_azure_queue import AzureQue
+from main.utils_azure_queue import AzureQueue
 
 JOB_MESSAGE_VERSION_NAME = "Statistiek_job_v1"
 
@@ -13,6 +13,6 @@ def store_job_in_queue(job_pk, dry_run):
         }
     )
 
-    queue_client = AzureQue.get_queue_client()
+    queue_client = AzureQueue.get_queue_client()
     queue_client.send_message(import_job)
 

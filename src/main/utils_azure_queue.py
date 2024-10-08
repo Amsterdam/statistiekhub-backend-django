@@ -8,21 +8,15 @@ from django.conf import settings
 log = logging.getLogger(__name__)
 
 
-class AzureQue:
+class AzureQueue:
     ''' singleton Queue'''
     _instance = None
     _client = None
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(AzureQue, cls).__new__(cls)
+            cls._instance = super(AzureQueue, cls).__new__(cls)
         return cls._instance
-
-    @classmethod
-    def _initialize_client(cls):
-        if cls._client is None:
-            # Maak de connectie met de Azure Queue
-            cls._client = cls._create_azure_queue_client()
 
     @staticmethod
     def _create_azure_queue_client():
@@ -38,9 +32,9 @@ class AzureQue:
             
         elif AZURITE_QUEUE_CONNECTION_STRING := os.getenv("AZURITE_QUEUE_CONNECTION_STRING"): # for local development     
             queue_service_client = QueueServiceClient.from_connection_string(AZURITE_QUEUE_CONNECTION_STRING)
-            try: # create queue for the first time
+            try: 
                 queue_service_client.create_queue(settings.JOB_QUEUE_NAME)
-            except:
+            except: # for local development the error is not important
                 pass    
             queue_client = queue_service_client.get_queue_client(settings.JOB_QUEUE_NAME)
 
@@ -51,5 +45,6 @@ class AzureQue:
 
     @classmethod
     def get_queue_client(cls):
-        cls._initialize_client()
+        if cls._client is None:
+            cls._client = cls._create_azure_queue_client()
         return cls._client        
