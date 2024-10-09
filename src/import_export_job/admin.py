@@ -7,6 +7,8 @@ from django.contrib import admin
 from django.core.cache import cache
 from django.http.request import HttpRequest
 from django.utils.translation import gettext_lazy as _
+from django.core.files.storage import default_storage
+from django.utils.safestring import mark_safe
 
 from . import admin_actions, models
 
@@ -62,6 +64,11 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "processing_initiated",
     )
     exclude = ("job_status",)
+
+    def change_summary(self, obj):
+        if obj.change_summary:
+            return mark_safe('<a href="{}">{}</a>', default_storage.url(obj.change_summary.name), obj.change_summary.name)
+        return "-"
 
     list_filter = ("model", "imported")
 
