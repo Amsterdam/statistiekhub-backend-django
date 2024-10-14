@@ -5,7 +5,9 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.core.cache import cache
+from django.core.files.storage import default_storage
 from django.http.request import HttpRequest
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from . import admin_actions, models
@@ -51,6 +53,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "imported",
         "owner",
         "updated_at",
+        "change_summary_link",
     )
     readonly_fields = (
         "job_status_info",
@@ -69,6 +72,13 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         admin_actions.run_import_job_action,
         admin_actions.run_import_job_action_dry,
     )
+
+    def change_summary_link(self, obj):
+        if obj.change_summary:
+            media_url = default_storage.url(obj.change_summary.name)
+            return mark_safe(f'<a href="{media_url}">{obj.change_summary.name}</a>')
+        return "-"
+
 
     def get_readonly_fields(
         self, request: HttpRequest, obj: Any | None = ...
