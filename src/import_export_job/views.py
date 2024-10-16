@@ -9,7 +9,6 @@ from main.utils_azure_storage import AzureStorage
 logger = logging.getLogger(__name__)
 
 def get_blob(request, blob_name):
-    logger.info(f"Requested blob_name: {blob_name}")
     if  hasattr(settings, 'STORAGE_AZURE'):
         try:
             blob_service_client = AzureStorage.get_blob_service_client()
