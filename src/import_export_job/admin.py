@@ -6,6 +6,8 @@ from django.conf import settings
 from django.contrib import admin
 from django.core.cache import cache
 from django.http.request import HttpRequest
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from . import admin_actions, models
@@ -45,9 +47,9 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
     list_display = (
         "model",
         "job_status_info",
-        "file",
+        "file_link",
         "errors",
-        "change_summary",
+        "change_summary_link",
         "imported",
         "owner",
         "updated_at",
@@ -69,6 +71,20 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         admin_actions.run_import_job_action,
         admin_actions.run_import_job_action_dry,
     )
+
+    def file_link(self, obj):
+        url = reverse('get_blob', args=[obj.file.name])
+        return mark_safe(f'<a href="{url}">{obj.file.name}</a>')
+
+    file_link.short_description = models.ImportJob._meta.get_field('file').verbose_name
+
+    def change_summary_link(self, obj):
+        if obj.change_summary:
+            url = reverse('get_blob', args=[obj.change_summary.name])
+            return mark_safe(f'<a href="{url}">{obj.change_summary.name}</a>')
+        return "-"
+
+    change_summary_link.short_description = models.ImportJob._meta.get_field('change_summary').verbose_name
 
     def get_readonly_fields(
         self, request: HttpRequest, obj: Any | None = ...
