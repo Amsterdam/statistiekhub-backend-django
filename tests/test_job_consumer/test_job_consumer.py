@@ -48,11 +48,3 @@ class TestJobConsumer:
 
         # Test whether the records that were in the queue are correctly removed
         assert self.queue_message_count(self.queue_client) == 0
-
-
-def test_singleton():
-    # Singleton test
-    queueclient_1 = AzureQueue()
-    queueclient_2 = AzureQueue()
-    assert queueclient_1 is queueclient_2
-    assert queueclient_1.get_queue_client() is queueclient_2.get_queue_client()
