@@ -33,6 +33,6 @@ class AzureStorage:
     @classmethod
     def get_blob_service_client(cls):
         if cls._client is None:
-            cls._client = cls._create_azure_blob_service_client
+            cls._client = cls._create_azure_blob_service_client()
         return cls._client
         
