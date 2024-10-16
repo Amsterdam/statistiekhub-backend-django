@@ -56,7 +56,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
     )
     readonly_fields = (
         "job_status_info",
-        "change_summary_link",
+        "change_summary",
         "imported",
         "errors",
         "owner",
