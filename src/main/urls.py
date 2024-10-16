@@ -27,10 +27,11 @@ admin.site.index_title = "Welcome to Statistiekhub Portal"
 
 urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
+urlpatterns += [ path('get-blob/<path:blob_name>', include("import_export_job.urls")), ]
 
 urlpatterns +=[
         path("login/", auth.oidc_login),
         path("oidc/", include("mozilla_django_oidc.urls")),
  path("", admin.site.urls),
     ]
+
