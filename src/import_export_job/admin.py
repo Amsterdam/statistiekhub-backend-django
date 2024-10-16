@@ -47,7 +47,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
     list_display = (
         "model",
         "job_status_info",
-        "file",
+        "file_link",
         "errors",
         "change_summary_link",
         "imported",
@@ -71,6 +71,12 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         admin_actions.run_import_job_action,
         admin_actions.run_import_job_action_dry,
     )
+
+    def file_link(self, obj):
+        url = reverse('get_blob', args=[obj.file.name])
+        return mark_safe(f'<a href="{url}">{obj.file.name}</a>')
+
+    file_link.short_description = models.ImportJob._meta.get_field('file').verbose_name
 
     def change_summary_link(self, obj):
         if obj.change_summary:
