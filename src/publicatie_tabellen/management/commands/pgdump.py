@@ -1,6 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
+
 from publicatie_tabellen.save_as_csv import SaveAsCsv
 
 logger = logging.getLogger(__name__)

@@ -1,13 +1,11 @@
+import logging
 import os
 import shutil
 
-import logging
-
 import django.apps
-from django.db import connection
-from django.core.files.storage import DefaultStorage
 from django.conf import settings
-
+from django.core.files.storage import DefaultStorage
+from django.db import connection
 
 logger = logging.getLogger(__name__)
 
