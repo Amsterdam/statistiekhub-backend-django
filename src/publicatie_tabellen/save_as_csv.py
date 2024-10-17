@@ -4,8 +4,8 @@ import shutil
 
 import django.apps
 from django.conf import settings
-from django.core.files.storage import DefaultStorage
 from django.db import connection
+from django.utils.module_loading import import_string
 
 logger = logging.getLogger(__name__)
 
@@ -56,16 +56,29 @@ class SaveAsCsv:
         shutil.rmtree(self.TMP_DIRECTORY)
 
 
-class OverwriteStorage(DefaultStorage):
-    """Set storage to pgdump container
+def get_storage_class(import_path):
+    return import_string(import_path)
+
+class OverwriteStorage:
+    """ Set storage to pgdump container
         and overwrite existing files instead of using hash postfixes."""
 
     def __init__(self, *args, **kwargs):
-        if  hasattr(settings, 'STORAGE_AZURE'):
-            "set storage to pgdump container"
-            kwargs.update(settings.STORAGE_AZURE['pgdump']['OPTIONS'])
-        super().__init__(*args, **kwargs)
+        if hasattr(settings, 'STORAGE_AZURE'):
+            # Gebruik de 'pgdump' opslagconfiguratie
+            storage_class = get_storage_class(settings.STORAGES['pgdump']['BACKEND'])
+            storage_options = settings.STORAGES['pgdump']['OPTIONS']
+        else:
+            # Gebruik de standaard opslagconfiguratie
+            storage_class = get_storage_class(settings.STORAGES['default']['BACKEND'])
+            storage_options = {}
+        
+        self.storage = storage_class(**storage_options)
 
+
+    def __getattr__(self, name):
+        return getattr(self.storage, name)
+    
     def save_without_postfix(self, name, content):
         if self.exists(name):
             self.delete(name)
