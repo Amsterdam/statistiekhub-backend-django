@@ -218,7 +218,15 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
                 "azure_container": "django",
             },
         },
-    }
+        "pgdump": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "token_credential": credential,
+                "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
+                "azure_container": "pgdump",
+            },
+     },
+}
     STORAGES |= STORAGE_AZURE #update storages with storage_azure
 
 # -----Queue
