@@ -5,19 +5,13 @@ import shutil
 import django.apps
 from django.conf import settings
 from django.db import connection
-from django.utils.module_loading import import_string
+from django.utils.module_loading import import_string as get_storage_class
 
 logger = logging.getLogger(__name__)
 
 
-class SaveAsCsv:
+class PgDumpToStorage:
     TMP_DIRECTORY = "/tmp/pgdump"
-
-    def main(self, app_names:list):
-        self.start_dump(app_names)
-        self.upload_to_blob()
-        self.remove_dump()
-        logger.info("Completed DB dump")
 
     def start_dump(self, app_names:list):
         os.makedirs(self.TMP_DIRECTORY, exist_ok=True)
@@ -30,11 +24,11 @@ class SaveAsCsv:
         filepath = os.path.join(
             self.TMP_DIRECTORY, f"{table_name}.csv"
         )  # filename is model name
+
+        select_query = f"SELECT * FROM {table_name}"
+        sql = ( f"COPY ({select_query}) TO STDOUT WITH CSV HEADER" )
+
         with open(filepath, "w") as f:
-            select_query = f"SELECT * FROM {table_name}"
-            sql = (
-                f"COPY ({select_query}) TO STDOUT WITH CSV HEADER"
-            )
             with connection.cursor() as cursor:
                 cursor.copy_expert(sql, f)
 
@@ -56,8 +50,8 @@ class SaveAsCsv:
         shutil.rmtree(self.TMP_DIRECTORY)
 
 
-def get_storage_class(import_path):
-    return import_string(import_path)
+# def get_storage_class(import_path):
+#     return import_string(import_path)
 
 class OverwriteStorage:
     """ Set storage to pgdump container
