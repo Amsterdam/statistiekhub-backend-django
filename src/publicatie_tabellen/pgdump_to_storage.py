@@ -50,9 +50,6 @@ class PgDumpToStorage:
         shutil.rmtree(self.TMP_DIRECTORY)
 
 
-# def get_storage_class(import_path):
-#     return import_string(import_path)
-
 class OverwriteStorage:
     """ Set storage to pgdump container
         and overwrite existing files instead of using hash postfixes."""
