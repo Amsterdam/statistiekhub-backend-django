@@ -84,12 +84,9 @@ class MeasureResource(ModelResource):
         )
         return super().before_import(dataset, **kwargs)
 
-    def after_init_instance(self, instance, new, row, **kwargs):
-        instance.owner = kwargs["user"]
-
     class Meta:
         model = Measure
         skip_unchanged = True
         report_skipped = True
-        exclude = ("id", "owner", "created_at", "updated_at")
+        exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("name",)

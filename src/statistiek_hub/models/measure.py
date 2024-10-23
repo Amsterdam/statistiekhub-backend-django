@@ -1,6 +1,5 @@
 import datetime
 
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -12,7 +11,6 @@ from .model_mixin import AddErrorFuncion, TimeStampMixin
 
 
 class Measure(TimeStampMixin, AddErrorFuncion):
-    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)
