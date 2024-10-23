@@ -1,0 +1,134 @@
+[ {
+  "model": "auth.group",
+  "pk": 1,
+  "fields": {
+    "name": "maintainers"
+  }
+},
+  {
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+      "name": "bevolking"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 3,
+    "fields": {
+      "name": "bestuur en organisatie"
+    }
+  },  
+  {
+    "model": "auth.group",
+    "pk": 4,
+    "fields": {
+      "name": "cultuur"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 5,
+    "fields": {
+      "name": "diversiteit"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 6,
+    "fields": {
+      "name": "duurzaamheid"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 7,
+    "fields": {
+      "name": "economie"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 8,
+    "fields": {
+      "name": "inkomen"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 9,
+    "fields": {
+      "name": "jeugd"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 10,
+    "fields": {
+      "name": "onderwijs"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 11,
+    "fields": {
+      "name": "openbare ruimte"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 12,
+    "fields": {
+      "name": "participatie"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 13,
+    "fields": {
+      "name": "sociale kracht"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 14,
+    "fields": {
+      "name": "sport"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 15,
+    "fields": {
+      "name": "veiligheid"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 16,
+    "fields": {
+      "name": "verkeer"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 17,
+    "fields": {
+      "name": "volksgezondheid en zorg"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 18,
+    "fields": {
+      "name": "werk"
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 19,
+    "fields": {
+      "name": "wonen"
+    }
+  }
+]
