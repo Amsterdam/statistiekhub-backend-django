@@ -36,7 +36,7 @@ class TestFormatters:
         sc = SCSV()
         with pytest.raises(ValidationError) as e:
             sc.create_dataset(csv_file)
-        assert str(e.value) == "['file is using `,` delimiter, but semicolon_csv format is with `;` delimiter']"
+        assert str(e.value) == str(["SCSV semicolon_csv format is with ';' delimiter"])
         
     def test_SCSV(self,csv_file_semicolon):
         sc = SCSV()

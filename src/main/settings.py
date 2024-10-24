@@ -124,11 +124,21 @@ def resource_observation():
     from statistiek_hub.resources.observation_resource import ObservationResource
     return ObservationResource
 
+def resource_measure():
+    from statistiek_hub.resources.measure_resource import MeasureResource
+    return MeasureResource
+
 def resource_spatialdimension():
     from statistiek_hub.resources.spatial_dimension_resource import (
         SpatialDimensionResource,
     )
     return SpatialDimensionResource
+
+def resource_temporaldimension():
+    from statistiek_hub.resources.temporal_dimension_resource import (
+        TemporalDimensionResource,
+    )
+    return TemporalDimensionResource
 
 
 IMPORT_EXPORT_JOB_MODELS = {
@@ -137,10 +147,20 @@ IMPORT_EXPORT_JOB_MODELS = {
         "model_name": "Observation",
         "resource": resource_observation,
     },
+    "Measure": {
+        "app_label": "statistiek_hub",
+        "model_name": "Measure",
+        "resource": resource_measure,
+    },
     "SpatialDimension": {
         "app_label": "statistiek_hub",
         "model_name": "SpatialDimension",
         "resource": resource_spatialdimension,
+    },
+    "TemporalDimension": {
+        "app_label": "statistiek_hub",
+        "model_name": "TemporalDimension",
+        "resource": resource_temporaldimension,
     },
 }
 

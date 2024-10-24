@@ -39,8 +39,6 @@ class OIDCAuthenticationBackend(mozilla_django_oidc.auth.OIDCAuthenticationBacke
         """
 
         with transaction.atomic():
-            # standard zero permissions shows only home-admin-page with mention: You don’t have permission to view or edit anything.
-            user.groups.clear()
             user.is_staff = True
             user.is_superuser = False
 

@@ -18,7 +18,7 @@ def _get_qs_publishmeasure(obsmodel=Measure) -> QuerySet:
     queryset = (
         obsmodel.objects.select_related("theme", "unit")
         .all()
-        .defer("created_at", "updated_at", "owner_id", "id")
+        .defer("created_at", "updated_at", "id")
         .annotate(
             theme_uk=F("theme__name_uk"),
             unit_code=F("unit__code"),

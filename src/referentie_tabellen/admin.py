@@ -58,8 +58,8 @@ class UnitAdmin(admin.ModelAdmin):
 
 @admin.register(Theme)
 class ThemeAdmin(admin.ModelAdmin):
-    list_display = ("name", "id")
-    ordering = ("id",)
+    list_display = ("name", "id", "parent", "group")
+    ordering = ("group", "id")
 
 
 @admin.register(SpatialDimensionType)
