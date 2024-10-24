@@ -9,6 +9,7 @@ from import_export.formats import base_formats
 
 class SCSV(base_formats.CSV):
     CONTENT_TYPE = "semicolon text/csv"
+    DEFAULT_DELIMITER = ";"
 
     def get_title(self):
         return "semicolon_csv"
@@ -18,11 +19,11 @@ class SCSV(base_formats.CSV):
             in_stream = in_stream.decode(self.encoding)
 
         delimiter = csv.Sniffer().sniff(in_stream, delimiters=";,").delimiter
-        if delimiter != ";":
+        if delimiter != self.DEFAULT_DELIMITER:
             raise ValidationError(
-                f"file is using `{delimiter}` delimiter, but semicolon_csv format is with `;` delimiter"
+                f"SCSV semicolon_csv format is with '{self.DEFAULT_DELIMITER}' delimiter"
             )
-        kwargs["delimiter"] = delimiter
+        kwargs["delimiter"] = self.DEFAULT_DELIMITER
         kwargs["format"] = "csv"
         return tablib.import_set(in_stream, **kwargs)
 
