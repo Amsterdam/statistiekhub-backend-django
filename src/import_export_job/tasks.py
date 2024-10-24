@@ -37,61 +37,57 @@ def get_format(job):
 
 
 def _run_import_job(import_job, dry_run=True):
-    change_job_status(import_job, "import", "1/5 Import started", dry_run)
+    def update_status(step, message):
+        change_job_status(import_job, "import", f"{step} {message}", dry_run)
+
+    def log_error(message, exception=None):
+        error_message = _(message)
+        if exception:
+            error_message += f": {exception}"
+        import_job.errors += error_message + "\n"
+        update_status("Error", error_message)
+        import_job.save()
+
+    update_status("1/4", "Import started")
     import_job.errors = ""
 
     model_config = ModelConfig(**importables[import_job.model])
-
     import_format = get_format(import_job)
 
-    # Copied from https://github.com/django-import-export/django-import-export/blob/3c082f98afe7996e79f936418fced3094f141c26/import_export/admin.py#L260 sorry  # noqa
     try:
-        data = import_job.file.read()
-
-        if isinstance(data, bytes):
-            data = data.decode("utf8")
+        data_chunks = []
+        with import_job.file.open('rb') as file:  # Open in binary mode
+            for chunk in file.chunks():
+                data_chunks.append(chunk.decode('utf-8'))
+        data = ''.join(data_chunks)
 
         dataset = import_format.create_dataset(data)
-
     except UnicodeDecodeError as e:
-        import_job.errors += _("Imported file has a wrong encoding: %s" % e) + "\n"
-        change_job_status(
-            import_job, "import", "Imported file has a wrong encoding", dry_run
-        )
-        import_job.save()
+        log_error("Imported file has a wrong encoding", e)
         return
-
     except Exception as e:
-        import_job.errors += _("Error reading file: %s") % e + "\n"
-        change_job_status(import_job, "import", "Error reading file", dry_run)
-        import_job.save()
+        log_error("Error reading file", e)
         return
 
-    change_job_status(import_job, "import", "2/5 Processing import data", dry_run)
+    update_status("2/4", "Processing import data")
 
-    class Resource(model_config.resource):
-        def __init__(self, import_job, *args, **kwargs):
-            self.import_job = import_job
-            super().__init__(*args, **kwargs)
+    # class Resource(model_config.resource):
+    #     def __init__(self, import_job, *args, **kwargs):
+    #         self.import_job = import_job
+    #         super().__init__(*args, **kwargs)
 
-        def before_import_row(self, row, **kwargs):
-            if "row_number" in kwargs:
-                row_number = kwargs["row_number"]
-                if row_number % 100 == 0 or row_number == 1:
-                    change_job_status(
-                        import_job,
-                        "import",
-                        f"3/5 Importing row {row_number}/{len(dataset)}",
-                        dry_run,
-                    )
-            return super().before_import_row(row, **kwargs)
+    #     def before_import_row(self, row, **kwargs):
+    #         row_number = kwargs.get("row_number")
+    #         if row_number and (row_number % 100 == 0 or row_number == 1):
+    #             update_status("3/5", f"Importing row {row_number}/{len(dataset)}")
+    #         return super().before_import_row(row, **kwargs)
 
-    resource = Resource(import_job=import_job)
-
+    resource = model_config.resource()
+    
     skip_diff = resource._meta.skip_diff or resource._meta.skip_html_diff
 
     result = resource.import_data(dataset, dry_run=dry_run)
-    change_job_status(import_job, "import", "4/5 Generating import summary", dry_run)
+    update_status("3/4", "Generating import summary")
 
     if result.base_errors or result.row_errors():
         import_job.errors = "ERRORS zie change_summary"
@@ -104,9 +100,11 @@ def _run_import_job(import_job, dry_run=True):
         os.path.split(import_job.file.name)[1] + ".html",
         ContentFile(content.encode("utf-8")),
     )
+
     if not dry_run and (import_job.errors==""):
         import_job.imported = timezone.now()
-    change_job_status(import_job, "import", "5/5 Import job finished", dry_run)
+
+    update_status("4/4", "Import job finished")
     import_job.save()
 
 
