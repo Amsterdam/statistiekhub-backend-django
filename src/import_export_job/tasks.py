@@ -70,18 +70,6 @@ def _run_import_job(import_job, dry_run=True):
         return
 
     update_status("2/4", "Processing import data")
-
-    # class Resource(model_config.resource):
-    #     def __init__(self, import_job, *args, **kwargs):
-    #         self.import_job = import_job
-    #         super().__init__(*args, **kwargs)
-
-    #     def before_import_row(self, row, **kwargs):
-    #         row_number = kwargs.get("row_number")
-    #         if row_number and (row_number % 100 == 0 or row_number == 1):
-    #             update_status("3/5", f"Importing row {row_number}/{len(dataset)}")
-    #         return super().before_import_row(row, **kwargs)
-
     resource = model_config.resource()
     
     skip_diff = resource._meta.skip_diff or resource._meta.skip_html_diff
