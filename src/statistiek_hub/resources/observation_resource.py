@@ -244,11 +244,8 @@ class ObservationResource(ModelResource):
 
     class Meta:
         model = Observation
-        # use_bulk = True
-        # instance_loader_class = CachedInstanceLoader
+        use_bulk = True
         skip_unchanged = True
         report_skipped = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("measure", "spatialdimension", "temporaldimension")
-        # Iterate over chunks of CHUNKSIZE objects at once
-        chunk_size = CHUNKSIZE

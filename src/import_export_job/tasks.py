@@ -40,14 +40,6 @@ def _run_import_job(import_job, dry_run=True):
     def update_status(step, message):
         change_job_status(import_job, "import", f"{step} {message}", dry_run)
 
-    def log_error(message, exception=None):
-        error_message = _(message)
-        if exception:
-            error_message += f": {exception}"
-        import_job.errors += error_message + "\n"
-        update_status("Error", error_message)
-        import_job.save()
-
     update_status("1/4", "Import started")
     import_job.errors = ""
 
@@ -55,19 +47,14 @@ def _run_import_job(import_job, dry_run=True):
     import_format = get_format(import_job)
 
     try:
-        data_chunks = []
-        with import_job.file.open('rb') as file:  # Open in binary mode
-            for chunk in file.chunks():
-                data_chunks.append(chunk.decode('utf-8'))
-        data = ''.join(data_chunks)
-
+        data = import_job.file.read()
+        if isinstance(data, bytes):
+            data = data.decode("utf8")
         dataset = import_format.create_dataset(data)
     except UnicodeDecodeError as e:
-        log_error("Imported file has a wrong encoding", e)
-        return
+        raise UnicodeDecodeError("Imported file has a wrong encoding" + str(e)) from e
     except Exception as e:
-        log_error("Error reading file", e)
-        return
+        raise Exception("Error reading file" + str(e)) from e
 
     update_status("2/4", "Processing import data")
     resource = model_config.resource()

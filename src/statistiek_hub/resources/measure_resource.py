@@ -1,4 +1,5 @@
 from import_export.fields import Field
+from import_export.instance_loaders import CachedInstanceLoader
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 
@@ -90,3 +91,5 @@ class MeasureResource(ModelResource):
         report_skipped = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("name",)
+        use_bulk = True
+        instance_loader_class = CachedInstanceLoader # only works when there is one import_id_fields field

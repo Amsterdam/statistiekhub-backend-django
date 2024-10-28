@@ -97,17 +97,10 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         if obj is not None:
-            user_groups = self._get_user_groups(request)
-            if obj.theme.group in user_groups:
-                return True
-            return False
+            return obj.theme.group in self._get_user_groups(request)
         return super().has_change_permission(request, obj)
 
     def has_delete_permission(self, request, obj=None):
         if obj is not None:
-            user_groups = self._get_user_groups(request)
-            if obj.theme.group in user_groups:
-                return True
-            return False
+            return obj.theme.group in self._get_user_groups(request)
         return super().has_delete_permission(request, obj)
-
