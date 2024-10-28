@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from . import admin_actions, models
+from . import models
 
 
 class JobWithStatusMixin:
@@ -67,21 +67,16 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
 
     list_filter = ("model", "imported")
 
-    actions = (
-        admin_actions.run_import_job_action,
-        admin_actions.run_import_job_action_dry,
-    )
-
     def file_link(self, obj):
         url = reverse('get_blob', args=[obj.file.name])
-        return mark_safe(f'<a href="{url}">{obj.file.name}</a>')
+        return mark_safe(f'<a href="{url}" target="_blank" >{obj.file.name}</a>')
 
     file_link.short_description = models.ImportJob._meta.get_field('file').verbose_name
 
     def change_summary_link(self, obj):
         if obj.change_summary:
             url = reverse('get_blob', args=[obj.change_summary.name])
-            return mark_safe(f'<a href="{url}">{obj.change_summary.name}</a>')
+            return mark_safe(f'<a href="{url}" target="_blank" >{obj.change_summary.name}</a>')
         return "-"
 
     change_summary_link.short_description = models.ImportJob._meta.get_field('change_summary').verbose_name

@@ -21,7 +21,6 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
         "theme",
         "sensitive",
         "deprecated",
-        "owner",
     )
     list_filter = (
         "theme",
@@ -32,9 +31,7 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
         "updated_at",
     )
     resource_classes = [MeasureResource]
-    readonly_fields = [
-        "owner",
-    ]
+
     search_help_text = "search on measure name"
     search_fields = ["name"]
 
@@ -42,7 +39,7 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
         (
             None,
             {
-                "fields": ("owner",),
+                "fields": ("theme",),
             },
         ),
         (
@@ -54,7 +51,6 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
                     "definition",
                     "unit",
                     "decimals",
-                    "theme",
                     "source",
                 ),
             },
@@ -86,22 +82,25 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
         ),
     )
 
+    inlines = [FilterInline]
+
     def get_readonly_fields(self, request, obj=None):
         if request.user.is_superuser:
             return []
         return self.readonly_fields
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(owner=request.user)
+    def _get_user_groups(self, request):
+        # Collect user groups once
+        if not hasattr(request, '_cached_user_groups'):
+            request._cached_user_groups = request.user.groups.all()
+        return request._cached_user_groups
 
-    # measure field 'owner' get's filled automaticaly
-    def save_model(self, request, obj, form, change):
-        if not obj.pk:
-            # Only set owner during the first save.
-            obj.owner = request.user
-        super().save_model(request, obj, form, change)
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            return obj.theme.group in self._get_user_groups(request)
+        return super().has_change_permission(request, obj)
 
-    inlines = [FilterInline]
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None:
+            return obj.theme.group in self._get_user_groups(request)
+        return super().has_delete_permission(request, obj)

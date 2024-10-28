@@ -48,7 +48,7 @@ dev: migrate
 	$(run) --service-ports dev
 
 load_fixtures:  migrate                  ## Load initial data into database by django fixtures
-	$(manage) loaddata import_auth.json \
+	$(manage) loaddata import_group.json \
 	import_theme.json \
 	import_unit.json \
 	import_temporaldimensiontype.json \

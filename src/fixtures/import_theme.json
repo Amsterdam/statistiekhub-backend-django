@@ -5,7 +5,8 @@
     "name": "Bestuur en organisatie",
     "name_uk": "Municipality and support",
     "abbreviation": "BO",
-    "parent": null
+    "parent": null,
+    "group": 3
   }
 },
   {
@@ -15,7 +16,8 @@
       "name": "Bevolking",
       "name_uk": "Population",
       "abbreviation": "BEV",
-      "parent": null
+      "parent": null,
+      "group": 2
     }
   },
   {
@@ -25,7 +27,8 @@
       "name": "Bevolking leeftijd",
       "name_uk": "Population age",
       "abbreviation": "BEVL",
-      "parent": null
+      "parent": null,
+      "group": 2
     }
   },
   {
@@ -35,7 +38,8 @@
       "name": "Cultuur",
       "name_uk": "Culture",
       "abbreviation": "CT",
-      "parent": null
+      "parent": null,
+      "group": 4
     }
   },
   {
@@ -45,7 +49,8 @@
       "name": "Diversiteit",
       "name_uk": "Diversity",
       "abbreviation": "DV",
-      "parent": null
+      "parent": null,
+      "group": 5
     }
   },
   {
@@ -55,7 +60,8 @@
       "name": "Duurzaamheid",
       "name_uk": "Sustainability",
       "abbreviation": "DZ",
-      "parent": null
+      "parent": null,
+      "group": 6
     }
   },
   {
@@ -65,7 +71,8 @@
       "name": "Economie",
       "name_uk": "Commercial activities",
       "abbreviation": "EC",
-      "parent": null
+      "parent": null,
+      "group": 7
     }
   },
   {
@@ -75,7 +82,8 @@
       "name": "Economie functie",
       "name_uk": "Commercial categories",
       "abbreviation": "ECF",
-      "parent": null
+      "parent": null,
+      "group": 7
     }
   },
   {
@@ -85,7 +93,8 @@
       "name": "Economie sectie",
       "name_uk": "Commercial section",
       "abbreviation": "ECS",
-      "parent": null
+      "parent": null,
+      "group": 7
     }
   },
   {
@@ -95,7 +104,8 @@
       "name": "Economie winkels",
       "name_uk": "Commercial activities: retail",
       "abbreviation": "ECD",
-      "parent": null
+      "parent": null,
+      "group": 7
     }
   },
   {
@@ -105,7 +115,8 @@
       "name": "Inkomen",
       "name_uk": "Income",
       "abbreviation": "I",
-      "parent": null
+      "parent": null,
+      "group": 8
     }
   },
   {
@@ -115,7 +126,8 @@
       "name": "Jeugd",
       "name_uk": "Well-being and youth care",
       "abbreviation": "J",
-      "parent": null
+      "parent": null,
+      "group":  9
     }
   },
   {
@@ -125,7 +137,8 @@
       "name": "Onderwijs",
       "name_uk": "Education",
       "abbreviation": "O",
-      "parent": null
+      "parent": null,
+      "group": 10
     }
   },
   {
@@ -135,7 +148,8 @@
       "name": "Openbare ruimte",
       "name_uk": "Public space",
       "abbreviation": "OR",
-      "parent": null
+      "parent": null,
+      "group": 11
     }
   },
   {
@@ -145,7 +159,8 @@
       "name": "Participatie",
       "name_uk": "Participation",
       "abbreviation": "P",
-      "parent": null
+      "parent": null,
+      "group": 12
     }
   },
   {
@@ -155,7 +170,8 @@
       "name": "Sociale kracht",
       "name_uk": "Socioeconomic status",
       "abbreviation": "SK",
-      "parent": null
+      "parent": null,
+      "group": 13
     }
   },
   {
@@ -165,7 +181,8 @@
       "name": "Sport",
       "name_uk": "Sports",
       "abbreviation": "S",
-      "parent": null
+      "parent": null,
+      "group": 14
     }
   },
   {
@@ -175,7 +192,8 @@
       "name": "Veiligheid",
       "name_uk": "Safety",
       "abbreviation": "V",
-      "parent": null
+      "parent": null,
+      "group": 15
     }
   },
   {
@@ -185,7 +203,8 @@
       "name": "Verkeer",
       "name_uk": "Traffic",
       "abbreviation": "VK",
-      "parent": null
+      "parent": null,
+      "group": 16
     }
   },
   {
@@ -195,7 +214,8 @@
       "name": "Volksgezondheid en zorg",
       "name_uk": "Well-being and care",
       "abbreviation": "VZ",
-      "parent": null
+      "parent": null,
+      "group": 17
     }
   },
   {
@@ -205,7 +225,8 @@
       "name": "Werk",
       "name_uk": "Work",
       "abbreviation": "W",
-      "parent": null
+      "parent": null,
+      "group": 18
     }
   },
   {
@@ -215,7 +236,8 @@
       "name": "Wonen",
       "name_uk": "Housing",
       "abbreviation": "WON",
-      "parent": null
+      "parent": null,
+      "group": 19
     }
   }
 ]
