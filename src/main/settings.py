@@ -352,6 +352,11 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
+        "import_export_job": {
+            "level": "INFO",
+            "handlers": ["console"],
+            "propagate": False,
+        },
     },
 }
 
