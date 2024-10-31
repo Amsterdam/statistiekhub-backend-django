@@ -29,6 +29,24 @@ class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     raw_id_fields = ("measure", "temporaldimension", "spatialdimension")
     resource_classes = [ObservationResource]
 
+    readonly_fields = ["measure", "temporaldimension", "spatialdimension"]
+
+    def _get_user_groups(self, request):
+        # Collect user groups once
+        if not hasattr(request, '_cached_user_groups'):
+            request._cached_user_groups = request.user.groups.all()
+        return request._cached_user_groups
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            return obj.measure.theme.group in self._get_user_groups(request)
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None:
+            return obj.measure.theme.group in self._get_user_groups(request)
+        return super().has_delete_permission(request, obj)    
+
 
 @admin.register(ObservationCalculated)
 class ObservationCalculatedAdmin(admin.ModelAdmin):
