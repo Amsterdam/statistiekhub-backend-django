@@ -84,11 +84,6 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
 
     inlines = [FilterInline]
 
-    def get_readonly_fields(self, request, obj=None):
-        if request.user.is_superuser:
-            return []
-        return self.readonly_fields
-
     def _get_user_groups(self, request):
         # Collect user groups once
         if not hasattr(request, '_cached_user_groups'):

@@ -1,4 +1,5 @@
 # Copyright (C) 2019 o.s. Auto*Mat
+import logging
 from typing import Any
 
 from django import forms
@@ -12,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from . import models
 
+logger = logging.getLogger(__name__)
 
 class JobWithStatusMixin:
     @admin.display(description=_("Job status info"))
@@ -32,18 +34,42 @@ class ImportJobForm(forms.ModelForm):
         fields = "__all__"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["model"].choices = [
-            (x, x) for x in getattr(settings, "IMPORT_EXPORT_JOB_MODELS", {}).keys()
-        ]
+        self.user = kwargs.pop('user')
 
+        self.modifier = self.user.is_superuser
+        if self.user.groups.filter(name='modifier_statistiekhub_tabellen').exists():
+            self.modifier = True
+
+        super().__init__(*args, **kwargs)
+
+        self.fields["model"].choices = self._get_model_choices()
         self.fields["format"].choices = self.instance.get_format_choices()
+
+    def _get_model_choices(self) -> list:
+        _import_job_models = getattr(settings, "IMPORT_EXPORT_JOB_MODELS", {})
+        if not self.modifier:
+            logger.info(f"user not in modifier-group")
+            _import_job_models.pop("SpatialDimension")
+            _import_job_models.pop("TemporalDimension")
+            
+        return [(x, x) for x in _import_job_models.keys()]
 
 
 @admin.register(models.ImportJob)
 class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
     direction = "import"
     form = ImportJobForm
+
+    def get_form(self, request, *args, **kwargs):
+        Form = super().get_form(request, *args, **kwargs)
+
+        class AdminFormWithUser(Form):
+            def __new__(cls, *args, **kwargs):
+                kwargs['user'] = request.user
+                return Form(*args, **kwargs)
+
+        return AdminFormWithUser
+
     list_display = (
         "model",
         "job_status_info",

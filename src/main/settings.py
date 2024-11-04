@@ -119,6 +119,11 @@ OIDC_RP_SIGN_ALGO = "RS256"
 OIDC_AUTH_REQUEST_EXTRA_PARAMS = {"prompt": "select_account"}
 
 
+# import_export
+IMPORT_EXPORT_IMPORT_PERMISSION_CODE = "add"
+IMPORT_EXPORT_SKIP_ADMIN_LOG = True
+IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True
+
 # import_export_job
 def resource_observation():
     from statistiek_hub.resources.observation_resource import ObservationResource
@@ -343,6 +348,11 @@ LOGGING = {
             "level": "ERROR",
         },
         "publicatie_tabellen": {
+            "level": "INFO",
+            "handlers": ["console"],
+            "propagate": False,
+        },
+        "import_export_job": {
             "level": "INFO",
             "handlers": ["console"],
             "propagate": False,

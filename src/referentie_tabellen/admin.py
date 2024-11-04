@@ -15,32 +15,18 @@ admin.site.unregister(User)
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     """Custum UsterAdmin"""
+    fieldsets = (
+    #    (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissions', {'fields': ('groups',)}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
 
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        is_superuser = request.user.is_superuser
-        disabled_fields = set()
-
-        if not is_superuser:
-            disabled_fields |= {
-                "is_superuser",
-                "user_permissions",
-            }
-
-        # Prevent non-superusers from editing their own permissions
-        if not is_superuser and obj == request.user:
-            disabled_fields |= {
-                "is_staff",
-                "is_superuser",
-                "groups",
-                "user_permissions",
-            }
-
-        for f in disabled_fields:
-            if f in form.base_fields:
-                form.base_fields[f].disabled = True
-
-        return form
+    def get_fieldsets(self, request, obj=None):
+        if not request.user.is_superuser:
+            return self.fieldsets
+        return super().get_fieldsets(request, obj)
+    
 
 
 # referentie tabellen
