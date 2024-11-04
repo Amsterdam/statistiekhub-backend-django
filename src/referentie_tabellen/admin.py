@@ -16,7 +16,6 @@ admin.site.unregister(User)
 class CustomUserAdmin(UserAdmin):
     """Custum UsterAdmin"""
     fieldsets = (
-    #    (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
         ('Permissions', {'fields': ('groups',)}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
