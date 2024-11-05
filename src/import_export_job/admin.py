@@ -71,13 +71,13 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         return AdminFormWithUser
 
     list_display = (
+        "id",
         "model",
         "job_status_info",
         "file_link",
         "errors",
         "change_summary_link",
         "imported",
-        "owner",
         "updated_at",
     )
     readonly_fields = (
@@ -85,7 +85,6 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "change_summary",
         "imported",
         "errors",
-        "owner",
         "updated_at",
         "processing_initiated",
     )
