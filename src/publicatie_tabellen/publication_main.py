@@ -20,20 +20,44 @@ class PublishFunction:
         self.publish_function()
 
     def publish_function(self):
-        """runs the correct model-function for publication"""
+        """runs the correct model-function for publication after button-signal"""
         if self.model:
 
             match self.model._meta.model_name:
                 case "publicationmeasure":
                     self.result = publishmeasure()
 
-                case "publicationstatistic":
-                    self.fill_observationcalculated()
-                    self.result = publishstatistic()
-
                 case "publicationobservation":
                     self.fill_observationcalculated()
                     self.result = publishobservation()
+
+                case "publicationstatistic":
+                    self.fill_observationcalculated()
+                    self.result = publishstatistic()                    
+
+    @classmethod
+    def run_all_publish_tables(cls):
+        """ runs all three publish tables """
+
+        instance = cls()
+
+        measure_message, measure_succes = publishmeasure()
+        if not measure_succes:
+            logging.exception(f"Error op publishmeasure: {measure_message}")
+
+        try:
+            instance.fill_observationcalculated()
+        except Exception as e:
+            logging.exception(f"Error op obs calculated table: {e}")
+
+        obs_message, obs_succes = publishmeasure()
+        if not obs_succes:
+            logging.exception(f"Error op publishobservations: {obs_message}")
+
+        statistic_message, statistic_succes = publishobservation()
+        if not statistic_succes:
+            logging.exception(f"Error op publishstatistic: {statistic_message}")
+
 
     def fill_observationcalculated(self):
         """fill model ObservationCalculated with observations calculated by the calculation-query of the measure"""
