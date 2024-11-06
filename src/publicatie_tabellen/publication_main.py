@@ -43,20 +43,22 @@ class PublishFunction:
 
         measure_message, measure_succes = publishmeasure()
         if not measure_succes:
-            logging.exception(f"Error op publishmeasure: {measure_message}")
+            raise Exception(f"Error op publishmeasure: {measure_message}")
 
         try:
             instance.fill_observationcalculated()
         except Exception as e:
-            logging.exception(f"Error op obs calculated table: {e}")
-
+            raise Exception(f"Error op obs calculated table: {e}")
+            
         obs_message, obs_succes = publishmeasure()
         if not obs_succes:
-            logging.exception(f"Error op publishobservations: {obs_message}")
+            raise Exception(f"Error op publishobservations: {obs_message}")
 
         statistic_message, statistic_succes = publishobservation()
         if not statistic_succes:
-            logging.exception(f"Error op publishstatistic: {statistic_message}")
+            raise Exception(f"Error op publishstatistic: {statistic_message}")
+
+        logger.info("all three publish tables succesfull")
 
 
     def fill_observationcalculated(self):

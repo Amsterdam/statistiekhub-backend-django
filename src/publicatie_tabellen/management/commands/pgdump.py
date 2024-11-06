@@ -1,11 +1,13 @@
+import datetime
 import logging
 
-from django.db import transaction
 from django.core.management.base import BaseCommand
+from django.db import transaction
+from django.utils import timezone
 
-from publicatie_tabellen.publication_main import PublishFunction
 from publicatie_tabellen.models import PublicationUpdatedAt
 from publicatie_tabellen.pgdump_to_storage import PgDumpToStorage
+from publicatie_tabellen.publication_main import PublishFunction
 
 logger = logging.getLogger(__name__)
 
@@ -17,13 +19,14 @@ class Command(BaseCommand):
         try:
             with transaction.atomic():
                 # calculate all publication-tables
-                updated_at = PublicationUpdatedAt.objects.last()
+                updated = PublicationUpdatedAt.objects.last()
+                if not updated:
+                    updated = PublicationUpdatedAt(updated_at=datetime.datetime(1900,10,1))
                 PublishFunction.run_all_publish_tables()
-                updated_at.save()
+                updated.save()
             
                 # pg_dump tables
                 app_names = ["publicatie_tabellen",]
-
                 dump = PgDumpToStorage()
                 try:                    
                     dump.start_dump(app_names)
