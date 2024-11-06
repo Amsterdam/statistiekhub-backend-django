@@ -87,6 +87,11 @@ def run_import_job(pk, dry_run=True):
     logger.info(f"Importing {pk} dry-run {dry_run}")
     try:
         import_job = models.ImportJob.objects.get(pk=pk)
+    except Exception as e:
+        logger.info(f"error op job {pk}: {e}")
+        return
+
+    try:        
         _run_import_job(import_job, dry_run)
     except Exception as e:
         logger.info(f"error op job {pk}: {e}")
