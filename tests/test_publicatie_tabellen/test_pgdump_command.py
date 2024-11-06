@@ -1,3 +1,4 @@
+import datetime
 import os
 import shutil
 from unittest.mock import patch
@@ -5,7 +6,9 @@ from unittest.mock import patch
 import pytest
 from django.conf import settings
 from django.core.management import call_command
+from django.utils import timezone
 
+from publicatie_tabellen.models import PublicationUpdatedAt
 from publicatie_tabellen.pgdump_to_storage import PgDumpToStorage
 from referentie_tabellen.models import Theme
 
@@ -43,14 +46,41 @@ class TestPgDumpToStorage:
         assert os.path.isfile(stored_file)
         os.remove(stored_file)
 
+
 class TestPgdumpCommand:
     @pytest.mark.django_db
     def test_pg_dump(self):
         """
         Check the whole happy flow
         """
+
+        current_time = datetime.datetime.now()
+
         call_command("pgdump")
+
+        assert PublicationUpdatedAt.objects.all().count() == 1
+        updated_at = PublicationUpdatedAt.objects.first()
+        assert abs(updated_at.updated_at - current_time) < datetime.timedelta(seconds=5)
 
         assert not os.path.isdir(PgDumpToStorage.TMP_DIRECTORY)
         assert len(os.listdir(os.path.join(settings.MEDIA_ROOT, "pgdump"))) > 1
         shutil.rmtree(os.path.join(settings.MEDIA_ROOT, "pgdump"))  # post cleanup
+
+    @pytest.mark.django_db
+    def test_pg_dump_failure(self, caplog):
+        """
+        Check the flow when an error is raised
+        """
+
+        current_time = datetime.datetime.now()
+
+        with patch('publicatie_tabellen.publication_main.publishmeasure', side_effect=Exception("Failure message")):
+            try:
+                call_command("pgdump")
+            except Exception as e:
+                assert "Failure message" in str(e)
+
+        assert PublicationUpdatedAt.objects.all().count() == 0
+        assert not os.path.exists(os.path.join(settings.MEDIA_ROOT, "pgdump")) 
+
+        
