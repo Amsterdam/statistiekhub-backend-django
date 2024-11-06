@@ -210,7 +210,7 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "ENGINE": "custom_db_backend",
         "NAME": DATABASE_NAME,
         "USER": DATABASE_USER,
         "PASSWORD": DATABASE_PASSWORD,
