@@ -6,12 +6,21 @@ from publicatie_tabellen.models import (
     PublicationMeasure,
     PublicationObservation,
     PublicationStatistic,
+    PublicationUpdatedAt,
 )
 from publicatie_tabellen.publication_main import PublishFunction
 
 
 class NoAddDeleteChangePermission(admin.ModelAdmin):
     change_list_template = "publicatie_tabellen/changelist.html"
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        # Haal de waarde op uit het andere model
+        updated_at = PublicationUpdatedAt.objects.first().updated_at
+        extra_context['updated_at'] = updated_at.strftime("%d %B %Y, %I:%M %p")
+        return super().changelist_view(request, extra_context=extra_context)
+
 
     def has_add_permission(self, request) -> bool:
         return False

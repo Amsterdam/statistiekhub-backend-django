@@ -2,10 +2,7 @@
 
 {% block object-tools %}
     <div>
-        <form action="publish/" method="POST">
-            {% csrf_token %}
-                <button type="submit">Publish table</button>
-        </form>
+        <p>Laatste versie: {{ updated_at }}</p>
     </div>
     <br />
     {{ block.super }}

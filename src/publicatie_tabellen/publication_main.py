@@ -15,25 +15,7 @@ logger = logging.getLogger(__name__)
 class PublishFunction:
     def __init__(self, model=None) -> None:
         self.model = model
-        self.result = None
 
-        self.publish_function()
-
-    def publish_function(self):
-        """runs the correct model-function for publication after button-signal"""
-        if self.model:
-
-            match self.model._meta.model_name:
-                case "publicationmeasure":
-                    self.result = publishmeasure()
-
-                case "publicationobservation":
-                    self.fill_observationcalculated()
-                    self.result = publishobservation()
-
-                case "publicationstatistic":
-                    self.fill_observationcalculated()
-                    self.result = publishstatistic()                    
 
     @classmethod
     def run_all_publish_tables(cls):
