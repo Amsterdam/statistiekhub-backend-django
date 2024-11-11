@@ -85,6 +85,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "change_summary",
         "imported",
         "errors",
+        "owner",        
         "updated_at",
         "processing_initiated",
     )

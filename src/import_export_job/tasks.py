@@ -94,7 +94,7 @@ def run_import_job(pk, dry_run=True):
     try:        
         _run_import_job(import_job, dry_run)
     except Exception as e:
-        logger.info(f"error op job {pk}: {e}")
+        logger.info(f"error op _run_import_job {pk}: {e}")
         import_job.errors += _("Import error %s") % e + "\n"
         change_job_status(import_job, "import", "Import error", dry_run)
         import_job.save()
