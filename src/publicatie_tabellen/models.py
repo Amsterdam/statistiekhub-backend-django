@@ -1,6 +1,10 @@
 from django.db import models
 
 
+class PublicationUpdatedAt(models.Model):
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class PublicationMeasure(models.Model):
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)

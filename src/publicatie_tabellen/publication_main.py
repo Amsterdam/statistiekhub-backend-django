@@ -15,25 +15,33 @@ logger = logging.getLogger(__name__)
 class PublishFunction:
     def __init__(self, model=None) -> None:
         self.model = model
-        self.result = None
 
-        self.publish_function()
 
-    def publish_function(self):
-        """runs the correct model-function for publication"""
-        if self.model:
+    @classmethod
+    def run_all_publish_tables(cls):
+        """ runs all three publish tables """
 
-            match self.model._meta.model_name:
-                case "publicationmeasure":
-                    self.result = publishmeasure()
+        instance = cls()
 
-                case "publicationstatistic":
-                    self.fill_observationcalculated()
-                    self.result = publishstatistic()
+        measure_message, measure_succes = publishmeasure()
+        if not measure_succes:
+            raise Exception(f"Error op publishmeasure: {measure_message}")
 
-                case "publicationobservation":
-                    self.fill_observationcalculated()
-                    self.result = publishobservation()
+        try:
+            instance.fill_observationcalculated()
+        except Exception as e:
+            raise Exception(f"Error op obs calculated table: {e}")
+            
+        obs_message, obs_succes = publishmeasure()
+        if not obs_succes:
+            raise Exception(f"Error op publishobservations: {obs_message}")
+
+        statistic_message, statistic_succes = publishobservation()
+        if not statistic_succes:
+            raise Exception(f"Error op publishstatistic: {statistic_message}")
+
+        logger.info("all three publish tables succesfull")
+
 
     def fill_observationcalculated(self):
         """fill model ObservationCalculated with observations calculated by the calculation-query of the measure"""
