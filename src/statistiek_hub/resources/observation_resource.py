@@ -62,16 +62,10 @@ class TemporalForeignKeyWidget(ForeignKeyWidget):
         start_date = convert_to_date(row["temporal_date"])
         end_date = add_timedelta(start_date, temporal_type)
 
-        temporal, created = TemporalDimension.objects.get_or_create(
+        temporal = TemporalDimension.objects.get(
             type=temporal_type,
             startdate=start_date,
-            enddate=end_date,
-            defaults={
-                "name": f"{temporal_type}: {start_date.strftime('%Y-%m-%d')}-->{end_date.strftime('%Y-%m-%d')}",
-                "type": temporal_type,
-                "startdate": start_date,
-                "enddate": end_date,
-            },
+            enddate=end_date
         )
         return temporal
 
