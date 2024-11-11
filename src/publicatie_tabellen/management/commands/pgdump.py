@@ -3,7 +3,6 @@ import logging
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.utils import timezone
 
 from publicatie_tabellen.models import PublicationUpdatedAt
 from publicatie_tabellen.pgdump_to_storage import PgDumpToStorage
