@@ -11,8 +11,9 @@ from django.utils.asyncio import async_unsafe
 from psycopg2 import InterfaceError
 
 
-@async_unsafe
 class DatabaseWrapper(BuiltinPostgresDatabaseWrapper):
+
+    @async_unsafe
     def create_cursor(self, name=None):
         try:
             return super().create_cursor(name=name)
