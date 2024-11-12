@@ -35,9 +35,9 @@ azure-batch==14.2.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-cli==2.65.0
+azure-cli==2.66.0
     # via -r ./requirements.txt
-azure-cli-core==2.65.0
+azure-cli-core==2.66.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
@@ -49,7 +49,6 @@ azure-common==1.1.28
     # via
     #   -r ./requirements.txt
     #   azure-batch
-    #   azure-graphrbac
     #   azure-keyvault-administration
     #   azure-keyvault-certificates
     #   azure-keyvault-keys
@@ -92,8 +91,10 @@ azure-common==1.1.28
     #   azure-mgmt-media
     #   azure-mgmt-monitor
     #   azure-mgmt-msi
+    #   azure-mgmt-mysqlflexibleservers
     #   azure-mgmt-netapp
     #   azure-mgmt-policyinsights
+    #   azure-mgmt-postgresqlflexibleservers
     #   azure-mgmt-privatedns
     #   azure-mgmt-rdbms
     #   azure-mgmt-recoveryservices
@@ -120,7 +121,7 @@ azure-common==1.1.28
     #   azure-synapse-artifacts
     #   azure-synapse-managedprivateendpoints
     #   azure-synapse-spark
-azure-core==1.31.0
+azure-core==1.32.0
     # via
     #   -r ./requirements.txt
     #   azure-appconfiguration
@@ -150,10 +151,6 @@ azure-data-tables==12.4.0
     #   -r ./requirements.txt
     #   azure-cli
 azure-datalake-store==0.0.53
-    # via
-    #   -r ./requirements.txt
-    #   azure-cli
-azure-graphrbac==0.60.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
@@ -242,11 +239,11 @@ azure-mgmt-containerregistry==10.3.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-mgmt-containerservice==32.0.0
+azure-mgmt-containerservice==32.1.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-mgmt-core==1.4.0
+azure-mgmt-core==1.5.0
     # via
     #   -r ./requirements.txt
     #   azure-cli-core
@@ -286,8 +283,10 @@ azure-mgmt-core==1.4.0
     #   azure-mgmt-media
     #   azure-mgmt-monitor
     #   azure-mgmt-msi
+    #   azure-mgmt-mysqlflexibleservers
     #   azure-mgmt-netapp
     #   azure-mgmt-policyinsights
+    #   azure-mgmt-postgresqlflexibleservers
     #   azure-mgmt-privatedns
     #   azure-mgmt-rdbms
     #   azure-mgmt-recoveryservices
@@ -397,6 +396,10 @@ azure-mgmt-msi==7.0.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
+azure-mgmt-mysqlflexibleservers==1.0.0b2
+    # via
+    #   -r ./requirements.txt
+    #   azure-cli
 azure-mgmt-netapp==10.1.0
     # via
     #   -r ./requirements.txt
@@ -405,11 +408,15 @@ azure-mgmt-policyinsights==1.1.0b4
     # via
     #   -r ./requirements.txt
     #   azure-cli
+azure-mgmt-postgresqlflexibleservers==1.0.0
+    # via
+    #   -r ./requirements.txt
+    #   azure-cli
 azure-mgmt-privatedns==1.0.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-mgmt-rdbms==10.2.0b18
+azure-mgmt-rdbms==10.2.0b17
     # via
     #   -r ./requirements.txt
     #   azure-cli
@@ -441,7 +448,7 @@ azure-mgmt-security==6.0.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-mgmt-servicebus==8.2.0
+azure-mgmt-servicebus==8.2.1
     # via
     #   -r ./requirements.txt
     #   azure-cli
@@ -453,11 +460,11 @@ azure-mgmt-servicefabricmanagedclusters==2.0.0b6
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-mgmt-servicelinker==1.2.0b2
+azure-mgmt-servicelinker==1.2.0b3
     # via
     #   -r ./requirements.txt
     #   azure-cli
-azure-mgmt-signalr==2.0.0b1
+azure-mgmt-signalr==2.0.0b2
     # via
     #   -r ./requirements.txt
     #   azure-cli
@@ -595,7 +602,7 @@ distro==1.9.0
     #   -r ./requirements.txt
     #   azure-cli
     #   azure-cli-core
-django==5.1.2
+django==5.1.3
     # via
     #   -r ./requirements.txt
     #   django-db-views
@@ -607,13 +614,13 @@ django==5.1.2
     #   opencensus-ext-django
 django-db-views==0.1.8
     # via -r ./requirements.txt
-django-import-export[xlsx]==4.2.0
+django-import-export[pandas,xlsx]==4.2.1
     # via -r ./requirements.txt
 django-leaflet==0.31.0
     # via -r ./requirements.txt
 django-storages[azure]==1.14.4
     # via -r ./requirements.txt
-et-xmlfile==1.1.0
+et-xmlfile==2.0.0
     # via
     #   -r ./requirements.txt
     #   openpyxl
@@ -623,11 +630,11 @@ fabric==3.2.2
     # via
     #   -r ./requirements.txt
     #   azure-cli
-google-api-core==2.21.0
+google-api-core==2.23.0
     # via
     #   -r ./requirements.txt
     #   opencensus
-google-auth==2.35.0
+google-auth==2.36.0
     # via
     #   -r ./requirements.txt
     #   google-api-core
@@ -671,7 +678,9 @@ isodate==0.7.2
     #   azure-mgmt-imagebuilder
     #   azure-mgmt-iothub
     #   azure-mgmt-keyvault
+    #   azure-mgmt-mysqlflexibleservers
     #   azure-mgmt-netapp
+    #   azure-mgmt-postgresqlflexibleservers
     #   azure-mgmt-rdbms
     #   azure-mgmt-recoveryservices
     #   azure-mgmt-recoveryservicesbackup
@@ -680,6 +689,7 @@ isodate==0.7.2
     #   azure-mgmt-resource
     #   azure-mgmt-search
     #   azure-mgmt-security
+    #   azure-mgmt-servicebus
     #   azure-mgmt-servicefabric
     #   azure-mgmt-servicefabricmanagedclusters
     #   azure-mgmt-servicelinker
@@ -739,7 +749,6 @@ msrest==0.7.1
     # via
     #   -r ./requirements.txt
     #   azure-data-tables
-    #   azure-graphrbac
     #   azure-mgmt-advisor
     #   azure-mgmt-appcontainers
     #   azure-mgmt-applicationinsights
@@ -766,7 +775,6 @@ msrest==0.7.1
     #   azure-mgmt-msi
     #   azure-mgmt-policyinsights
     #   azure-mgmt-privatedns
-    #   azure-mgmt-servicebus
     #   azure-mgmt-sqlvirtualmachine
     #   azure-mgmt-synapse
     #   azure-mgmt-trafficmanager
@@ -780,12 +788,11 @@ msrestazure==0.6.4.post1
     #   -r ./requirements.txt
     #   azure-batch
     #   azure-cli-core
-    #   azure-graphrbac
     #   azure-mgmt-devtestlabs
     #   azure-mgmt-kusto
 mypy-extensions==1.0.0
     # via black
-numpy==2.1.2
+numpy==2.1.3
     # via
     #   -r ./requirements.txt
     #   pandas
@@ -819,7 +826,7 @@ openpyxl==3.1.5
     # via
     #   -r ./requirements.txt
     #   tablib
-packaging==24.1
+packaging==24.2
     # via
     #   -r ./requirements.txt
     #   azure-cli
@@ -829,11 +836,13 @@ packaging==24.1
     #   knack
     #   pytest
 pandas==2.2.3
-    # via -r ./requirements.txt
+    # via
+    #   -r ./requirements.txt
+    #   tablib
 paramiko==3.5.0
     # via
     #   -r ./requirements.txt
-    #   azure-cli-core
+    #   azure-cli
     #   fabric
     #   scp
     #   sshtunnel
@@ -854,7 +863,7 @@ portalocker==2.10.1
     #   -r ./requirements.txt
     #   azure-cli-telemetry
     #   msal-extensions
-proto-plus==1.24.0
+proto-plus==1.25.0
     # via
     #   -r ./requirements.txt
     #   google-api-core
@@ -931,7 +940,7 @@ pytest==7.4.4
     #   -r requirements_dev.in
     #   pytest-cov
     #   pytest-django
-pytest-cov==5.0.0
+pytest-cov==6.0.0
     # via -r requirements_dev.in
 pytest-django==4.9.0
     # via -r requirements_dev.in
@@ -1004,7 +1013,7 @@ sshtunnel==0.1.5
     # via
     #   -r ./requirements.txt
     #   azure-cli
-tablib[xlsx]==3.7.0
+tablib[pandas,xlsx]==3.7.0
     # via
     #   -r ./requirements.txt
     #   django-import-export
@@ -1015,7 +1024,7 @@ tabulate==0.9.0
     #   knack
 timeout-decorator==0.5.0
     # via -r ./requirements.txt
-tomli==2.0.2
+tomli==2.1.0
     # via
     #   autoflake
     #   black
@@ -1036,8 +1045,11 @@ typing-extensions==4.12.2
     #   azure-mgmt-containerservice
     #   azure-mgmt-cosmosdb
     #   azure-mgmt-hdinsight
-    #   azure-mgmt-rdbms
+    #   azure-mgmt-mysqlflexibleservers
+    #   azure-mgmt-postgresqlflexibleservers
     #   azure-mgmt-redhatopenshift
+    #   azure-mgmt-servicebus
+    #   azure-mgmt-servicelinker
     #   azure-mgmt-sql
     #   azure-monitor-query
     #   azure-storage-blob
@@ -1056,7 +1068,7 @@ websocket-client==1.3.3
     # via
     #   -r ./requirements.txt
     #   azure-cli
-wheel==0.44.0
+wheel==0.45.0
     # via pip-tools
 wrapt==1.16.0
     # via
@@ -1069,9 +1081,9 @@ xmltodict==0.14.2
     #   azure-cli
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==24.2
+pip==24.3.1
     # via pip-tools
-setuptools==75.2.0
+setuptools==75.4.0
     # via
     #   -r ./requirements.txt
     #   azure-cli
