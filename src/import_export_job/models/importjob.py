@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class ImportJob(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     
     file = models.FileField(
         verbose_name=_("File to be imported"),

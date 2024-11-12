@@ -79,14 +79,15 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "change_summary_link",
         "imported",
         "updated_at",
+        "created_at",
     )
     readonly_fields = (
         "job_status_info",
         "change_summary",
         "imported",
-        "errors",
-        "owner",        
+        "errors",       
         "updated_at",
+        "created_at",
         "processing_initiated",
     )
     exclude = ("job_status",)
