@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from referentie_tabellen.models import Theme, Unit
-from statistiek_hub.validations import check_code_in_name
+from statistiek_hub.validations import check_code_in_name, validate_calculation_string
 
 from .dimension import Dimension
 from .model_mixin import AddErrorFuncion, TimeStampMixin
@@ -18,7 +18,7 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     definition = models.TextField()
     definition_uk = models.TextField(blank=True, default="")
     description = models.TextField(blank=True, default="")
-    calculation = models.CharField(max_length=100, blank=True, default="")
+    calculation = models.CharField(max_length=100, blank=True, default="", validators=[validate_calculation_string])
     sensitive = models.BooleanField(
         default=False,
         help_text="gevoeligedata - afronden en groepsonthulling toepassen",

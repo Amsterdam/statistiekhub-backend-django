@@ -1,9 +1,10 @@
 # # validation of the input data
+import re
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
-# field validation
+# field filter validation
 def check_filter_rule(rule: str) -> ValidationError:
     """ TODO check rule
     - validate syntax: spaces, OR AND and brackets
@@ -11,6 +12,28 @@ def check_filter_rule(rule: str) -> ValidationError:
     - validate at leas 1 observation of rule measure:
     """
     isinstance(rule, str) # added ivm linting
+
+
+
+def validate_calculation_string(string: str) -> ValidationError:
+    ''' check if string has format that can be used by database function
+    publicatie_tabellen.db_functions.function_calculate_observations '''
+    
+    open_brackets = re.findall(r'\(', string)
+    close_brackets = re.findall(r'\)', string)
+
+    if not len(open_brackets) == len(close_brackets):
+        raise ValidationError(
+            f'Invalid format. The string {string} should have equal open and closing brackets'
+        )
+
+    strip_brackets = string.replace('(', '').replace(')', '')
+    pattern =  r'^\s*\$\w+\s*[\+\-\*/]\s*\$\w+(\s*[\+\-\*/]\s*(\$\w+|\d+))*\s*$'
+
+    if not re.fullmatch(pattern, strip_brackets):
+        raise ValidationError(
+            f'Invalid format. The string should be of the form like: ( $VAR1 [+-*/] $VAR2 ) [+-*/] 1000'
+        )
 
 
 def check_value_context(unit_code: str, value: float) -> ValidationError:
