@@ -27,7 +27,7 @@ def fill_ref_tabellen() -> dict:
         TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
     )
     spatial = baker.make(SpatialDimension)
-    return {"unit": unit, "temp": temp, "spatial": spatial}
+    return {"unit": unit, "temp": temp, "spatial": spatial, "tempdimtype": tempdimtype}
 
 
 @pytest.mark.parametrize(
@@ -111,6 +111,65 @@ def test_get_df_with_filterrule(
     obs_base.delete()
     obs_var.delete()
 
+
+@pytest.mark.parametrize(
+    "filter, basis_start_date, var_start_date, expected_start_date",
+    [
+        ("( $BASE < 10 )", datetime.date(2023, 4, 10), datetime.date(2023, 1, 10), "Peildatum: 2023-01-10-->2023-01-10"),
+        ("( $BASE < 10 )", datetime.date(2023, 12, 10), datetime.date(2023, 10, 10), "Peildatum: 2023-10-10-->2023-10-10"),
+        ("( $BASE < 10 )", datetime.date(2023, 12, 4), datetime.date(2023, 12, 29), "Peildatum: 2023-12-29-->2023-12-29"),
+    ],
+)
+@pytest.mark.django_db
+def test_get_df_filterrule_with_difftempdate(
+    fill_ref_tabellen, filter, basis_start_date, var_start_date, expected_start_date
+):
+    """apply sql db_function public.apply_filter on measure
+    return: dataframe with timestamp from VAR measure"""
+    fixture = fill_ref_tabellen
+
+    temp1 = baker.make(
+        TemporalDimension, startdate=basis_start_date, type=fixture["tempdimtype"]
+    )
+    temp2 = baker.make(
+        TemporalDimension, startdate=var_start_date, type=fixture["tempdimtype"]
+    )
+
+    measure_base = baker.make(Measure, name="BASE", unit=fixture["unit"])
+    measure_var = baker.make(Measure, name="VAR", unit=fixture["unit"])
+
+    filter_var = baker.make(
+        Filter, measure=measure_var, rule=filter, value_new=None
+    )
+
+    obs_base = baker.make(
+        Observation,
+        measure=measure_base,
+        temporaldimension=temp1,
+        spatialdimension=fixture["spatial"],
+        value=5,
+    )
+    obs_var = baker.make(
+        Observation,
+        measure=measure_var,
+        temporaldimension=temp2,
+        spatialdimension=fixture["spatial"],
+        value=100,
+    )
+
+    dftest = _get_df_with_filterrule(measure_var)
+
+    assert dftest["value"].tolist() == [None]
+    temp_id = dftest["temporaldimension_id"].item()
+    assert str(TemporalDimension.objects.get(pk=temp_id)) == expected_start_date
+
+    measure_base.delete()
+    measure_var.delete()
+    filter_var.delete()
+    obs_base.delete()
+    obs_var.delete()
+    temp1.delete()
+    temp2.delete()
 
 @pytest.mark.parametrize(
     "decimals, base_value, expected",
