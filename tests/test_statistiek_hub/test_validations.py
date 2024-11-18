@@ -1,4 +1,5 @@
 import pytest
+from django.core.exceptions import ValidationError
 from model_bakery import baker
 
 from statistiek_hub.models.measure import Measure
@@ -6,6 +7,7 @@ from statistiek_hub.validations import (
     check_code_in_name,
     check_value_context,
     get_instance,
+    validate_calculation_string,
 )
 
 
@@ -49,3 +51,24 @@ class TestValidations:
         result = check_value_context(unit_code=test_code, value=test_value)
         assert str(result) == expected
 
+
+    def test_validate_custom_string_valid(self):
+        valid_strings = [
+            '( $A / ( $B ) ) * 1000',
+            '( $VAR1 + $VAR2 ) - 500',
+            '( $A * $B ) / 2',
+            '( ( $VAR1 - $VAR2 ) / ( $VAR3 ) ) * 1'
+        ]
+        for string in valid_strings:
+            validate_calculation_string(string)
+
+    def test_validate_custom_string_invalid(self):
+        invalid_strings = [
+            '$A / ( $B ) ) * 1000',  # Missing opening parenthesis
+            '( $VAR1 + + $VAR2 ) - 500',  # double operator
+            '( $A * ( B ) ) / 2'  # Missing $ before B
+        ]
+        for string in invalid_strings:
+            with pytest.raises(ValidationError):
+                validate_calculation_string(string)
+        
