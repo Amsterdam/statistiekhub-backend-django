@@ -13,7 +13,6 @@ timeout-decorator
 mozilla-django-oidc
 
 # Azure
-azure-cli
 azure-core
 azure-identity==1.14  # 1.15 leads to incompatible version dependencies right now
 azure-storage-blob
@@ -25,3 +24,5 @@ opencensus-ext-azure
 opencensus-ext-postgresql
 opencensus-ext-logging
 opencensus-ext-requests
+
+setuptools
