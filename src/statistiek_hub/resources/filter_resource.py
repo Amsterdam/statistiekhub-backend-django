@@ -50,6 +50,7 @@ class FilterResource(ModelResource):
 
     class Meta:
         model = Filter
+        clean_model_instances = True
         skip_unchanged = True
         report_skipped = True
         exclude = ("id",)

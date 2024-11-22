@@ -87,6 +87,7 @@ class MeasureResource(ModelResource):
 
     class Meta:
         model = Measure
+        clean_model_instances = True
         skip_unchanged = True
         report_skipped = True
         exclude = ("id", "created_at", "updated_at")
