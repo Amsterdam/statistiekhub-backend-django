@@ -4,21 +4,7 @@ import re
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
-# field filter validation
-def check_filter_rule(rule: str) -> ValidationError:
-    """ TODO check rule
-    - validate syntax: spaces, OR AND and brackets
-    - validate measure: bv is measure een aantal (met percentages als basis is raar?)
-    - validate at leas 1 observation of rule measure:
-    """
-    isinstance(rule, str) # added ivm linting
-
-
-
-def validate_calculation_string(string: str) -> ValidationError:
-    ''' check if string has format that can be used by database function
-    publicatie_tabellen.db_functions.function_calculate_observations '''
-    
+def _check_open_closing_brackets(string: str):
     open_brackets = re.findall(r'\(', string)
     close_brackets = re.findall(r'\)', string)
 
@@ -26,6 +12,32 @@ def validate_calculation_string(string: str) -> ValidationError:
         raise ValidationError(
             f'Invalid format. The string {string} should have equal open and closing brackets'
         )
+
+# field filter validation
+def validate_filter_rule(string: str) -> ValidationError:
+    """ check rule format
+    """
+    _check_open_closing_brackets(string)
+
+    strip_brackets = string.replace('(', '').replace(')', '')
+
+    matches = re.findall(r'\b(AND|OR)\b', strip_brackets)
+    count_and_or = len(matches)
+
+    strip_and_or = strip_brackets.replace('AND','').replace('OR', '')
+    pattern = fr'^(?:\s*\$\w+\s+[!=<>]+\s+\d+\s*){{{count_and_or + 1}}}$'
+
+    if not re.fullmatch(pattern, strip_and_or):
+        raise ValidationError(
+            f'Invalid format. The string should be of the form like: ( $VAR1 [!=<>] getal ) AND | OR etc'
+        )    
+
+
+def validate_calculation_string(string: str) -> ValidationError:
+    ''' check if string has format that can be used by database function
+    publicatie_tabellen.db_functions.function_calculate_observations '''
+    
+    _check_open_closing_brackets(string)
 
     strip_brackets = string.replace('(', '').replace(')', '')
     pattern =  r'^\s*\$\w+\s*[\+\-\*/]\s*\$\w+(\s*[\+\-\*/]\s*(\$\w+|\d+))*\s*$'

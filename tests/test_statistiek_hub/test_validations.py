@@ -8,6 +8,7 @@ from statistiek_hub.validations import (
     check_value_context,
     get_instance,
     validate_calculation_string,
+    validate_filter_rule,
 )
 
 
@@ -52,7 +53,7 @@ class TestValidations:
         assert str(result) == expected
 
 
-    def test_validate_custom_string_valid(self):
+    def test_validate_calculation_string_valid(self):
         valid_strings = [
             '( $A / ( $B ) ) * 1000',
             '( $VAR1 + $VAR2 ) - 500',
@@ -62,7 +63,7 @@ class TestValidations:
         for string in valid_strings:
             validate_calculation_string(string)
 
-    def test_validate_custom_string_invalid(self):
+    def test_validate_calculation_string_invalid(self):
         invalid_strings = [
             '$A / ( $B ) ) * 1000',  # Missing opening parenthesis
             '( $VAR1 + + $VAR2 ) - 500',  # double operator
@@ -72,3 +73,28 @@ class TestValidations:
             with pytest.raises(ValidationError):
                 validate_calculation_string(string)
         
+
+    def test_validate_filter_rule_valid(self):
+        valid_strings = [
+            '( $VAR < 11 )',
+            '( $VAR > 11 )',
+            '( $VAR >= 11 )',
+            '( $VAR != 11 )',
+            '( $VAR =! 11 )',
+            '( $VAR = 11 )',
+            '( $VAR1 = 0 AND $VAR1 < 5 )',
+            '( ( ( $VAR1 != 0 ) AND ( $VAR1 < 5 ) ) OR ( $VAR2 < 11 ) )',
+        ]
+        for string in valid_strings:
+            validate_filter_rule(string)
+
+    def test_validate_filter_rule_invalid(self):
+        invalid_strings = [
+            ' $VAR < 11 )',  # Missing opening parenthesis
+            '( VAR > 11 )', # Missing $ before VAR
+            '( $VAR >= 11 + 10 )', # double operator
+            '( ( ( $VAR1 != 0 $VAR1 < 5 ) ) OR ( $VAR2 < 11 ) )', #missing operator 
+        ]
+        for string in invalid_strings:
+            with pytest.raises(ValidationError):
+                validate_filter_rule(string)
