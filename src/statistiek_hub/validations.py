@@ -13,7 +13,7 @@ def _check_open_closing_brackets(string: str):
             f'Invalid format. The string {string} should have equal open and closing brackets'
         )
 
-# field filter validation
+
 def validate_filter_rule(string: str) -> ValidationError:
     """ check rule format
     """
