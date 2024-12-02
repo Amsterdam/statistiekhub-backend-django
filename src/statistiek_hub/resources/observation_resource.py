@@ -17,78 +17,17 @@ from statistiek_hub.utils.converter import convert_str
 from statistiek_hub.utils.datetime import add_timedelta, convert_to_date
 from statistiek_hub.validations import get_instance
 
-CHUNKSIZE = 5000
 
 
-class MeasureForeignKeyWidget(ForeignKeyWidget):
-    def clean(self, value, row, **kwargs):
-        measure, _ = get_instance(
-            model=Measure, field="name", row=row, column="measure"
-        )
-
-        return measure
-
-
-class SpatialForeignKeyWidget(ForeignKeyWidget):
-    def clean(self, value, row, **kwargs):
-        spatial_code = row["spatial_code"]
-        spatial_type, _ = get_instance(
-            model=SpatialDimensionType, field="name", row=row, column="spatial_type"
-        )
-
-        try:
-            spatial_date = convert_to_date(row["spatial_date"])
-        except ValueError:
-            spatial_date = None
-        spatial_date = (
-            SpatialDimension.objects.filter(
-                code__iexact=spatial_code, type=spatial_type
-            )
-            .order_by("source_date")
-            .latest("source_date")
-        ).source_date
-
-        spatial = SpatialDimension.objects.get(
-            code__iexact=spatial_code, type=spatial_type, source_date=spatial_date
-        )
-        return spatial
-
-
-class TemporalForeignKeyWidget(ForeignKeyWidget):
-    def clean(self, value, row, **kwargs):
-        temporal_type, _ = get_instance(
-            model=TemporalDimensionType, field="name", row=row, column="temporal_type"
-        )
-        start_date = convert_to_date(row["temporal_date"])
-        end_date = add_timedelta(start_date, temporal_type)
-
-        temporal = TemporalDimension.objects.get(
-            type=temporal_type,
-            startdate=start_date,
-            enddate=end_date
-        )
-        return temporal
+def set_stringfields_to_upper(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.map(lambda x: x.upper() if isinstance(x, str) else x)
+    return df
 
 
 class ObservationResource(ModelResource):
-    measure = Field(
-        column_name="measure",
-        attribute="measure",
-        widget=MeasureForeignKeyWidget(Measure, field="name"),
-    )
-    spatialdimension = Field(
-        column_name="spatialdimension",
-        attribute="spatialdimension",
-        widget=SpatialForeignKeyWidget(SpatialDimension, field="code"),
-    )
-    temporaldimension = Field(
-        column_name="temporaldimension",
-        attribute="temporaldimension",
-        widget=TemporalForeignKeyWidget(TemporalDimension, field="name"),
-    )
 
     def before_import(self, dataset, **kwargs):
-        # check main error's first on Dataset (instead of row by row)
+        # check major error's first on Dataset (instead of row by row)
 
         errors = {}
 
@@ -109,95 +48,77 @@ class ObservationResource(ModelResource):
 
         else:
             # load querysets into pandas df
-            dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name")))
-            dfspatialdimtype = pd.DataFrame(
-                list(SpatialDimensionType.objects.values("id", "name"))
+            dfmeasure = set_stringfields_to_upper(
+                pd.DataFrame(list(Measure.objects.values("id", "name")))
             )
-            dftemporaldimtype = pd.DataFrame(
-                list(TemporalDimensionType.objects.values("id", "name"))
-            )
-            dfspatialdim = pd.DataFrame(
+
+            dfspatialdim = set_stringfields_to_upper(
+                pd.DataFrame(
                 list(
                     SpatialDimension.objects.select_related("type").values(
                         "id", "code", "source_date", "type__name"
                     )
                 )
-            )
-            dftemporaldim = pd.DataFrame(
+            ))
+
+            dftemporaldim = set_stringfields_to_upper(
+                pd.DataFrame(
                 list(
                     TemporalDimension.objects.select_related("type").values(
                         "id", "startdate", "type__name"
                     )
                 )
-            )
+            ))
 
-            # convert 'spatial_date' to datetime.date format for check
-            dataset.append_col(
-                tuple([convert_to_date(x) for x in dataset["spatial_date"]]),
-                header="source_date",
-            )
-            dataset.append_col(
-                tuple([convert_to_date(x) for x in dataset["temporal_date"]]),
-                header="start_date",
-            )
+            # load dataset to pandas dataframe
+            df_main = dataset.df
+            df_main = set_stringfields_to_upper(df_main)
+
+            # convert 'date' to datetime.date format 
+            df_main["spatial_date"] = df_main["spatial_date"].apply(convert_to_date)
+            df_main["temporal_date"] = df_main["temporal_date"].apply(convert_to_date)
 
             check = {
                 "measure_names": {
-                    "dataset": dataset,
+                    "dataset": df_main,
                     "dfmodel": dfmeasure,
                     "column": ["measure"],
                     "field": ["name"],
                 },
                 "spatial_types": {
-                    "dataset": dataset,
-                    "dfmodel": dfspatialdimtype,
-                    "column": [
-                        "spatial_type",
-                    ],
-                    "field": [
-                        "name",
-                    ],
+                    "dataset": df_main,
+                    "dfmodel": dfspatialdim,
+                    "column": ["spatial_type"],
+                    "field": ["type__name"],
                 },
                 "temporal_types": {
-                    "dataset": dataset,
-                    "dfmodel": dftemporaldimtype,
-                    "column": [
-                        "temporal_type",
-                    ],
-                    "field": [
-                        "name",
-                    ],
+                    "dataset": df_main,
+                    "dfmodel": dftemporaldim,
+                    "column": ["temporal_type"],
+                    "field": ["type__name"],
                 },
                 "spatial_codes": {
-                    "dataset": dataset,
+                    "dataset": df_main,
                     "dfmodel": dfspatialdim,
-                    "column": [
-                        "spatial_code",
-                    ],
-                    "field": [
-                        "code",
-                    ],
+                    "column": ["spatial_code"],
+                    "field": ["code"],
                 },
                 "spatial_dates": {
-                    "dataset": dataset,
+                    "dataset": df_main,
                     "dfmodel": dfspatialdim,
-                    "column": [
-                        "source_date",
-                    ],
-                    "field": [
-                        "source_date",
-                    ],
+                    "column": ["spatial_date"],
+                    "field": ["source_date"],
                 },
                 "spatial_dim": {
-                    "dataset": dataset,
+                    "dataset": df_main,
                     "dfmodel": dfspatialdim,
-                    "column": ["source_date", "spatial_code", "spatial_type"],
+                    "column": ["spatial_date", "spatial_code", "spatial_type"],
                     "field": ["source_date", "code", "type__name"],
                 },
                 "temporal_dim": {
-                    "dataset": dataset,
+                    "dataset": df_main,
                     "dfmodel": dftemporaldim,
-                    "column": ["start_date", "temporal_type"],
+                    "column": ["temporal_date", "temporal_type"],
                     "field": ["startdate", "type__name"],
                 },
             }
@@ -216,15 +137,31 @@ class ObservationResource(ModelResource):
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
         
-        # mimic a 'dynamic field' - i.e. append field which exists on
-        # model, but not in dataset
-        dataset.headers.append("spatialdimension")
-        dataset.headers.append("temporaldimension")
+        # no errors
+        # merge id spatialdim 
+        merged_df = df_main.merge(dfspatialdim,  left_on=['spatial_code', 'spatial_type', 'spatial_date'],
+                      right_on=['code', 'type__name', 'source_date'], how='left')
+        merged_df = merged_df.rename(columns={'id': "spatialdimension"})
 
-    def before_import_row(self, row, **kwargs):
-        row["value"] = convert_str(row["value"])
-        row["spatialdimension"] = "-"
-        row["temporaldimension"] = "-"
+        # merge id temporaldim
+        merged_df = merged_df.merge(dftemporaldim,  left_on= ["temporal_date", "temporal_type"],
+                      right_on=["startdate", "type__name"], how='left')
+        merged_df = merged_df.rename(columns={'id': "temporaldimension"})
+
+        # merge id measure
+        merged_df = merged_df.merge(dfmeasure,  left_on= ["measure"],
+                      right_on=["name"], how='left')
+        merged_df = merged_df.rename(columns={'id': "measure", "measure": "name"})
+
+        # clean df
+        df_main = merged_df[["measure", "spatialdimension", "temporaldimension", "value"]]
+        df_main.loc[:, 'value'] = df_main['value'].apply(convert_str)
+        print(df_main.head())
+
+        # Converteer de DataFrame naar een Tablib dataset
+        dataset.df = df_main
+        print(dataset[0:5])
+        
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
         """Skip rows with empty value,

@@ -19,7 +19,7 @@ class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
         "updated_at",
     )
 
-    list_filter = (
+    list_filter = ( ("measure__theme", admin.RelatedOnlyFieldListFilter),
         ("temporaldimension__type", admin.RelatedOnlyFieldListFilter),
         ("spatialdimension__type", admin.RelatedOnlyFieldListFilter),
     )
@@ -29,7 +29,11 @@ class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     raw_id_fields = ("measure", "temporaldimension", "spatialdimension")
     resource_classes = [ObservationResource]
 
-    readonly_fields = ["measure", "temporaldimension", "spatialdimension"]
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return  ["measure", "temporaldimension", "spatialdimension"]
+        else:  # Add obj
+            return []
 
     def _get_user_groups(self, request):
         # Collect user groups once
