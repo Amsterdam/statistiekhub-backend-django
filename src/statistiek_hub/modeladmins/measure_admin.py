@@ -7,6 +7,24 @@ from statistiek_hub.resources.measure_resource import MeasureResource
 from .import_export_formats_mixin import ImportExportFormatsMixin
 
 
+class CalculationFilter(admin.SimpleListFilter):
+    title = "calculation"
+    parameter_name = "calculation"
+
+    def lookups(self, request, model_admin):
+        return (
+            ('true', 'Yes'),
+            ('false', 'No'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'true':
+            return queryset.exclude(calculation='')
+        elif self.value() == 'false':
+            return queryset.filter(calculation='')
+        return queryset
+    
+
 class FilterInline(admin.TabularInline):
     model = Filter
     fk_name = "measure"
@@ -24,9 +42,10 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     )
     list_filter = (
         "theme",
-        "unit",
+        CalculationFilter,
         "sensitive",
         "deprecated",
+        "unit",
         "created_at",
         "updated_at",
     )

@@ -9,7 +9,7 @@ create or replace function public.apply_filter
                     p_replacement_value		float
                 )
                     returns setof statistiek_hub_observation -- returns query result
---                    returns text -- returns query statement
+                    -- returns text -- returns query statement
                 as
                 $$
 
@@ -30,6 +30,7 @@ create or replace function public.apply_filter
                     p_stmt_with_base    text default ' as	(
                                                         select	o.spatialdimension_id
                                                         , 		o.temporaldimension_id
+                                                        ,       t.year
                                                         , 		o.value
                                                         from	(
 																select measure_id, spatialdimension_id, temporaldimension_id, value from statistiek_hub_observation
@@ -114,7 +115,7 @@ create or replace function public.apply_filter
 
                                 p_stmt_join := 	p_stmt_join || 'join	var' || p_number ||
                                                 ' on var' || p_number || '.spatialdimension_id = var' || p_number -1 || '.spatialdimension_id and var' ||
-                                                p_number || '.temporaldimension_id = var' || p_number -1 || '.temporaldimension_id '
+                                                p_number || '.year = var' || p_number -1 || '.year '
                                                 ;
 
 
@@ -173,8 +174,8 @@ create or replace function public.apply_filter
                                             ,       cast(row_number() over () as bigint) as local_id
                                             ,       ' || p_stmt_value || ' as value
                                             ,		cast(' || p_measure_id || ' as bigint) as measure_id
-                                            ,		var1.spatialdimension_id
-                                            ,		var1.temporaldimension_id
+                                            ,		var0.spatialdimension_id
+                                            ,		var0.temporaldimension_id
                                             from	var0
                                             '
                                             ;
@@ -202,7 +203,7 @@ create or replace function public.apply_filter
 
                     if length(p_stmt) > 0 then
                        return query execute p_stmt; -- returns query result
---                       return p_stmt; -- returns query statement
+                       -- return p_stmt; -- returns query statement
                     end if;
 
                 end;

@@ -1,16 +1,51 @@
 # # validation of the input data
+import re
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
-# field validation
-def check_filter_rule(rule: str) -> ValidationError:
-    """ TODO check rule
-    - validate syntax: spaces, OR AND and brackets
-    - validate measure: bv is measure een aantal (met percentages als basis is raar?)
-    - validate at leas 1 observation of rule measure:
+def _check_open_closing_brackets(string: str):
+    open_brackets = re.findall(r'\(', string)
+    close_brackets = re.findall(r'\)', string)
+
+    if not len(open_brackets) == len(close_brackets):
+        raise ValidationError(
+            f'Invalid format. The string {string} should have equal open and closing brackets'
+        )
+
+
+def validate_filter_rule(string: str) -> ValidationError:
+    """ check rule format
     """
-    isinstance(rule, str) # added ivm linting
+    _check_open_closing_brackets(string)
+
+    strip_brackets = string.replace('(', '').replace(')', '')
+
+    matches = re.findall(r'\b(AND|OR)\b', strip_brackets)
+    count_and_or = len(matches)
+
+    strip_and_or = strip_brackets.replace('AND','').replace('OR', '')
+    pattern = fr'^(?:\s*\$\w+\s+[!=<>]+\s+\d+\s*){{{count_and_or + 1}}}$'
+
+    if not re.fullmatch(pattern, strip_and_or):
+        raise ValidationError(
+            f'Invalid format. The string should be of the form like: ( $VAR1 [!=<>] getal ) AND | OR etc'
+        )    
+
+
+def validate_calculation_string(string: str) -> ValidationError:
+    ''' check if string has format that can be used by database function
+    publicatie_tabellen.db_functions.function_calculate_observations '''
+    
+    _check_open_closing_brackets(string)
+
+    strip_brackets = string.replace('(', '').replace(')', '')
+    pattern =  r'^\s*\$\w+\s*[\+\-\*/]\s*\$\w+(\s*[\+\-\*/]\s*(\$\w+|\d+))*\s*$'
+
+    if not re.fullmatch(pattern, strip_brackets):
+        raise ValidationError(
+            f'Invalid format. The string should be of the form like: ( $VAR1 [+-*/] $VAR2 ) [+-*/] 1000'
+        )
 
 
 def check_value_context(unit_code: str, value: float) -> ValidationError:
