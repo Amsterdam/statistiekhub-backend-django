@@ -1,10 +1,7 @@
 import pandas as pd
 from django.core.exceptions import ValidationError
-from import_export.fields import Field
 from import_export.resources import ModelResource
-from import_export.widgets import ForeignKeyWidget
 
-from referentie_tabellen.models import SpatialDimensionType, TemporalDimensionType
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
@@ -14,9 +11,7 @@ from statistiek_hub.utils.check_functions import (
     check_missing_fields,
 )
 from statistiek_hub.utils.converter import convert_str
-from statistiek_hub.utils.datetime import add_timedelta, convert_to_date
-from statistiek_hub.validations import get_instance
-
+from statistiek_hub.utils.datetime import convert_to_date
 
 
 def set_stringfields_to_upper(df: pd.DataFrame) -> pd.DataFrame:
