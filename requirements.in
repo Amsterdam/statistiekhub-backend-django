@@ -2,7 +2,7 @@
 # See # https://git.datapunt.amsterdam.nl/Datapunt/python-best-practices/blob/master/dependency_management/
 
 django
-django-import-export[xlsx]
+django-import-export[xlsx, pandas]
 django-db-views
 django-leaflet
 django-storages[azure]
@@ -19,10 +19,8 @@ azure-storage-blob
 azure-keyvault
 azure-keyvault-secrets
 azure-storage-queue
-opencensus-ext-django
-opencensus-ext-azure
-opencensus-ext-postgresql
-opencensus-ext-logging
-opencensus-ext-requests
 
-setuptools
+# OpenTelemetry
+azure-monitor-opentelemetry
+azure-monitor-opentelemetry-exporter
+opentelemetry-sdk
