@@ -40,7 +40,9 @@ def validate_calculation_string(string: str) -> ValidationError:
     _check_open_closing_brackets(string)
 
     strip_brackets = string.replace('(', '').replace(')', '')
-    pattern =  r'^\s*\$\w+\s*[\+\-\*/]\s*\$\w+(\s*[\+\-\*/]\s*(\$\w+|\d+))*\s*$'
+    pattern =  r'^\s*\$(\w+|\[[0-9]{4}-[0-9]{4}\]\|\w+)(\|\[[0-9]{4}-[0-9]{4}\]\|\w+|)'\
+                    r'\s*[\+\-\*\/]\s*\$(\w+|\[[0-9]{4}-[0-9]{4}\]\|\w+)(\|\[[0-9]{4}-[0-9]{4}\]\|\w+|)'\
+                    r'(\s*[\+\-\*\/]\s*(\$\w+|\d+))*\s*$'
 
     if not re.fullmatch(pattern, strip_brackets):
         raise ValidationError(
