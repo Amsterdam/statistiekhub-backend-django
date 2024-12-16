@@ -58,7 +58,9 @@ class TestValidations:
             '( $A / ( $B ) ) * 1000',
             '( $VAR1 + $VAR2 ) - 500',
             '( $A * $B ) / 2',
-            '( ( $VAR1 - $VAR2 ) / ( $VAR3 ) ) * 1'
+            '( ( $VAR1 - $VAR2 ) / ( $VAR3 ) ) * 1',
+            '( $A / ( $[2015-2017]|B|[2018-2999]|C ) ) * 100',
+            '( $A / ( $[2018-2999]|B ) ) * 100'
         ]
         for string in valid_strings:
             validate_calculation_string(string)
