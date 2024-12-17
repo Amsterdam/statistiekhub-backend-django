@@ -51,14 +51,14 @@ dataset.headers = [
 
 testinput = [
     {
-        "dataset": dataset,
+        "dataset": dataset.df,
         "dfmodel": DataFrame([[1, "BEVTOTAAL"], [2, "BEVMAN"]], columns=["id", "name"]),
         "column": ["measure"],
         "field": ["name"],
         "expected": False,
     },
     {
-        "dataset": dataset,
+        "dataset": dataset.df,
         "dfmodel": DataFrame([[1, "TEST"], [2, "BEVMAN"]], columns=["id", "name"]),
         "column": ["measure"],
         "field": ["name"],
