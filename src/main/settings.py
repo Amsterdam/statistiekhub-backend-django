@@ -11,11 +11,14 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import json
+import logging
 import os
 from pathlib import Path
 from urllib.parse import urljoin
 
 from azure.identity import WorkloadIdentityCredential
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 
 from .azure_settings import Azure
 
@@ -316,6 +319,30 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 
+
+# Configure OpenTelemetry to use Azure Monitor with the specified connection string
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+
+if APPLICATIONINSIGHTS_CONNECTION_STRING:
+    configure_azure_monitor(
+        logger_name="root",
+        instrumentation_options={
+            "azure_sdk": {"enabled": False},
+            "django": {"enabled": True}, 
+            "fastapi": {"enabled": False},
+            "flask": {"enabled": False},
+            "psycopg2": {"enabled": False},
+            "requests": {"enabled": True},
+            "urllib": {"enabled": True},
+            "urllib3": {"enabled": True},
+        },
+        resource=Resource.create({SERVICE_NAME: "Statistiekhub"}),
+    )
+
+    logger = logging.getLogger("root")
+    logger.info("OpenTelemetry has been enabled")
+
+
 # Django Logging settings
 base_log_fmt = {"time": "%(asctime)s", "name": "%(name)s", "level": "%(levelname)s"}
 log_fmt = base_log_fmt.copy()
@@ -354,6 +381,12 @@ LOGGING = {
         },
         "import_export_job": {
             "level": "INFO",
+            "handlers": ["console"],
+            "propagate": False,
+        },
+         # Log all unhandled exceptions
+        "django.request": {
+            "level": "ERROR",
             "handlers": ["console"],
             "propagate": False,
         },
