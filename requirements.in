@@ -19,10 +19,8 @@ azure-storage-blob
 azure-keyvault
 azure-keyvault-secrets
 azure-storage-queue
-opencensus-ext-django
-opencensus-ext-azure
-opencensus-ext-postgresql
-opencensus-ext-logging
-opencensus-ext-requests
 
-setuptools
+# OpenTelemetry
+azure-monitor-opentelemetry
+azure-monitor-opentelemetry-exporter
+opentelemetry-sdk

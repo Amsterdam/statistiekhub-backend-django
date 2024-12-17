@@ -8,23 +8,29 @@ asgiref==3.8.1
     # via
     #   -r ./requirements.txt
     #   django
+    #   opentelemetry-instrumentation-asgi
 autoflake==2.3.1
     # via -r requirements_dev.in
 azure-core==1.32.0
     # via
     #   -r ./requirements.txt
+    #   azure-core-tracing-opentelemetry
     #   azure-identity
     #   azure-keyvault-certificates
     #   azure-keyvault-keys
     #   azure-keyvault-secrets
+    #   azure-monitor-opentelemetry
+    #   azure-monitor-opentelemetry-exporter
     #   azure-storage-blob
     #   azure-storage-queue
     #   django-storages
-    #   opencensus-ext-azure
-azure-identity==1.14.0
+    #   msrest
+azure-core-tracing-opentelemetry==1.0.0b11
     # via
     #   -r ./requirements.txt
-    #   opencensus-ext-azure
+    #   azure-monitor-opentelemetry
+azure-identity==1.14.0
+    # via -r ./requirements.txt
 azure-keyvault==4.2.0
     # via -r ./requirements.txt
 azure-keyvault-certificates==4.9.0
@@ -39,6 +45,12 @@ azure-keyvault-secrets==4.9.0
     # via
     #   -r ./requirements.txt
     #   azure-keyvault
+azure-monitor-opentelemetry==1.6.4
+    # via -r ./requirements.txt
+azure-monitor-opentelemetry-exporter==1.0.0b32
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
 azure-storage-blob==12.24.0
     # via
     #   -r ./requirements.txt
@@ -49,13 +61,10 @@ black==24.10.0
     # via -r requirements_dev.in
 build==1.2.2.post1
     # via pip-tools
-cachetools==5.5.0
+certifi==2024.12.14
     # via
     #   -r ./requirements.txt
-    #   google-auth
-certifi==2024.8.30
-    # via
-    #   -r ./requirements.txt
+    #   msrest
     #   requests
 cffi==1.17.1
     # via
@@ -69,9 +78,9 @@ click==8.1.7
     # via
     #   black
     #   pip-tools
-coverage[toml]==7.6.7
+coverage[toml]==7.6.9
     # via pytest-cov
-cryptography==43.0.3
+cryptography==44.0.0
     # via
     #   -r ./requirements.txt
     #   azure-identity
@@ -83,11 +92,16 @@ cryptography==43.0.3
     #   msal
     #   pyjwt
     #   pyopenssl
+deprecated==1.2.15
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-api
+    #   opentelemetry-semantic-conventions
 diff-match-patch==20241021
     # via
     #   -r ./requirements.txt
     #   django-import-export
-django==5.1.3
+django==5.1.4
     # via
     #   -r ./requirements.txt
     #   django-db-views
@@ -96,10 +110,9 @@ django==5.1.3
     #   django-storages
     #   model-bakery
     #   mozilla-django-oidc
-    #   opencensus-ext-django
-django-db-views==0.1.8
+django-db-views==0.1.9
     # via -r ./requirements.txt
-django-import-export[xlsx]==4.2.1
+django-import-export[xlsx]==4.3.3
     # via -r ./requirements.txt
 django-leaflet==0.31.0
     # via -r ./requirements.txt
@@ -111,22 +124,18 @@ et-xmlfile==2.0.0
     #   openpyxl
 exceptiongroup==1.2.2
     # via pytest
-google-api-core==2.23.0
+fixedint==0.1.6
     # via
     #   -r ./requirements.txt
-    #   opencensus
-google-auth==2.36.0
-    # via
-    #   -r ./requirements.txt
-    #   google-api-core
-googleapis-common-protos==1.66.0
-    # via
-    #   -r ./requirements.txt
-    #   google-api-core
+    #   azure-monitor-opentelemetry-exporter
 idna==3.10
     # via
     #   -r ./requirements.txt
     #   requests
+importlib-metadata==8.5.0
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-api
 iniconfig==2.0.0
     # via pytest
 isodate==0.7.2
@@ -137,6 +146,7 @@ isodate==0.7.2
     #   azure-keyvault-secrets
     #   azure-storage-blob
     #   azure-storage-queue
+    #   msrest
 isort==5.13.2
     # via -r requirements_dev.in
 josepy==1.14.0
@@ -156,42 +166,138 @@ msal-extensions==1.2.0
     # via
     #   -r ./requirements.txt
     #   azure-identity
+msrest==0.7.1
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry-exporter
 mypy-extensions==1.0.0
     # via black
-numpy==2.1.3
+numpy==2.2.0
     # via
     #   -r ./requirements.txt
     #   pandas
-opencensus==0.11.4
+oauthlib==3.2.2
     # via
     #   -r ./requirements.txt
-    #   opencensus-ext-azure
-    #   opencensus-ext-django
-    #   opencensus-ext-logging
-    #   opencensus-ext-postgresql
-    #   opencensus-ext-requests
-opencensus-context==0.1.3
-    # via
-    #   -r ./requirements.txt
-    #   opencensus
-opencensus-ext-azure==1.1.13
-    # via -r ./requirements.txt
-opencensus-ext-django==0.8.0
-    # via -r ./requirements.txt
-opencensus-ext-logging==0.1.1
-    # via -r ./requirements.txt
-opencensus-ext-postgresql==0.1.3
-    # via -r ./requirements.txt
-opencensus-ext-requests==0.8.0
-    # via -r ./requirements.txt
+    #   requests-oauthlib
 openpyxl==3.1.5
     # via
     #   -r ./requirements.txt
     #   tablib
+opentelemetry-api==1.29.0
+    # via
+    #   -r ./requirements.txt
+    #   azure-core-tracing-opentelemetry
+    #   azure-monitor-opentelemetry-exporter
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-psycopg2
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-urllib
+    #   opentelemetry-instrumentation-urllib3
+    #   opentelemetry-instrumentation-wsgi
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+opentelemetry-instrumentation==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-psycopg2
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-urllib
+    #   opentelemetry-instrumentation-urllib3
+    #   opentelemetry-instrumentation-wsgi
+opentelemetry-instrumentation-asgi==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-dbapi==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-instrumentation-psycopg2
+opentelemetry-instrumentation-django==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-instrumentation-fastapi==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-instrumentation-flask==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-instrumentation-psycopg2==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-instrumentation-requests==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-instrumentation-urllib==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-instrumentation-urllib3==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-instrumentation-wsgi==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-flask
+opentelemetry-resource-detector-azure==0.1.5
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+opentelemetry-sdk==1.29.0
+    # via
+    #   -r ./requirements.txt
+    #   azure-monitor-opentelemetry
+    #   azure-monitor-opentelemetry-exporter
+    #   opentelemetry-resource-detector-azure
+opentelemetry-semantic-conventions==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-urllib
+    #   opentelemetry-instrumentation-urllib3
+    #   opentelemetry-instrumentation-wsgi
+    #   opentelemetry-sdk
+opentelemetry-util-http==0.50b0
+    # via
+    #   -r ./requirements.txt
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-urllib
+    #   opentelemetry-instrumentation-urllib3
+    #   opentelemetry-instrumentation-wsgi
 packaging==24.2
     # via
+    #   -r ./requirements.txt
     #   black
     #   build
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-flask
     #   pytest
 pandas==2.2.3
     # via -r ./requirements.txt
@@ -207,44 +313,23 @@ portalocker==2.10.1
     # via
     #   -r ./requirements.txt
     #   msal-extensions
-proto-plus==1.25.0
+psutil==5.9.8
     # via
     #   -r ./requirements.txt
-    #   google-api-core
-protobuf==5.28.3
-    # via
-    #   -r ./requirements.txt
-    #   google-api-core
-    #   googleapis-common-protos
-    #   proto-plus
-psutil==6.1.0
-    # via
-    #   -r ./requirements.txt
-    #   opencensus-ext-azure
+    #   azure-monitor-opentelemetry-exporter
 psycopg2-binary==2.9.10
-    # via
-    #   -r ./requirements.txt
-    #   opencensus-ext-postgresql
-pyasn1==0.6.1
-    # via
-    #   -r ./requirements.txt
-    #   pyasn1-modules
-    #   rsa
-pyasn1-modules==0.4.1
-    # via
-    #   -r ./requirements.txt
-    #   google-auth
+    # via -r ./requirements.txt
 pycparser==2.22
     # via
     #   -r ./requirements.txt
     #   cffi
 pyflakes==3.2.0
     # via autoflake
-pyjwt[crypto]==2.10.0
+pyjwt[crypto]==2.10.1
     # via
     #   -r ./requirements.txt
     #   msal
-pyopenssl==24.2.1
+pyopenssl==24.3.0
     # via
     #   -r ./requirements.txt
     #   josepy
@@ -273,23 +358,21 @@ requests==2.32.3
     # via
     #   -r ./requirements.txt
     #   azure-core
-    #   google-api-core
     #   mozilla-django-oidc
     #   msal
-    #   opencensus-ext-azure
-    #   opencensus-ext-requests
-rsa==4.9
+    #   msrest
+    #   requests-oauthlib
+requests-oauthlib==2.0.0
     # via
     #   -r ./requirements.txt
-    #   google-auth
-six==1.16.0
+    #   msrest
+six==1.17.0
     # via
     #   -r ./requirements.txt
     #   azure-core
     #   django-db-views
-    #   opencensus
     #   python-dateutil
-sqlparse==0.5.2
+sqlparse==0.5.3
     # via
     #   -r ./requirements.txt
     #   django
@@ -299,7 +382,7 @@ tablib[xlsx]==3.7.0
     #   django-import-export
 timeout-decorator==0.5.0
     # via -r ./requirements.txt
-tomli==2.1.0
+tomli==2.2.1
     # via
     #   autoflake
     #   black
@@ -318,6 +401,7 @@ typing-extensions==4.12.2
     #   azure-storage-blob
     #   azure-storage-queue
     #   black
+    #   opentelemetry-sdk
 tzdata==2024.2
     # via
     #   -r ./requirements.txt
@@ -326,17 +410,22 @@ urllib3==2.2.3
     # via
     #   -r ./requirements.txt
     #   requests
-wheel==0.45.0
+wheel==0.45.1
     # via pip-tools
-wrapt==1.16.0
+wrapt==1.17.0
     # via
     #   -r ./requirements.txt
-    #   opencensus-ext-requests
+    #   deprecated
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-urllib3
+zipp==3.21.0
+    # via
+    #   -r ./requirements.txt
+    #   importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==24.3.1
     # via pip-tools
-setuptools==75.5.0
-    # via
-    #   -r ./requirements.txt
-    #   pip-tools
+setuptools==75.6.0
+    # via pip-tools
