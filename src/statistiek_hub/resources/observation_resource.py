@@ -1,10 +1,7 @@
 import pandas as pd
 from django.core.exceptions import ValidationError
-from import_export.fields import Field
 from import_export.resources import ModelResource
-from import_export.widgets import ForeignKeyWidget
 
-from referentie_tabellen.models import SpatialDimensionType, TemporalDimensionType
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
@@ -13,15 +10,8 @@ from statistiek_hub.utils.check_functions import (
     check_exists_in_model,
     check_missing_fields,
 )
-from statistiek_hub.utils.converter import convert_str
-from statistiek_hub.utils.datetime import add_timedelta, convert_to_date
-from statistiek_hub.validations import get_instance
-
-
-
-def set_stringfields_to_upper(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.map(lambda x: x.upper() if isinstance(x, str) else x)
-    return df
+from statistiek_hub.utils.converter import convert_str, set_stringfields_to_upper
+from statistiek_hub.utils.datetime import convert_to_date
 
 
 class ObservationResource(ModelResource):
@@ -84,30 +74,6 @@ class ObservationResource(ModelResource):
                     "dfmodel": dfmeasure,
                     "column": ["measure"],
                     "field": ["name"],
-                },
-                "spatial_types": {
-                    "dataset": df_main,
-                    "dfmodel": dfspatialdim,
-                    "column": ["spatial_type"],
-                    "field": ["type__name"],
-                },
-                "temporal_types": {
-                    "dataset": df_main,
-                    "dfmodel": dftemporaldim,
-                    "column": ["temporal_type"],
-                    "field": ["type__name"],
-                },
-                "spatial_codes": {
-                    "dataset": df_main,
-                    "dfmodel": dfspatialdim,
-                    "column": ["spatial_code"],
-                    "field": ["code"],
-                },
-                "spatial_dates": {
-                    "dataset": df_main,
-                    "dfmodel": dfspatialdim,
-                    "column": ["spatial_date"],
-                    "field": ["source_date"],
                 },
                 "spatial_dim": {
                     "dataset": df_main,

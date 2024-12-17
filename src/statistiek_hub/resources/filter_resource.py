@@ -10,6 +10,7 @@ from statistiek_hub.utils.check_functions import (
     check_exists_in_model,
     check_missing_fields,
 )
+from statistiek_hub.utils.converter import set_stringfields_to_upper
 
 
 class FilterResource(ModelResource):
@@ -35,8 +36,13 @@ class FilterResource(ModelResource):
             errors["column_names"] = error
         else:
             dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name")))
+
+            # load dataset to pandas dataframe
+            df_main = dataset.df
+            df_main = set_stringfields_to_upper(df_main)
+
             error = check_exists_in_model(
-                dataset=dataset, dfmodel=dfmeasure, column=["measure"], field=["name"]
+                dataset=df_main, dfmodel=dfmeasure, column=["measure"], field=["name"]
             )
 
             if error:
