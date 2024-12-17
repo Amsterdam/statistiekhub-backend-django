@@ -55,4 +55,4 @@ class FilterResource(ModelResource):
         report_skipped = True
         exclude = ("id",)
         fields = ("measure", "rule", "value_new")
-        import_id_fields = ("measure", "rule")
+        import_id_fields = ("measure",)
