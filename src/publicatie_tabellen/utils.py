@@ -9,7 +9,9 @@ def round_to_base(x, base=5):
 
 def convert_queryset_into_dataframe(queryset: QuerySet) -> pd.DataFrame:
     """converts a queryset into a dataframe"""
-    return pd.DataFrame(list(queryset.values()), columns=queryset._fields)
+    # Generator 
+    records = (record for record in queryset.values())
+    return pd.DataFrame.from_records(records, columns=queryset._fields)
 
 
 def copy_queryset(queryset: QuerySet, copy_to_model):

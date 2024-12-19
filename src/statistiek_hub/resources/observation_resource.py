@@ -2,6 +2,7 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from import_export.resources import ModelResource
 
+from publicatie_tabellen.utils import convert_queryset_into_dataframe
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
@@ -39,30 +40,31 @@ class ObservationResource(ModelResource):
         else:
             # load querysets into pandas df
             dfmeasure = set_stringfields_to_upper(
-                pd.DataFrame(list(Measure.objects.values("id", "name")))
+                convert_queryset_into_dataframe(
+                    Measure.objects.values(
+                        "id", "name"
+                    )
+                )
             )
 
             dfspatialdim = set_stringfields_to_upper(
-                pd.DataFrame(
-                list(
+                convert_queryset_into_dataframe(
                     SpatialDimension.objects.select_related("type").values(
                         "id", "code", "source_date", "type__name"
                     )
                 )
-            ))
+            )
 
             dftemporaldim = set_stringfields_to_upper(
-                pd.DataFrame(
-                list(
+                convert_queryset_into_dataframe(
                     TemporalDimension.objects.select_related("type").values(
                         "id", "startdate", "type__name"
                     )
                 )
-            ))
+            )
 
             # load dataset to pandas dataframe
-            df_main = dataset.df
-            df_main = set_stringfields_to_upper(df_main)
+            df_main = set_stringfields_to_upper(dataset.df)
 
             # convert 'date' to datetime.date format 
             df_main["spatial_date"] = df_main["spatial_date"].apply(convert_to_date)
@@ -143,6 +145,7 @@ class ObservationResource(ModelResource):
         model = Observation
         use_bulk = True
         skip_unchanged = True
-        report_skipped = True
+        skip_import_confirm = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("measure", "spatialdimension", "temporaldimension")
+        chunk_size = 5000
