@@ -1,5 +1,5 @@
 from django.contrib import admin
-from import_export.tmp_storages import CacheStorage
+from import_export.tmp_storages import MediaStorage
 
 from statistiek_hub.models.observation import ObservationCalculated
 from statistiek_hub.resources.observation_resource import ObservationResource
@@ -8,7 +8,7 @@ from .import_export_formats_mixin import ImportExportFormatsMixin
 
 
 class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
-    tmp_storage_class = CacheStorage
+    tmp_storage_class = MediaStorage
     list_display = (
         "id",
         "measure",
@@ -54,7 +54,7 @@ class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
 
 @admin.register(ObservationCalculated)
 class ObservationCalculatedAdmin(admin.ModelAdmin):
-    tmp_storage_class = CacheStorage
+    tmp_storage_class = MediaStorage
     list_display = (
         "id",
         "measure",

@@ -15,6 +15,7 @@ from statistiek_hub.utils.datetime import convert_to_date
 
 
 class ObservationResource(ModelResource):
+    delete_instance_empty_row_value=set()
 
     def before_import(self, dataset, **kwargs):
         # check major error's first on Dataset (instead of row by row)
@@ -124,19 +125,25 @@ class ObservationResource(ModelResource):
         df_main.loc[:, 'value'] = df_main['value'].apply(convert_str)
         print(df_main.head())
 
-        # Converteer de DataFrame naar een Tablib dataset
+        # Converteer de DataFrame terug naar een Tablib dataset
         dataset.df = df_main
-        print(dataset[0:5])
         
 
     def skip_row(self, instance, original, row, import_validation_errors=None):
-        """Skip rows with empty value,
-        necessary since importfile for Observationmodel allows blank value"""
+        """Skip rows with empty value, after deleting database-obj if not empty
+        necessary so empty value import overwrites database-obj otherwise database-obj keeps wrong value"""
 
         if row["value"] in [""]:
+            self.delete_instance_empty_row_value.add(original.id)
+            print(self.delete_instance_empty_row_value)
+            print(original.__dict__)
             return True
         else:
-            return super().skip_row(instance, original, row, import_validation_errors)
+            return False
+
+    def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
+        Observation.objects.filter(id__in=self.delete_instance_empty_row_value).delete()
+        self.delete_instance_empty_row_value=set()
 
 
     class Meta:
