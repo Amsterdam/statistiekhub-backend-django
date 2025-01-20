@@ -126,6 +126,8 @@ OIDC_AUTH_REQUEST_EXTRA_PARAMS = {"prompt": "select_account"}
 IMPORT_EXPORT_IMPORT_PERMISSION_CODE = "add"
 IMPORT_EXPORT_SKIP_ADMIN_LOG = True
 IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True
+IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
+
 
 # import_export_job
 def resource_observation():
@@ -253,6 +255,14 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
                 "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
                 "azure_container": "pgdump",
             },
+        },
+        "import_export": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "token_credential": credential,
+                "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
+                "azure_container": "django",
+            },
      },
 }
     STORAGES |= STORAGE_AZURE #update storages with storage_azure
@@ -369,6 +379,10 @@ LOGGING = {
         "django.db": {
             "handlers": ["console"],
             "level": "ERROR",
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "DEBUG", 
         },
         "django": {
             "handlers": ["console"],

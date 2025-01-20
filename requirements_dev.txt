@@ -112,7 +112,7 @@ django==5.1.4
     #   mozilla-django-oidc
 django-db-views==0.1.9
     # via -r ./requirements.txt
-django-import-export[xlsx]==4.3.3
+django-import-export[pandas,xlsx]==4.3.3
     # via -r ./requirements.txt
 django-leaflet==0.31.0
     # via -r ./requirements.txt
@@ -300,7 +300,9 @@ packaging==24.2
     #   opentelemetry-instrumentation-flask
     #   pytest
 pandas==2.2.3
-    # via -r ./requirements.txt
+    # via
+    #   -r ./requirements.txt
+    #   tablib
 pathspec==0.12.1
     # via black
 pip-tools==7.4.1
@@ -376,7 +378,7 @@ sqlparse==0.5.3
     # via
     #   -r ./requirements.txt
     #   django
-tablib[xlsx]==3.7.0
+tablib[pandas,xlsx]==3.7.0
     # via
     #   -r ./requirements.txt
     #   django-import-export

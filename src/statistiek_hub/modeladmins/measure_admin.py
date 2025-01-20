@@ -1,5 +1,5 @@
 from django.contrib import admin
-from import_export.tmp_storages import CacheStorage
+from import_export.tmp_storages import MediaStorage
 
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.resources.measure_resource import MeasureResource
@@ -32,7 +32,7 @@ class FilterInline(admin.TabularInline):
 
 
 class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
-    tmp_storage_class = CacheStorage     
+    tmp_storage_class = MediaStorage
     list_display = (
         "name",
         "label",

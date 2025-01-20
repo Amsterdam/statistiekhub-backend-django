@@ -41,4 +41,3 @@ class Command(BaseCommand):
             logger.exception(
                 f"An exception in dumping the publicationtables: {e}"
             )
-            raise

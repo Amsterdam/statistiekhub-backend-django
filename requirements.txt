@@ -83,7 +83,7 @@ django==5.1.4
     #   mozilla-django-oidc
 django-db-views==0.1.9
     # via -r requirements.in
-django-import-export[xlsx]==4.3.3
+django-import-export[pandas,xlsx]==4.3.3
     # via -r requirements.in
 django-leaflet==0.31.0
     # via -r requirements.in
@@ -210,7 +210,9 @@ packaging==24.2
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-flask
 pandas==2.2.3
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   tablib
 portalocker==2.10.1
     # via msal-extensions
 psutil==5.9.8
@@ -247,7 +249,7 @@ six==1.17.0
     #   python-dateutil
 sqlparse==0.5.3
     # via django
-tablib[xlsx]==3.7.0
+tablib[pandas,xlsx]==3.7.0
     # via django-import-export
 timeout-decorator==0.5.0
     # via -r requirements.in

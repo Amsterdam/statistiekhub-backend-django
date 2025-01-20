@@ -1,9 +1,8 @@
 from pandas import DataFrame
-from tablib import Dataset
 
 
 def check_exists_in_model(
-    dataset: Dataset, dfmodel: DataFrame, column: list, field: list
+    dataset: DataFrame, dfmodel: DataFrame, column: list, field: list
 ):
     """check if values from import (dataset[column]) exists in a model field
 
@@ -15,7 +14,14 @@ def check_exists_in_model(
     Returned: False (=no error)
     """
 
-    data_set = set(zip(*[list(str(x).upper() for x in dataset[c]) for c in column]))
+    data_set = set(
+        dataset[column]
+        .astype(str)
+        .apply(lambda col: col.str.upper())
+        .apply(tuple, axis=1)
+        .tolist()
+    )
+
     model_field = set(
         dfmodel[field]
         .astype(str)
