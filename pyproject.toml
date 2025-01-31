@@ -5,16 +5,16 @@ profile = "black"
 ignore_init_module_imports = true
 
 [tool.pytest.ini_options]
-addopts = "-s --cov --cov-config /pyproject.toml --disable-pytest-warnings "
+addopts = "-s --cov --cov-config /app/pyproject.toml --disable-pytest-warnings "
 
 [tool.coverage.run]
-source = ["/src"]
+source = ["/", "/app/src"]
 omit = [
-    "/tests",
-    "/src/main/wsgi.py",
-    "/src/main/settings.py",
-    "/src/manage.py",
-    "/src/main/asgi.py",    
+    "/app/tests",
+    "/app/src/main/wsgi.py",
+    "/app/src/main/settings.py",
+    "/app/src/manage.py",
+    "/app/src/main/asgi.py",
     "*/urls.py",
     "*/apps.py",
     "*/models.py",

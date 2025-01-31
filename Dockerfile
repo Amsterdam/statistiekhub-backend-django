@@ -1,35 +1,48 @@
-FROM python:3.11-bullseye AS app
-MAINTAINER datapunt@amsterdam.nl
+ARG PYTHON_VERSION=3.13
 
-ENV PYTHONUNBUFFERED 1 \
-    PIP_NO_CACHE_DIR=off
+# Builder
+FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
 
-RUN apt-get update \
-    && apt-get dist-upgrade -y \
-    && apt-get install --no-install-recommends -y \
-	&& apt-get install -y gdal-bin libgeos-dev netcat \
-    && pip install --upgrade pip \
-    && pip install uwsgi \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-RUN adduser --system datapunt
+RUN set -eux && \
+    python -m ensurepip --upgrade && \
+    apt-get update && apt-get install -y gcc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir -p /src && chown datapunt /src
-RUN mkdir -p /deploy && chown datapunt /deploy
-RUN mkdir -p /var/log/uwsgi && chown datapunt /var/log/uwsgi
+WORKDIR /app/install
 
-RUN mkdir -p /media && chmod 777 /media
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /install
-ADD requirements.txt .
-RUN pip install -r requirements.txt
-RUN chmod -R a+r /install
+# Application
+FROM python:${PYTHON_VERSION}-slim-bookworm AS app
 
-WORKDIR /src
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
+RUN set -eux && \
+    python -m ensurepip --upgrade && \
+    apt-get update && \
+    apt-get autoremove -y && \
+    apt-get install --no-install-recommends -y \
+        gdal-bin \
+        libgeos-dev && \
+    useradd --user-group -m datapunt && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Copy the Python dependencies from the builder stage
+COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin
+
+WORKDIR /app/deploy
+COPY deploy .
+
+WORKDIR /app/src
 COPY src .
-COPY deploy /deploy
 
 ARG SECRET_KEY=not-used
 ARG OIDC_RP_CLIENT_ID=not-used
@@ -38,35 +51,44 @@ RUN python manage.py collectstatic --no-input
 
 USER datapunt
 
-CMD ["/deploy/docker-run.sh"]
+CMD ["/app/deploy/docker-run.sh"]
 
 # devserver
 FROM app AS dev
 
 USER root
-WORKDIR /install
-ADD requirements_dev.txt .
-RUN pip install -r requirements_dev.txt
+WORKDIR /app/install
 
-WORKDIR /src
-USER datapunt
+COPY requirements_dev.txt requirements_dev.txt
+
+RUN pip install --no-cache-dir -r requirements_dev.txt
+
+WORKDIR /app/src
+USER app
 
 # Any process that requires to write in the home dir
 # we write to /tmp since we have no home dir
 ENV HOME /tmp
 
-CMD ["python manage.py runserver 0.0.0.0"]
+CMD ["/app/deploy/docker-run.sh"]
 
 # tests
 FROM dev AS tests
 
-USER datapunt
-WORKDIR /tests
-ADD tests .
-COPY pyproject.toml /.
+WORKDIR /app
+COPY tests tests
+COPY pyproject.toml pyproject.toml
 
-ENV COVERAGE_FILE=/tmp/.coverage
-ENV PYTHONPATH=/src
-# ENV USE_JWKS_TEST_KEY=True
+USER app
+
+ENV PYTHONPATH=/app/src
 
 CMD ["pytest"]
+
+# Linting
+FROM python:${PYTHON_VERSION}-alpine AS linting
+
+WORKDIR /app
+COPY . .
+
+RUN pip install --no-cache-dir -r requirements_linting.txt
