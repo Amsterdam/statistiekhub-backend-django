@@ -6,7 +6,7 @@
 PYTHON = python3
 
 dc = docker compose
-run = $(dc) run --rm
+run = $(dc) run --remove-orphans --rm -u ${UID}:${GID}
 manage = $(run) dev python manage.py
 
 help:                               ## Show this help.
@@ -22,6 +22,7 @@ requirements: pip-tools             ## Upgrade requirements (in requirements.in)
 	## The --allow-unsafe flag should be used and will become the default behaviour of pip-compile in the future
 	## https://stackoverflow.com/questions/58843905
 	pip-compile --upgrade --output-file requirements.txt --allow-unsafe requirements.in
+	pip-compile --upgrade --output-file requirements_linting.txt --allow-unsafe requirements_linting.in
 	pip-compile --upgrade --output-file requirements_dev.txt --allow-unsafe requirements_dev.in
 
 upgrade: requirements install       ## Run 'requirements' and 'install' targets
@@ -93,14 +94,14 @@ undeploy_kustomize:
 	kustomize build manifests/overlays/local | kubectl delete -f -
 
 lintfix:                            ## Execute lint fixes
-	$(run) test black /src/$(APP) /tests/$(APP)
-	$(run) test autoflake /src --recursive --in-place --remove-unused-variables --remove-all-unused-imports --quiet
-	$(run) test isort /src/$(APP) /tests/$(APP)
+	$(run) linting black /app/src/$(APP) /app/tests/$(APP)
+	$(run) linting autoflake /app/src --recursive --in-place --remove-unused-variables --remove-all-unused-imports --quiet
+	$(run) linting isort /app/src/$(APP) /app/tests/$(APP)
 
 
 lint:                               ## Execute lint checks
-	$(run) test autoflake /src --check --recursive --quiet
-	$(run) test isort --skip migrations --diff --check /src/$(APP) /tests/$(APP)
+	$(run) linting autoflake /app/src --check --recursive --quiet
+	$(run) linting isort --skip migrations --diff --check /app/src/$(APP) /app/tests/$(APP)
 
 diff:
 	@python3 ./deploy/diff.py

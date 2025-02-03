@@ -8,7 +8,7 @@ on:
 
 jobs:
   linting-and-tests:
-    name: Templates
-    uses: amsterdam/opdrachten-team-github-workflows/.github/workflows/CI.yml@v1
+    name: Linting and tests
+    uses: amsterdam/github-workflows/.github/workflows/CI.yml@v1
     with:
-      check_linting: true  # Requires Makefile target "lint"
+      check_linting: true

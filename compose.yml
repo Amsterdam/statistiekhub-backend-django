@@ -2,12 +2,12 @@ x-app: &base-app
   build:
     context: .  
   depends_on:
-    - database
-    - azurite
+    database:
+      condition: service_healthy
+    azurite:
+      condition: service_healthy
   volumes:
-    - ./src:/src
-    - ./tests:/tests
-    - ./deploy:/deploy
+    - .:/app
   environment: &base-app-env
     DEBUG: "True"
     SECRET_KEY: "insecure"
@@ -16,8 +16,7 @@ x-app: &base-app
     AZURITE_QUEUE_CONNECTION_STRING: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1;'
     OIDC_BASE_URL: "https://login.microsoftonline.com/72fca1b1-2c2e-4376-a445-294d80196804"
     OIDC_RP_CLIENT_ID: 
-    OIDC_RP_CLIENT_SECRET: 
-  entrypoint: /deploy/wait-for-it.sh database:5432 --
+    OIDC_RP_CLIENT_SECRET:
 
 services:
   database:
@@ -29,12 +28,21 @@ services:
       POSTGRES_USER: statistiek_hub
       POSTGRES_PASSWORD: insecure
     #command: postgres -c datestyle='iso, dmy'
+    healthcheck:
+      test: pg_isready -U statistiek_hub -d statistiek_hub
+      interval: 10s
+      timeout: 1s
+      retries: 5
   
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     ports:
       - "10000:10000"  # Blob service
       - "10001:10001"  # Queue service
+    healthcheck:
+      test: nc 127.0.0.1 10000 -z
+      interval: 1s
+      retries: 30
 
   app:
     <<: *base-app
@@ -45,7 +53,7 @@ services:
     environment:
       DEBUG: false
       DJANGO_SETTINGS_MODULE: main.settings
-    command: /deploy/docker-run.sh
+    command: /app/deploy/docker-run.sh
 
   dev:
     <<: *base-app
@@ -58,7 +66,7 @@ services:
       DJANGO_SUPERUSER_USERNAME: "admin"
       DJANGO_SUPERUSER_EMAIL: "admin@amsterdam.nl"
       DEBUG: "True"
-    command:  python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
 
   test:
     <<: *base-app
@@ -71,3 +79,11 @@ services:
       DEBUG: "True"
       OIDC_RP_CLIENT_ID: tests
       OIDC_RP_CLIENT_SECRET: tests
+
+  linting:
+    build:
+      context: .
+      target: linting
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
