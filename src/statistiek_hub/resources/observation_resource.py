@@ -123,7 +123,6 @@ class ObservationResource(ModelResource):
         # clean df
         df_main = merged_df[["measure", "spatialdimension", "temporaldimension", "value"]]
         df_main.loc[:, 'value'] = df_main['value'].apply(convert_str)
-        print(df_main.head())
 
         # Converteer de DataFrame terug naar een Tablib dataset
         dataset.df = df_main
@@ -135,8 +134,6 @@ class ObservationResource(ModelResource):
 
         if row["value"] in [""]:
             self.delete_instance_empty_row_value.add(original.id)
-            print(self.delete_instance_empty_row_value)
-            print(original.__dict__)
             return True
         else:
             return False
