@@ -18,7 +18,7 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     definition = models.TextField()
     definition_uk = models.TextField(blank=True, default="")
     description = models.TextField(blank=True, default="")
-    calculation = models.CharField(max_length=100, blank=True, default="", validators=[validate_calculation_string])
+    calculation = models.CharField(max_length=200, blank=True, default="", validators=[validate_calculation_string])
     sensitive = models.BooleanField(
         default=False,
         help_text="gevoeligedata - afronden en groepsonthulling toepassen",
