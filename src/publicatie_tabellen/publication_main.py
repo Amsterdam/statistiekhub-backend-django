@@ -32,11 +32,11 @@ class PublishFunction:
         except Exception as e:
             raise Exception(f"Error op obs calculated table: {e}")
             
-        obs_message, obs_succes = publishmeasure()
+        obs_message, obs_succes = publishobservation()
         if not obs_succes:
             raise Exception(f"Error op publishobservations: {obs_message}")
 
-        statistic_message, statistic_succes = publishobservation()
+        statistic_message, statistic_succes = publishstatistic()
         if not statistic_succes:
             raise Exception(f"Error op publishstatistic: {statistic_message}")
 

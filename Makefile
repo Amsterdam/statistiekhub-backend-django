@@ -56,7 +56,7 @@ load_fixtures:  migrate                  ## Load initial data into database by d
 
 
 test: lint							## Execute tests
-	$(run) test pytest $(ARGS)
+	$(run) test pytest -m 'not integration' $(ARGS)
 
 loadtest: migrate
 	$(manage) make_partitions $(ARGS)

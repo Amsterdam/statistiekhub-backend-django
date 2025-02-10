@@ -13,6 +13,6 @@ class ImportExportFormatsMixin(ImportExportMixin, ExportActionModelAdmin):
         return formats
 
     def get_export_formats(self):
-        """Returns available import formats."""
+        """Returns available export formats."""
         formats = [SCSV, base_formats.XLSX, base_formats.CSV]
         return formats
