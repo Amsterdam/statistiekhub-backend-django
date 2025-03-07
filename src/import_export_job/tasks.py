@@ -61,10 +61,10 @@ def _run_import_job(import_job, dry_run=True):
     
     skip_diff = resource._meta.skip_diff or resource._meta.skip_html_diff
 
-    result = resource.import_data(dataset, dry_run=dry_run)
+    result = resource.import_data(dataset, dry_run=dry_run, )
     update_status("3/4", "Generating import summary")
 
-    if result.base_errors or result.row_errors():
+    if result.has_errors() or result.has_validation_errors():
         import_job.errors = "ERRORS zie change_summary"
 
     # save import summary
