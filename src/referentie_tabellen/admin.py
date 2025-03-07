@@ -14,7 +14,7 @@ admin.site.unregister(User)
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    """Custum UsterAdmin"""
+    """Custom UserAdmin"""
     fieldsets = (
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
         ('Permissions', {'fields': ('groups',)}),
@@ -44,7 +44,7 @@ class UnitAdmin(admin.ModelAdmin):
 @admin.register(Theme)
 class ThemeAdmin(admin.ModelAdmin):
     list_display = ("name", "id", "parent", "group")
-    ordering = ("group", "id")
+    ordering = ("group__name", "name")
 
 
 @admin.register(SpatialDimensionType)
