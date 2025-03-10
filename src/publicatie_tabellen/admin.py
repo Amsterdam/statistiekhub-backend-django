@@ -16,7 +16,7 @@ class NoAddDeleteChangePermission(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-        if instance :=PublicationUpdatedAt.objects.first():
+        if instance := PublicationUpdatedAt.objects.first():
             updated_at = instance.updated_at
             extra_context['updated_at'] = updated_at.strftime("%d %B %Y, %I:%M %p")
         
