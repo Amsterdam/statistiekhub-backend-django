@@ -11,8 +11,11 @@ from publicatie_tabellen.models import PublicationObservation
 from publicatie_tabellen.utils import (
     convert_queryset_into_dataframe,
     copy_dataframe,
+    get_qs_for_bevmin_wonmin,
     round_to_base,
+    set_small_regions_to_nan_if_minimum,
 )
+from referentie_tabellen.models import SpatialDimensionType
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation, ObservationCalculated
 from statistiek_hub.utils.truncate_model import truncate
@@ -128,6 +131,11 @@ def publishobservation() -> tuple:
     df_calc = convert_queryset_into_dataframe(qscalcobs)
     df = pd.concat([df_obs, df_calc], ignore_index=True)
 
+    # get BEVTOTAAL for all types for sensitive rule 1: small regions to np.nan
+    spatialdimtypes = SpatialDimensionType.objects.all().values_list("name", flat=True)
+    qsmin = get_qs_for_bevmin_wonmin(Observation, measures=["BEVTOTAAL",], spatialdimensiontypes=spatialdimtypes)
+    dfmin = convert_queryset_into_dataframe(qsmin)
+
     truncate(PublicationObservation)
     qsmeasure = Measure.objects.all()
     measure_no_data = []
@@ -157,6 +165,9 @@ def publishobservation() -> tuple:
                 lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1
             )
             logger.info("sensitiverules applied")
+            # apply rule 1: Over gebieden met minder dan 50 inwoners rapporteren we geen privacygevoelige indicatoren
+            mdf = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", mdf, minimum_value=50)
+            logger.info("sensitive less 50 inwoners applied")
 
         # remove the by filter and sensitive introduced np.nan values
         mdf.dropna(subset=['value'], inplace=True)
