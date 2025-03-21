@@ -1,4 +1,6 @@
+import numpy as np
 import pandas as pd
+from django.db.models import F
 from django.db.models.query import QuerySet
 
 
@@ -37,3 +39,73 @@ def copy_dataframe(dataframe: pd.DataFrame, copy_to_model):
         new_item_list.append(copy_to_model(**params))
 
     copy_to_model.objects.bulk_create(new_item_list)
+
+
+def get_qs_for_bevmin_wonmin(obsmodel, 
+                              measures:list=["BEVTOTAAL", "WVOORRBAG"],
+                              spatialdimensiontypes:list=["Wijk", "GGW-gebied"],
+                              temporaldimensiontype:str="Peildatum"
+                              ) -> QuerySet:
+    """get queryset of observations with only measures bevtotaal and wvoorrbag (default),
+    for spatialdimensiontype wijk and ggw-gebied (default)
+    and temporaldimensiontype 'Peildatum' (default)
+    """
+    queryset = (
+        obsmodel.objects.select_related(
+            "measure", "spatialdimension", "temporaldimension"
+        )
+        .filter(
+            measure__name__in=measures,
+            spatialdimension__type__name__in=spatialdimensiontypes,
+            temporaldimension__type__name=temporaldimensiontype,
+        )
+        .annotate(
+            spatialdimensiondate=F("spatialdimension__source_date"),
+            spatialdimensioncode=F("spatialdimension__code"),
+            temporaldimensionstartdate=F("temporaldimension__startdate"),
+            temporaldimensionyear=F("temporaldimension__year"),
+            measure_name=F("measure__name"),
+        )
+        .order_by("measure", "temporaldimension__year", "temporaldimension__startdate")
+        .defer("created_at", "updated_at")
+        .distinct()
+    )
+    return queryset
+
+
+def set_small_regions_to_nan_if_minimum(
+    dfmin: pd.DataFrame, var_min: str, dataframe: pd.DataFrame, minimum_value: int=None
+) -> pd.DataFrame:
+    """set region value to np.nan if var_min is less than minimum_value :
+    remove value observation if sd_minimum_bevtotaal or sd_minimum_wvoorrbag condition is not met
+    or if minimum_value is set as param: if value observation is smaller than minimum_value
+    """
+
+    # get the values of bevtotaal or wvoorrbag
+    _df_var_min = dfmin[(dfmin["measure_name"] == var_min)][
+        [
+            "temporaldimensionyear",
+            "spatialdimensiondate",
+            "spatialdimensioncode",
+            "value",
+        ]
+    ]
+
+    if len(_df_var_min) == 0:
+        return dataframe
+
+    hulp = dataframe.join(
+        _df_var_min.rename(columns={"value": "varc"}).set_index(
+            ["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"]
+        ),
+        on=["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"],
+        how="left",
+    ).replace({None: np.nan})
+
+    #'value' vervangen door onbekend als te klein
+    if minimum_value:
+        hulp.loc[(hulp["varc"] < minimum_value ), "value"] = np.nan
+    else:        
+        minimum_value = f"sd_minimum_{var_min.lower()}"
+        hulp.loc[(hulp["varc"] < hulp[minimum_value]), "value"] = np.nan
+    return hulp.drop("varc", axis=1)

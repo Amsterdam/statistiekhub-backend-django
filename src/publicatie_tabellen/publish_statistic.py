@@ -8,7 +8,12 @@ from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 
 from publicatie_tabellen.models import PublicationStatistic
-from publicatie_tabellen.utils import convert_queryset_into_dataframe, copy_dataframe
+from publicatie_tabellen.utils import (
+    convert_queryset_into_dataframe,
+    copy_dataframe,
+    get_qs_for_bevmin_wonmin,
+    set_small_regions_to_nan_if_minimum,
+)
 from statistiek_hub.models.observation import Observation, ObservationCalculated
 from statistiek_hub.utils.truncate_model import truncate
 
@@ -48,34 +53,6 @@ def _get_qs_publishstatistic(obsmodel) -> QuerySet:
             measure_name=F("measure__name"),
         )
         .order_by("measure", "temporaldimensionyear", "temporaldimensionstartdate")
-        .defer("created_at", "updated_at")
-        .distinct()
-    )
-    return queryset
-
-
-def _get_qs_for_bevmin_wonmin(obsmodel=Observation) -> QuerySet:
-    """get queryset of observations with only measures, bevtotaal and wvoorrbag,
-    for spatialdimensiontype wijk and ggw-gebied
-    and temporaldimensiontype 'Peildatum'
-    """
-    queryset = (
-        obsmodel.objects.select_related(
-            "measure", "spatialdimension", "temporaldimension"
-        )
-        .filter(
-            measure__name__in=["BEVTOTAAL", "WVOORRBAG"],
-            spatialdimension__type__name__in=["Wijk", "GGW-gebied"],
-            temporaldimension__type__name="Peildatum",
-        )
-        .annotate(
-            spatialdimensiondate=F("spatialdimension__source_date"),
-            spatialdimensioncode=F("spatialdimension__code"),
-            temporaldimensionstartdate=F("temporaldimension__startdate"),
-            temporaldimensionyear=F("temporaldimension__year"),
-            measure_name=F("measure__name"),
-        )
-        .order_by("measure", "temporaldimension__year", "temporaldimension__startdate")
         .defer("created_at", "updated_at")
         .distinct()
     )
@@ -122,41 +99,6 @@ def _select_df_wijk_ggw(df: pd.DataFrame) -> pd.DataFrame:
         ]
     ].copy()
     return df_wijk_ggw
-
-
-def _set_small_regions_to_nan_if_minimum(
-    dfmin: pd.DataFrame, var_min: str, dataframe: pd.DataFrame
-) -> pd.DataFrame:
-    """set region value to np.nan if var_min is less than minimum_value :
-    remove value observation if sd_minimum_bevtotaal or sd_minimum_wvoorrbag condition is not met
-    """
-
-    # get the values of bevtotaal or wvoorrbag
-    _df_var_min = dfmin[(dfmin["measure_name"] == var_min)][
-        [
-            "temporaldimensionyear",
-            "spatialdimensiondate",
-            "spatialdimensioncode",
-            "value",
-        ]
-    ]
-
-    if len(_df_var_min) == 0:
-        return dataframe
-
-    hulp = dataframe.join(
-        _df_var_min.rename(columns={"value": "varc"}).set_index(
-            ["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"]
-        ),
-        on=["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"],
-        how="left",
-    ).replace({None: np.nan})
-
-    #'value' vervangen door onbekend als te klein
-    minimum_value = f"sd_minimum_{var_min.lower()}"
-    hulp.loc[(hulp["varc"] < hulp[minimum_value]), "value"] = np.nan
-
-    return hulp.drop("varc", axis=1)
 
 
 def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -233,7 +175,7 @@ def publishstatistic() -> tuple:
     df_calc = convert_queryset_into_dataframe(qscalcobs)
     df = pd.concat([df_obs, df_calc], ignore_index=True)
 
-    qsmin = _get_qs_for_bevmin_wonmin(Observation)
+    qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
 
     logger.info("aanmaken df met gemiddelde")
@@ -241,8 +183,8 @@ def publishstatistic() -> tuple:
 
     logger.info("berekening standaarddeviatie op wijk en geb22")
     df_wijk_ggw = _select_df_wijk_ggw(df)
-    _hulp1 = _set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", df_wijk_ggw)
-    _hulp2 = _set_small_regions_to_nan_if_minimum(dfmin, "WVOORRBAG", _hulp1)
+    _hulp1 = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", df_wijk_ggw)
+    _hulp2 = set_small_regions_to_nan_if_minimum(dfmin, "WVOORRBAG", _hulp1)
     _hulp3 = _sd_berekening(_hulp2)
 
     logger.info("alles samenvoegen tot statistic df")

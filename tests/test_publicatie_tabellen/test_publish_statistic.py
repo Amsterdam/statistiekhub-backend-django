@@ -1,19 +1,18 @@
 import datetime
-import json
 
 import numpy as np
-import pandas as pd
 import pytest
-from django.db.models import Q
 from model_bakery import baker
 
 from publicatie_tabellen.publish_statistic import (
-    _get_qs_for_bevmin_wonmin,
     _get_qs_publishstatistic,
     _select_df_wijk_ggw,
-    _set_small_regions_to_nan_if_minimum,
 )
-from publicatie_tabellen.utils import convert_queryset_into_dataframe
+from publicatie_tabellen.utils import (
+    convert_queryset_into_dataframe,
+    get_qs_for_bevmin_wonmin,
+    set_small_regions_to_nan_if_minimum,
+)
 from referentie_tabellen.models import SpatialDimensionType, TemporalDimensionType, Unit
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
@@ -188,7 +187,7 @@ def test_get_qs_for_bevmin_wonmin(fill_bev_won_obs):
     """
     fixture = fill_bev_won_obs
 
-    qsmin = _get_qs_for_bevmin_wonmin(Observation)
+    qsmin = get_qs_for_bevmin_wonmin(Observation)
     assert set(qsmin.values_list("measure__name", flat=True)) == {
         "BEVTOTAAL",
         "WVOORRBAG",
@@ -297,11 +296,11 @@ def test_set_small_regions_to_nan_if_minimum(
     )
 
     qsobs = _get_qs_publishstatistic(Observation)
-    qsmin = _get_qs_for_bevmin_wonmin(Observation)
+    qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
     dfwijkggw = _select_df_wijk_ggw(convert_queryset_into_dataframe(qsobs))
 
-    df_result = _set_small_regions_to_nan_if_minimum(dfmin, var_min, dfwijkggw)
+    df_result = set_small_regions_to_nan_if_minimum(dfmin, var_min, dfwijkggw)
     assert (
         np.testing.assert_equal(
             df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected
@@ -310,4 +309,51 @@ def test_set_small_regions_to_nan_if_minimum(
     )
 
     measurevar.delete()
+    obsvar.delete()
+
+
+@pytest.mark.parametrize(
+    "bev_value, min_value, expected",
+    [ (49, 10, 100.0,),(49, 49, 100.0),(49, 50, np.nan),(np.nan, 50, 100) ],
+)
+@pytest.mark.django_db
+def test_set_small_regions_to_nan_if_minimum_observations(
+    fill_ref_tabellen, bev_value, min_value, expected
+):
+    """set region value to np.nan if var_min is less than minimum_value"""
+    f_ref_tabellen = fill_ref_tabellen
+
+    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=f_ref_tabellen["unit"])
+    obsbev = baker.make(
+        Observation,
+        measure=measurebev,
+        temporaldimension=f_ref_tabellen["temppeildatum"],
+        spatialdimension=f_ref_tabellen["spatialwijk"],
+        value=bev_value,
+    )
+
+    measurevar = baker.make(Measure, name="VAR", unit=f_ref_tabellen["unit"])
+    obsvar = baker.make(
+        Observation,
+        measure=measurevar,
+        temporaldimension=f_ref_tabellen["temppeildatum"],
+        spatialdimension=f_ref_tabellen["spatialwijk"],
+        value=100,
+    )
+
+    qsobs = _get_qs_publishstatistic(Observation)
+    qsmin = get_qs_for_bevmin_wonmin(Observation)
+    dfmin = convert_queryset_into_dataframe(qsmin)
+    dfobs = convert_queryset_into_dataframe(qsobs)
+
+    df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
+    assert (
+        np.testing.assert_equal(
+            df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected
+        )
+        is None
+    )
+
+    measurebev.delete()
+    obsbev.delete()
     obsvar.delete()
