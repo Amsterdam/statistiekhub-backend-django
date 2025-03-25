@@ -314,7 +314,7 @@ def test_set_small_regions_to_nan_if_minimum(
 
 @pytest.mark.parametrize(
     "bev_value, min_value, expected",
-    [ (49, 10, 100.0,),(49, 49, 100.0),(49, 50, np.nan),(np.nan, 50, 100) ],
+    [ (200, 10, 100.0,),(49, 49, 100.0),(10, 50, np.nan),(np.nan, 50, 100) ],
 )
 @pytest.mark.django_db
 def test_set_small_regions_to_nan_if_minimum_observations(
@@ -354,6 +354,12 @@ def test_set_small_regions_to_nan_if_minimum_observations(
         is None
     )
 
+    assert (
+        np.testing.assert_equal(
+            df_result[df_result["measure_name"] == "BEVTOTAAL"]["value"].values[0], bev_value
+        )
+        is None
+    )
     measurebev.delete()
     obsbev.delete()
     obsvar.delete()
