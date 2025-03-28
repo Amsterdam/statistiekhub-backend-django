@@ -59,3 +59,12 @@ class PublicationStatistic(models.Model):
 
     def __str__(self):
         return f"{self.measure}"
+
+
+class ChangesLog(models.Model):
+    table_name = models.CharField(max_length=255, unique=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'changes_log'
