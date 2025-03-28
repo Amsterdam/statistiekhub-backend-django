@@ -1,4 +1,4 @@
-function_apply_filter = """
+function_apply_filter = r"""
 create or replace function public.apply_filter
                 ----------------------------------------------------------------------------------
                 -- GOAL: function to return observation values after applying (privacy) filters --
