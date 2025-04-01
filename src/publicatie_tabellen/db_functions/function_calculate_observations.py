@@ -1,4 +1,4 @@
-function_calculate_observation = """
+function_calculate_observation = r"""
                 create or replace function public.calculate_observation
                 ------------------------------------------------------------------------
                 -- GOAL: function to return observation values of calculated measures --
