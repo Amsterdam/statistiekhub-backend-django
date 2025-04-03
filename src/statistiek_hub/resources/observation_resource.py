@@ -136,7 +136,7 @@ class ObservationResource(ModelResource):
             self.delete_instance_empty_row_value.add(original.id)
             return True
         else:
-            return False
+            return super().skip_row(instance, original, row, import_validation_errors)
 
     def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
         Observation.objects.filter(id__in=self.delete_instance_empty_row_value).delete()
@@ -145,8 +145,6 @@ class ObservationResource(ModelResource):
 
     class Meta:
         model = Observation
-        use_bulk = True
         skip_unchanged = True
-        report_skipped = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("measure", "spatialdimension", "temporaldimension")
