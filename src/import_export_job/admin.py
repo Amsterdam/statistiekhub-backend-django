@@ -11,8 +11,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from import_export_job import models
-from import_export_job import admin_actions
+from import_export_job import admin_actions, models
 
 logger = logging.getLogger(__name__)
 
