@@ -354,6 +354,9 @@ if APPLICATIONINSIGHTS_CONNECTION_STRING:
 
 
 # Django Logging settings
+LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
+DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "WARNING").upper()
+
 base_log_fmt = {"time": "%(asctime)s", "name": "%(name)s", "level": "%(levelname)s"}
 log_fmt = base_log_fmt.copy()
 log_fmt["message"] = "%(message)s"
@@ -366,41 +369,51 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": "INFO",
+            "level": LOG_LEVEL,
             "class": "logging.StreamHandler",
             "formatter": "json",
         },
     },
     "root": {
         "handlers": ["console"],
-        "level": "WARNING" if not DEBUG else "INFO",
+        "level": LOG_LEVEL,
     },
     "loggers": {
         "django.db": {
             "handlers": ["console"],
-            "level": "ERROR",
+            "level": LOG_LEVEL,
         },
         "django.db.backends": {
             "handlers": ["console"],
-            "level": "DEBUG", 
+            "level": LOG_LEVEL,
         },
         "django": {
             "handlers": ["console"],
-            "level": "ERROR",
+            "level": LOG_LEVEL,
+        },
+        "statistiek_hub": {
+            "level": LOG_LEVEL,
+            "handlers": ["console"],
+            "propagate": False,
+        },
+        "referentie_tabellen": {
+            "level": LOG_LEVEL,
+            "handlers": ["console"],
+            "propagate": False,
         },
         "publicatie_tabellen": {
-            "level": "INFO",
+            "level": LOG_LEVEL,
             "handlers": ["console"],
             "propagate": False,
         },
         "import_export_job": {
-            "level": "INFO",
+            "level": LOG_LEVEL,
             "handlers": ["console"],
             "propagate": False,
         },
          # Log all unhandled exceptions
         "django.request": {
-            "level": "ERROR",
+            "level": LOG_LEVEL,
             "handlers": ["console"],
             "propagate": False,
         },
