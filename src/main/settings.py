@@ -269,7 +269,7 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
 
 # -----Queue
 JOB_QUEUE_NAME = "job-queue"
-IMPORT_DRY_RUN_FIRST_TIME = False
+IMPORT_DRY_RUN_FIRST_TIME = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
