@@ -18,8 +18,8 @@ from urllib.parse import urljoin
 
 from azure.identity import WorkloadIdentityCredential
 from azure.monitor.opentelemetry import configure_azure_monitor
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from csp.constants import NONCE, SELF
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 
 from .azure_settings import Azure
 
