@@ -19,6 +19,7 @@ from urllib.parse import urljoin
 from azure.identity import WorkloadIdentityCredential
 from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from csp.constants import NONCE, SELF
 
 from .azure_settings import Azure
 
@@ -76,6 +77,7 @@ THIRD_PARTY_APPS = [
     "import_export",
     "leaflet",
     "storages",
+    "csp",
     "mozilla_django_oidc", # load after django.contrib.auth!"
 ]
 LOCAL_APPS = [
@@ -88,6 +90,7 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    "csp.middleware.CSPMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -424,4 +427,15 @@ LEAFLET_CONFIG = {
     "MAX_ZOOM": 21,
     "SPATIAL_EXTENT": (3.2, 50.75, 7.22, 53.7),
     "RESET_VIEW": False,
+}
+
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [SELF,],
+        "frame-ancestors": [SELF,],
+        "script-src": [SELF, NONCE],
+        "img-src": [SELF, "data:",],
+        "style-src": [SELF, NONCE],
+        "connect-src": [SELF,],
+    },
 }
