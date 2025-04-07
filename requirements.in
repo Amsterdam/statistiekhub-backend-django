@@ -6,6 +6,7 @@ django-import-export[xlsx, pandas]
 django-db-views
 django-leaflet
 django-storages[azure]
+django-csp
 psycopg2-binary
 python-dateutil
 pandas
