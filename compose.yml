@@ -9,7 +9,6 @@ x-app: &base-app
   volumes:
     - .:/app
   environment: &base-app-env
-    DEBUG: "True"
     SECRET_KEY: "insecure"
     AUTHORIZATION_TOKEN: "auth-token"
     GET_AUTHORIZATION_TOKEN: "get-auth-token"
@@ -62,10 +61,12 @@ services:
       target: dev
     environment:
       <<: *base-app-env
+      LOG_LEVEL: "DEBUG"
+      DEBUG: "True"
+      DJANGO_LOG_LEVEL: "DEBUG"
       DJANGO_SUPERUSER_PASSWORD: "admin"
       DJANGO_SUPERUSER_USERNAME: "admin"
       DJANGO_SUPERUSER_EMAIL: "admin@amsterdam.nl"
-      DEBUG: "True"
     command: python manage.py runserver 0.0.0.0:8000
 
   test:
@@ -76,7 +77,6 @@ services:
     environment:
       <<: *base-app-env
       DJANGO_SETTINGS_MODULE: "main.settings"
-      DEBUG: "True"
       OIDC_RP_CLIENT_ID: tests
       OIDC_RP_CLIENT_SECRET: tests
 
