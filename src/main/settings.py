@@ -18,6 +18,7 @@ from urllib.parse import urljoin
 
 from azure.identity import WorkloadIdentityCredential
 from azure.monitor.opentelemetry import configure_azure_monitor
+from csp.constants import NONCE, SELF
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 
 from .azure_settings import Azure
@@ -76,6 +77,7 @@ THIRD_PARTY_APPS = [
     "import_export",
     "leaflet",
     "storages",
+    "csp",
     "mozilla_django_oidc", # load after django.contrib.auth!"
 ]
 LOCAL_APPS = [
@@ -88,6 +90,7 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    "csp.middleware.CSPMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -354,6 +357,9 @@ if APPLICATIONINSIGHTS_CONNECTION_STRING:
 
 
 # Django Logging settings
+LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
+DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "WARNING").upper()
+
 base_log_fmt = {"time": "%(asctime)s", "name": "%(name)s", "level": "%(levelname)s"}
 log_fmt = base_log_fmt.copy()
 log_fmt["message"] = "%(message)s"
@@ -366,41 +372,51 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": "INFO",
+            "level": LOG_LEVEL,
             "class": "logging.StreamHandler",
             "formatter": "json",
         },
     },
     "root": {
         "handlers": ["console"],
-        "level": "WARNING" if not DEBUG else "INFO",
+        "level": LOG_LEVEL,
     },
     "loggers": {
         "django.db": {
             "handlers": ["console"],
-            "level": "ERROR",
+            "level": LOG_LEVEL,
         },
         "django.db.backends": {
             "handlers": ["console"],
-            "level": "DEBUG", 
+            "level": LOG_LEVEL,
         },
         "django": {
             "handlers": ["console"],
-            "level": "ERROR",
+            "level": LOG_LEVEL,
+        },
+        "statistiek_hub": {
+            "level": LOG_LEVEL,
+            "handlers": ["console"],
+            "propagate": False,
+        },
+        "referentie_tabellen": {
+            "level": LOG_LEVEL,
+            "handlers": ["console"],
+            "propagate": False,
         },
         "publicatie_tabellen": {
-            "level": "INFO",
+            "level": LOG_LEVEL,
             "handlers": ["console"],
             "propagate": False,
         },
         "import_export_job": {
-            "level": "INFO",
+            "level": LOG_LEVEL,
             "handlers": ["console"],
             "propagate": False,
         },
          # Log all unhandled exceptions
         "django.request": {
-            "level": "ERROR",
+            "level": LOG_LEVEL,
             "handlers": ["console"],
             "propagate": False,
         },
@@ -424,4 +440,15 @@ LEAFLET_CONFIG = {
     "MAX_ZOOM": 21,
     "SPATIAL_EXTENT": (3.2, 50.75, 7.22, 53.7),
     "RESET_VIEW": False,
+}
+
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [SELF,],
+        "frame-ancestors": [SELF,],
+        "script-src": [SELF, NONCE],
+        "img-src": [SELF, "data:",],
+        "style-src": [SELF, NONCE],
+        "connect-src": [SELF,],
+    },
 }
