@@ -6,7 +6,7 @@ from statistiek_hub.resources.filter_resource import FilterResource
 from .import_export_formats_mixin import ImportExportFormatsMixin
 
 
-class FilterAdmin(ImportExportFormatsMixin, ImportMixin, admin.ModelAdmin):
+class FilterAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     list_display = (
         "measure",
         "rule",

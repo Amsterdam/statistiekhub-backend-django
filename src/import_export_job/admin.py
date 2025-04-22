@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from . import models
+from import_export_job import admin_actions, models
 
 logger = logging.getLogger(__name__)
 
@@ -115,3 +115,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
             return ("file",) + self.readonly_fields
         else:
             return self.readonly_fields
+
+    actions = (
+        admin_actions.run_import_job_action,
+    )
