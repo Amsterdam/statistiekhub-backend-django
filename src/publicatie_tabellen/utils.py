@@ -1,3 +1,5 @@
+from decimal import ROUND_HALF_EVEN, Decimal
+
 import numpy as np
 import pandas as pd
 from django.db.models import F
@@ -7,6 +9,17 @@ from django.db.models.query import QuerySet
 def round_to_base(x, base=5):
     """round up / down to base"""
     return base * round(x / base)
+
+
+def round_to_decimal(x, decimal):
+    """ banker's rounding: when a number is exactly halfway between two possible rounding amounts, it is rounded to the nearest even number.
+    Use of package decimal because python round() doesnt give secure rounding half to even due to uncertainty with floats """
+
+    number = Decimal(str(x))
+    dec_str= '1' if decimal == 0 else '0.' + '0' * (decimal - 1) + '1'
+    rounded_number = number.quantize(Decimal(dec_str), rounding=ROUND_HALF_EVEN)
+
+    return float(rounded_number)
 
 
 def convert_queryset_into_dataframe(queryset: QuerySet) -> pd.DataFrame:

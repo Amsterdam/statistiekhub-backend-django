@@ -10,6 +10,7 @@ from publicatie_tabellen.utils import (
     copy_dataframe,
     copy_queryset,
     round_to_base,
+    round_to_decimal,
 )
 from statistiek_hub.models.measure import Measure
 
@@ -35,6 +36,31 @@ def test_round_to_base(test_input, expected):
     """round up / down to base"""
     assert round_to_base(test_input) == expected
 
+
+# dat hoort niet, moet zijn 4.55 -> 4.6 (even!) en 4.65 -> 4.6 (even)
+@pytest.mark.parametrize(
+    "test_value, test_decimals, expected",
+    [
+        (7.05, 1, 7.0),
+        (7.051, 1, 7.1),
+        (7.35, 1, 7.4),
+        (7.351, 1, 7.4),
+        (7.55, 1, 7.6),
+        (7.551, 1, 7.6),
+        (7.45, 1, 7.4),
+        (7.451, 1, 7.5),
+        (7.65, 1, 7.6),
+        (7.651, 1, 7.7),
+        (1.5, 0, 2),
+        (2.5, 0, 2),
+        (3.5, 0, 4),
+        (4.5, 0, 4),
+    ],
+)
+def test_round_to_decimal(test_value, test_decimals, expected):
+    """change value by rule depending on unit"""
+    result = round_to_decimal(test_value, test_decimals)
+    assert result == expected
 
 @pytest.mark.django_db
 def test_convert_queryset_into_dataframe(qs=None, model=Measure):
