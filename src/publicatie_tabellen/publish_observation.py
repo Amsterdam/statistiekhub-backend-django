@@ -1,6 +1,5 @@
 import logging
 
-import numpy as np
 import pandas as pd
 from django.contrib import messages
 from django.db import connection
@@ -13,6 +12,7 @@ from publicatie_tabellen.utils import (
     copy_dataframe,
     get_qs_for_bevmin_wonmin,
     round_to_base,
+    round_to_decimal,
     set_small_regions_to_nan_if_minimum,
 )
 from referentie_tabellen.models import SpatialDimensionType
@@ -175,8 +175,9 @@ def publishobservation() -> tuple:
         if len(mdf) == 0:
             measure_no_data.append(measure.name)
             continue
-
-        mdf["value"] = mdf.apply(lambda x: round(x.value, x.decimals), axis=1)
+        
+        # round value to decimals
+        mdf["value"] = mdf.apply(lambda x: round_to_decimal(x.value, x.decimals), axis=1)
         logger.info("decimals are set")
 
         mdf.rename(columns={"measure_name": "measure"}, inplace=True)
