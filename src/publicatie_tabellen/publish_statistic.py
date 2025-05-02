@@ -29,8 +29,13 @@ def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_list) -> QuerySet:
             temporaldimensiontype="Peildatum",
             measure__in = measure_list,
         )
-        .order_by("measure", "temporaldimensionyear", "temporaldimensionstartdate")
+        .annotate(measure_name = F("measure"),)
+        .order_by("measure_name", "temporaldimensionyear", "temporaldimensionstartdate")
         .distinct()
+        .values('id', 'spatialdimensiontype', 'spatialdimensiondate',
+                'spatialdimensioncode', 'spatialdimensionname', 'temporaldimensiontype',
+                'temporaldimensionstartdate', 'temporaldimensionenddate',
+                'temporaldimensionyear', 'measure_name', 'value')
     )    
 
     return queryset
@@ -43,10 +48,10 @@ def _get_qs_publishstatistic_measure(measuremodel)-> QuerySet:
         .exclude(extra_attr__BBGA_kleurenpalet__in=[9, 4])
         .annotate(
             sd_minimum_bevtotaal=Coalesce(
-                F("measure__extra_attr__BBGA_sd_minimum_bev_totaal"), Value(None)
+                F("extra_attr__BBGA_sd_minimum_bev_totaal"), Value(None)
             ),
             sd_minimum_wvoorrbag=Coalesce(
-                F("measure__extra_attr__BBGA_sd_minimum_wvoor_bag"), Value(None)
+                F("extra_attr__BBGA_sd_minimum_wvoor_bag"), Value(None)
             ),
             measure_id = F("id"),
         )
@@ -67,7 +72,7 @@ def _get_df_data_publishstatistic()-> pd.DataFrame:
 
     df_obs = convert_queryset_into_dataframe(qsobservation)
     df_measure = convert_queryset_into_dataframe(qsmeasure)
-    df = df_obs.merge(df_measure, how='left', left_on="measure", right_on='name')
+    df = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
 
     return df
 
@@ -82,7 +87,7 @@ def _select_df_mean(df: pd.DataFrame) -> pd.DataFrame:
                 "temporaldimensionstartdate",
                 "temporaldimensionyear",
                 "measure_id",
-                "measure",
+                "measure_name",
                 "value",
             ]
         ]
@@ -106,7 +111,7 @@ def _select_df_wijk_ggw(df: pd.DataFrame) -> pd.DataFrame:
             "temporaldimensionyear",
             "sd_minimum_bevtotaal",
             "sd_minimum_wvoorrbag",
-            "measure",
+            "measure_name",
             "value",
         ]
     ].copy()
@@ -201,11 +206,11 @@ def publishstatistic() -> tuple:
         how="left",
     ).replace({np.nan: None})
     measure_no_sd = dfstatistic[dfstatistic["standarddeviation"].isna()][
-        "measure"
+        "measure_name"
     ].values
     # if there is no standarddeviation -> remove record
     dfstatistic.dropna(subset=["standarddeviation"], inplace=True)
-    dfstatistic.rename(columns={"measure": "measure"}, inplace=True)
+    dfstatistic.rename(columns={"measure_name": "measure"}, inplace=True)
 
     # gemiddelde en std afronden op 3 decimalen -> set on the model field
     try:

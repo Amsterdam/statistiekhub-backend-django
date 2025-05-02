@@ -165,7 +165,7 @@ def test_get_df_data_publishstatistic(
                 set(['id', 'spatialdimensiontype', 'spatialdimensiondate',
         'spatialdimensioncode', 'spatialdimensionname', 'temporaldimensiontype',
         'temporaldimensionstartdate', 'temporaldimensionenddate',
-        'temporaldimensionyear', 'measure', 'value', 'measure_id', 'name',
+        'temporaldimensionyear', 'measure_name', 'value', 'measure_id', 'name',
         'sd_minimum_bevtotaal', 'sd_minimum_wvoorrbag']))
 
         assert len(diff) == 0
@@ -224,71 +224,71 @@ def test_get_qs_for_bevmin_wonmin(fill_bev_won_obs):
             {"BBGA_sd_minimum_bev_totaal": 900, "BBGA_kleurenpalet": 3},
             "spatialwijk",
             10.0,
-         ),
-        # (
-        #     "WVOORRBAG",
-        #     {"BBGA_sd_minimum_wvoor_bag": 900, "BBGA_kleurenpalet": 3},
-        #     "spatialwijk",
-        #     10.0,
-        # ),
-        # (
-        #     "BEVTOTAAL",
-        #     {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
-        #     "spatialwijk",
-        #     10.0,
-        # ),
-        # (
-        #     "WVOORRBAG",
-        #     {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
-        #     "spatialwijk",
-        #     10.0,
-        # ),
-        # (
-        #     "BEVTOTAAL",
-        #     {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
-        #     "spatialwijk",
-        #     np.nan,
-        # ),
-        # (
-        #     "WVOORRBAG",
-        #     {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
-        #     "spatialwijk",
-        #     np.nan,
-        # ),
-        # (
-        #     "BEVTOTAAL",
-        #     {"BBGA_sd_minimum_bev_totaal": 900, "BBGA_kleurenpalet": 3},
-        #     "spatialggw",
-        #     10.0,
-        # ),
-        # (
-        #     "WVOORRBAG",
-        #     {"BBGA_sd_minimum_wvoor_bag": 900, "BBGA_kleurenpalet": 3},
-        #     "spatialggw",
-        #     10.0,
-        # ),
-        # (
-        #     "BEVTOTAAL",
-        #     {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
-        #     "spatialggw",
-        #     np.nan,
-        # ),
-        # (
-        #     "WVOORRBAG",
-        #     {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
-        #     "spatialggw",
-        #     np.nan,
-        # ),
-        # (
-        #     "BEVTOTAAL",
-        #     {
-        #         "BBGA_sd_minimum_bev_totaal": 2000,
-        #         "BBGA_sd_minimum_wvoor_bag": 2000,
-        #         "BBGA_kleurenpalet": 3,
-        #     },
-        #     "spatialggw",
-        #     np.nan,
-        # ),
+        ),
+        (
+            "WVOORRBAG",
+            {"BBGA_sd_minimum_wvoor_bag": 900, "BBGA_kleurenpalet": 3},
+            "spatialwijk",
+            10.0,
+        ),
+        (
+            "BEVTOTAAL",
+            {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
+            "spatialwijk",
+            10.0,
+        ),
+        (
+            "WVOORRBAG",
+            {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
+            "spatialwijk",
+            10.0,
+        ),
+        (
+            "BEVTOTAAL",
+            {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
+            "spatialwijk",
+            np.nan,
+        ),
+        (
+            "WVOORRBAG",
+            {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
+            "spatialwijk",
+            np.nan,
+        ),
+        (
+            "BEVTOTAAL",
+            {"BBGA_sd_minimum_bev_totaal": 900, "BBGA_kleurenpalet": 3},
+            "spatialggw",
+            10.0,
+        ),
+        (
+            "WVOORRBAG",
+            {"BBGA_sd_minimum_wvoor_bag": 900, "BBGA_kleurenpalet": 3},
+            "spatialggw",
+            10.0,
+        ),
+        (
+            "BEVTOTAAL",
+            {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
+            "spatialggw",
+            np.nan,
+        ),
+        (
+            "WVOORRBAG",
+            {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
+            "spatialggw",
+            np.nan,
+        ),
+        (
+            "BEVTOTAAL",
+            {
+                "BBGA_sd_minimum_bev_totaal": 2000,
+                "BBGA_sd_minimum_wvoor_bag": 2000,
+                "BBGA_kleurenpalet": 3,
+            },
+            "spatialggw",
+            np.nan,
+        ),
     ],
 )
 @pytest.mark.django_db
@@ -320,7 +320,7 @@ def test_set_small_regions_to_nan_if_minimum(
     df_result = set_small_regions_to_nan_if_minimum(dfmin, var_min, dfwijkggw)
     assert (
         np.testing.assert_equal(
-            df_result[df_result["measure"] == "VAR"]["value"].values[0], expected
+            df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected
         )
         is None
     )
@@ -331,8 +331,7 @@ def test_set_small_regions_to_nan_if_minimum(
 
 @pytest.mark.parametrize(
     "bev_value, min_value, expected",
-    [ (200, 10, 100.0,)],
-    # [ (200, 10, 100.0,),(49, 49, 100.0),(10, 50, np.nan),(np.nan, 50, 100) ],
+    [ (200, 10, 100.0,),(49, 49, 100.0),(10, 50, np.nan),(np.nan, 50, 100) ],
 )
 @pytest.mark.django_db
 def test_set_small_regions_to_nan_if_minimum_observations(
@@ -362,23 +361,26 @@ def test_set_small_regions_to_nan_if_minimum_observations(
     # fill publishobservation model
     _, _ = publishobservation()
     dfobs = _get_df_data_publishstatistic()
+    print(dfobs)
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
 
     df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
     assert (
         np.testing.assert_equal(
-            df_result[df_result["measure"] == "VAR"]["value"].values[0], expected
+            df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected
         )
         is None
     )
 
-    assert (
-        np.testing.assert_equal(
-            df_result[df_result["measure"] == "BEVTOTAAL"]["value"].values[0], bev_value
+    # dfobs is based on publicationobservation (cleaned-obs) so no nan in df
+    if bev_value is not np.nan:
+        assert (
+            np.testing.assert_equal(
+                df_result[df_result["measure_name"] == "BEVTOTAAL"]["value"].values[0], bev_value
+            )
+            is None
         )
-        is None
-    )
     measurebev.delete()
     obsbev.delete()
     obsvar.delete()
