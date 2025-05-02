@@ -13,6 +13,7 @@ class TemporalDimensionAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     readonly_fields = ("enddate", "year")
 
     list_display = (
+        "id",
         "name",
         "year",
     )

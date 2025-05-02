@@ -46,7 +46,7 @@ class SpatialDimensionAdmin(
     list_filter = (("type", admin.RelatedOnlyFieldListFilter), SourceDateFilter)
     ordering = ("id",)
     search_help_text = "search on dimension name"
-    search_fields = ["name"]
+    search_fields = ["name", "id"]
     
     modifiable = False  # Make the leaflet map read-only
     resource_classes = [SpatialDimensionResource]
