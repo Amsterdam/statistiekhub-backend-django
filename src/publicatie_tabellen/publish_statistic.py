@@ -176,7 +176,7 @@ def publishstatistic() -> tuple:
     logger.info("get all data necessary for calculation of statistic standarddeviation")    
     df = _get_df_data_publishstatistic()
 
-    if not df:
+    if len(df) == 0:
         return (
             f"There are no observations standarddeviation could be applied to",
             messages.ERROR,

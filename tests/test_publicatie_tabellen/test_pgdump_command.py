@@ -58,6 +58,9 @@ class TestPgdumpCommand:
 
         current_time = datetime.datetime.now()
 
+        # change something in the db to be sure for the database trigger on statistiek_hub models
+        baker.make( Theme, name="TEST")
+
         call_command("pgdump")
 
         assert PublicationUpdatedAt.objects.all().count() == 1
