@@ -111,6 +111,7 @@ def _select_df_wijk_ggw(df: pd.DataFrame) -> pd.DataFrame:
             "temporaldimensionyear",
             "sd_minimum_bevtotaal",
             "sd_minimum_wvoorrbag",
+            "measure_id",
             "measure_name",
             "value",
         ]
@@ -197,6 +198,7 @@ def publishstatistic() -> tuple:
     df_wijk_ggw = _select_df_wijk_ggw(df)
     _hulp1 = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", df_wijk_ggw)
     _hulp2 = set_small_regions_to_nan_if_minimum(dfmin, "WVOORRBAG", _hulp1)
+    print(_hulp2.columns)
     _hulp3 = _sd_berekening(_hulp2)
 
     logger.info("alles samenvoegen tot statistic df")
