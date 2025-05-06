@@ -15,6 +15,7 @@ omit = [
     "/app/src/main/settings.py",
     "/app/src/manage.py",
     "/app/src/main/asgi.py",
+    "/app/src/main/auth.py",
     "*/urls.py",
     "*/apps.py",
     "*/models.py",
@@ -22,7 +23,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-fail_under = 50  # Bring to 80% when we have more tests
+fail_under = 80
 skip_covered = true
 show_missing = true
 sort = "Cover"

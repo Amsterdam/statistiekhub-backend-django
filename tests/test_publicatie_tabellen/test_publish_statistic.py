@@ -7,6 +7,7 @@ from model_bakery import baker
 from publicatie_tabellen.publish_observation import publishobservation
 from publicatie_tabellen.publish_statistic import (
     _get_df_data_publishstatistic,
+    _get_qs_publishstatistic_measure,
     _select_df_wijk_ggw,
 )
 from publicatie_tabellen.utils import (
@@ -116,6 +117,38 @@ def fill_bev_won_obs(fill_ref_tabellen):
         value=1000,
     )
 
+
+@pytest.mark.parametrize(
+    " extra_attr, expected ",
+    [
+        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_bev_totaal": 100}, (100, None)),
+        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_wvoor_bag": 150}, (None, 150)),
+        ({"BBGA_kleurenpalet": 4, "BBGA_sd_minimum_bev_totaal": 100}, (100, None)),
+        ({"BBGA_kleurenpalet": 9, "BBGA_sd_minimum_wvoor_bag": 150}, (None, 150)),
+        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_bev_totaal": 100, "BBGA_sd_minimum_wvoor_bag": 150}, (100, 150)),
+    ]
+)
+@pytest.mark.django_db
+def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected):
+    """check that measures excludes kleurenpalet 9: geen kleuren /absolute aantallen; kleurenpalet 4: wit 
+    and vars sd_minimum_bev_totaal and sd_minimum_wvoor_bag"""
+    fixture = fill_ref_tabellen
+
+    measure = baker.make(
+        Measure, name="TEST", unit=fixture["unit"], extra_attr=extra_attr
+    )
+
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    measure_list = qsmeasure.values_list('name', flat=True)
+
+    if measure_list[::1] == []:
+        assert extra_attr["BBGA_kleurenpalet"] in [4,9]
+    else:        
+        assert measure_list[::1] == ['TEST']
+        df_measure = convert_queryset_into_dataframe(qsmeasure)
+        assert (df_measure["sd_minimum_bevtotaal"][0] , df_measure["sd_minimum_wvoorrbag"][0] ) == expected
+
+    measure.delete()
 
 
 @pytest.mark.parametrize(
@@ -361,7 +394,6 @@ def test_set_small_regions_to_nan_if_minimum_observations(
     # fill publishobservation model
     _, _ = publishobservation()
     dfobs = _get_df_data_publishstatistic()
-    print(dfobs)
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
 
