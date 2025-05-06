@@ -121,5 +121,4 @@ def set_small_regions_to_nan_if_minimum(
     else:
         minimum_value = f"sd_minimum_{var_min.lower()}"
         hulp.loc[((hulp["varc"] < hulp[minimum_value]) & (hulp['measure_name'] != var_min)), "value"] = np.nan
-        print(hulp[['measure_name', 'value', 'varc']])
     return hulp.drop("varc", axis=1)
