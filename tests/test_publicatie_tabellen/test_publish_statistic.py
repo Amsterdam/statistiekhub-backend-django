@@ -4,8 +4,10 @@ import numpy as np
 import pytest
 from model_bakery import baker
 
+from publicatie_tabellen.publish_observation import publishobservation
 from publicatie_tabellen.publish_statistic import (
-    _get_qs_publishstatistic,
+    _get_df_data_publishstatistic,
+    _get_qs_publishstatistic_measure,
     _select_df_wijk_ggw,
 )
 from publicatie_tabellen.utils import (
@@ -56,7 +58,7 @@ def fill_ref_tabellen() -> dict:
 def fill_bev_won_obs(fill_ref_tabellen):
     fixture = fill_ref_tabellen
 
-    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=fixture["unit"])
+    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=fixture["unit"], extra_attr={"BBGA_kleurenpalet": 3})
     obsbev = baker.make(
         Observation,
         measure=measurebev,
@@ -85,7 +87,7 @@ def fill_bev_won_obs(fill_ref_tabellen):
         spatialdimension=fixture["spatialgem"],
         value=1000,
     )
-    measurewon = baker.make(Measure, name="WVOORRBAG", unit=fixture["unit"])
+    measurewon = baker.make(Measure, name="WVOORRBAG", unit=fixture["unit"], extra_attr={"BBGA_kleurenpalet": 3})
     obswon = baker.make(
         Observation,
         measure=measurewon,
@@ -117,6 +119,39 @@ def fill_bev_won_obs(fill_ref_tabellen):
 
 
 @pytest.mark.parametrize(
+    " extra_attr, expected ",
+    [
+        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_bev_totaal": 100}, (100, None)),
+        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_wvoor_bag": 150}, (None, 150)),
+        ({"BBGA_kleurenpalet": 4, "BBGA_sd_minimum_bev_totaal": 100}, (100, None)),
+        ({"BBGA_kleurenpalet": 9, "BBGA_sd_minimum_wvoor_bag": 150}, (None, 150)),
+        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_bev_totaal": 100, "BBGA_sd_minimum_wvoor_bag": 150}, (100, 150)),
+    ]
+)
+@pytest.mark.django_db
+def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected):
+    """check that measures excludes kleurenpalet 9: geen kleuren /absolute aantallen; kleurenpalet 4: wit 
+    and vars sd_minimum_bev_totaal and sd_minimum_wvoor_bag"""
+    fixture = fill_ref_tabellen
+
+    measure = baker.make(
+        Measure, name="TEST", unit=fixture["unit"], extra_attr=extra_attr
+    )
+
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    measure_list = qsmeasure.values_list('name', flat=True)
+
+    if measure_list[::1] == []:
+        assert extra_attr["BBGA_kleurenpalet"] in [4,9]
+    else:        
+        assert measure_list[::1] == ['TEST']
+        df_measure = convert_queryset_into_dataframe(qsmeasure)
+        assert (df_measure["sd_minimum_bevtotaal"][0] , df_measure["sd_minimum_wvoorrbag"][0] ) == expected
+
+    measure.delete()
+
+
+@pytest.mark.parametrize(
     " extra_attr, tempdim, spatialdim, expected",
     [
         ({"BBGA_kleurenpalet": 3}, "temppeildatum", "spatialwijk", 1),
@@ -128,11 +163,12 @@ def fill_bev_won_obs(fill_ref_tabellen):
     ],
 )
 @pytest.mark.django_db
-def test_get_qs_publishstatistic(
+def test_get_df_data_publishstatistic(
     fill_ref_tabellen, extra_attr, tempdim, spatialdim, expected
 ):
-    """check correct filter for select_get_qs_publishstatistic query selection"""
+    """check correct filter for select_get_qs_publishstatistic_obs query selection"""
     fixture = fill_ref_tabellen
+
 
     measure = baker.make(
         Measure, name="TEST", unit=fixture["unit"], extra_attr=extra_attr
@@ -145,16 +181,27 @@ def test_get_qs_publishstatistic(
         value=1000,
     )
 
-    qsobs = _get_qs_publishstatistic(Observation)
-    assert len(qsobs) == expected
-    dfobs = convert_queryset_into_dataframe(qsobs)
+    # fill publishobservation model
+    _, _ = publishobservation()
+    dfobs = _get_df_data_publishstatistic()
+
     assert len(dfobs) == expected
     if len(dfobs) > 0:
-        assert dfobs["spatialdimensiontypename"].unique()[0] in [
+        assert dfobs["spatialdimensiontype"].unique()[0] in [
             "Wijk",
             "GGW-gebied",
             "Gemeente",
         ]
+
+        # check all columns names
+        diff = (set(dfobs.columns.values.tolist()) - 
+                set(['id', 'spatialdimensiontype', 'spatialdimensiondate',
+        'spatialdimensioncode', 'spatialdimensionname', 'temporaldimensiontype',
+        'temporaldimensionstartdate', 'temporaldimensionenddate',
+        'temporaldimensionyear', 'measure_name', 'value', 'measure_id', 'name',
+        'sd_minimum_bevtotaal', 'sd_minimum_wvoorrbag']))
+
+        assert len(diff) == 0
 
     measure.delete()
     obs.delete()
@@ -164,17 +211,18 @@ def test_get_qs_publishstatistic(
 def test_select_df_wijk_ggw(fill_bev_won_obs):
     """Select only spatialdimension 'Wijk' and 'GGW-gebied'"""
     fixture = fill_bev_won_obs
+    # fill publishobservation model
+    _, _ = publishobservation()
 
-    qsobs = _get_qs_publishstatistic(Observation)
-    dfobs = convert_queryset_into_dataframe(qsobs)
+    dfobs = _get_df_data_publishstatistic()
     assert (
-        dfobs["spatialdimensiontypename"].unique().sort()
+        dfobs["spatialdimensiontype"].unique().sort()
         == ["Wijk", "GGW-gebied", "Gemeente"].sort()
     )
 
     dfwijkggw = _select_df_wijk_ggw(dfobs)
     assert (
-        dfwijkggw["spatialdimensiontypename"].unique().sort()
+        dfwijkggw["spatialdimensiontype"].unique().sort()
         == ["Wijk", "GGW-gebied"].sort()
     )
 
@@ -295,10 +343,12 @@ def test_set_small_regions_to_nan_if_minimum(
         value=10,
     )
 
-    qsobs = _get_qs_publishstatistic(Observation)
+    # fill publishobservation model
+    _, _ = publishobservation()
+    dfobs = _get_df_data_publishstatistic()
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
-    dfwijkggw = _select_df_wijk_ggw(convert_queryset_into_dataframe(qsobs))
+    dfwijkggw = _select_df_wijk_ggw(dfobs)
 
     df_result = set_small_regions_to_nan_if_minimum(dfmin, var_min, dfwijkggw)
     assert (
@@ -341,10 +391,11 @@ def test_set_small_regions_to_nan_if_minimum_observations(
         value=100,
     )
 
-    qsobs = _get_qs_publishstatistic(Observation)
+    # fill publishobservation model
+    _, _ = publishobservation()
+    dfobs = _get_df_data_publishstatistic()
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
-    dfobs = convert_queryset_into_dataframe(qsobs)
 
     df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
     assert (
@@ -354,12 +405,14 @@ def test_set_small_regions_to_nan_if_minimum_observations(
         is None
     )
 
-    assert (
-        np.testing.assert_equal(
-            df_result[df_result["measure_name"] == "BEVTOTAAL"]["value"].values[0], bev_value
+    # dfobs is based on publicationobservation (cleaned-obs) so no nan in df
+    if bev_value is not np.nan:
+        assert (
+            np.testing.assert_equal(
+                df_result[df_result["measure_name"] == "BEVTOTAAL"]["value"].values[0], bev_value
+            )
+            is None
         )
-        is None
-    )
     measurebev.delete()
     obsbev.delete()
     obsvar.delete()

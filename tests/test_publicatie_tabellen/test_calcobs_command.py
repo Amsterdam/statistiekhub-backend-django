@@ -1,10 +1,12 @@
 from unittest.mock import patch
 
+import pytest
 from django.conf import settings
 from django.core.management import call_command
 
 
 class TestCalcObsCommand:
+    @pytest.mark.django_db
     def test_calc_obs_failure(self, caplog):
         """
         Check the flow when an error is raised

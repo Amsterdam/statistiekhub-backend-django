@@ -60,6 +60,8 @@ class PublicationMeasureTypeAdmin(NoAddDeleteChangePermission):
         "sensitive",
         "deprecated",
     )
+    search_help_text = "search on measure name"
+    search_fields = ["name"]
 
 
 @admin.register(PublicationObservation)
@@ -80,6 +82,8 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         "spatialdimensiontype",
         "spatialdimensiondate",
     )
+    search_help_text = "search on measure name"
+    search_fields = ["measure"]
 
 
 @admin.register(PublicationStatistic)
@@ -94,3 +98,5 @@ class PublicationStatisticAdmin(NoAddDeleteChangePermission):
         "source",
     )
     ordering = ("id",)
+    search_help_text = "search on measure name"
+    search_fields = ["measure"]

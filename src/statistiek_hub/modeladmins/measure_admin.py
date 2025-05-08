@@ -34,6 +34,7 @@ class FilterInline(admin.TabularInline):
 class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     tmp_storage_class = MediaStorage
     list_display = (
+        "id",
         "name",
         "label",
         "theme",
@@ -52,7 +53,7 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
     resource_classes = [MeasureResource]
 
     search_help_text = "search on measure name"
-    search_fields = ["name"]
+    search_fields = ["name",  "id"]
 
     fieldsets = (
         (

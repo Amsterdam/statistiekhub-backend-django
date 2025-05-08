@@ -7,56 +7,74 @@ from django.db.models import F, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 
-from publicatie_tabellen.models import PublicationStatistic
+from publicatie_tabellen.models import PublicationObservation, PublicationStatistic
 from publicatie_tabellen.utils import (
     convert_queryset_into_dataframe,
     copy_dataframe,
     get_qs_for_bevmin_wonmin,
     set_small_regions_to_nan_if_minimum,
 )
-from statistiek_hub.models.observation import Observation, ObservationCalculated
+from statistiek_hub.models.observation import Measure, Observation
 from statistiek_hub.utils.truncate_model import truncate
 
 logger = logging.getLogger(__name__)
 
 
-def _get_qs_publishstatistic(obsmodel) -> QuerySet:
-    """get queryset from obsmodel specificly for publishstatistic"""
+def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_list) -> QuerySet:
+    """get queryset from cleaned obs publication model specificly for publishstatistic"""
     queryset = (
-        obsmodel.objects.select_related(
-            "measure",
-            "spatialdimension",
-            "temporaldimension",
-            "measure__unit",
-            "spatialdimension__type",
-            "temporaldimension__type",
-        )
-        .all()
+        cleaned_obsmodel.objects
         .filter(
-            spatialdimension__type__name__in=["Wijk", "GGW-gebied", "Gemeente"],
-            temporaldimension__type__name="Peildatum",
+            spatialdimensiontype__in=["Wijk", "GGW-gebied", "Gemeente"],
+            temporaldimensiontype="Peildatum",
+            measure__in = measure_list,
         )
-        .exclude(measure__extra_attr__BBGA_kleurenpalet__in=[9, 4])
+        .annotate(measure_name = F("measure"),)
+        .order_by("measure_name", "temporaldimensionyear", "temporaldimensionstartdate")
+        .distinct()
+        .values('id', 'spatialdimensiontype', 'spatialdimensiondate',
+                'spatialdimensioncode', 'spatialdimensionname', 'temporaldimensiontype',
+                'temporaldimensionstartdate', 'temporaldimensionenddate',
+                'temporaldimensionyear', 'measure_name', 'value')
+    )    
+
+    return queryset
+
+
+def _get_qs_publishstatistic_measure(measuremodel)-> QuerySet:
+    """measures exclude kleurenpalet 9: geen kleuren /absolute aantallen; kleurenpalet 4: wit """
+    queryset = (
+        measuremodel.objects
+        .exclude(extra_attr__BBGA_kleurenpalet__in=[9, 4])
         .annotate(
-            spatialdimensiondate=F("spatialdimension__source_date"),
-            spatialdimensioncode=F("spatialdimension__code"),
-            spatialdimensiontypename=F("spatialdimension__type__name"),
-            temporaldimensiontype=F("temporaldimension__type__name"),
-            temporaldimensionstartdate=F("temporaldimension__startdate"),
-            temporaldimensionyear=F("temporaldimension__year"),
             sd_minimum_bevtotaal=Coalesce(
-                F("measure__extra_attr__BBGA_sd_minimum_bev_totaal"), Value(None)
+                F("extra_attr__BBGA_sd_minimum_bev_totaal"), Value(None)
             ),
             sd_minimum_wvoorrbag=Coalesce(
-                F("measure__extra_attr__BBGA_sd_minimum_wvoor_bag"), Value(None)
+                F("extra_attr__BBGA_sd_minimum_wvoor_bag"), Value(None)
             ),
-            measure_name=F("measure__name"),
+            measure_id = F("id"),
         )
-        .order_by("measure", "temporaldimensionyear", "temporaldimensionstartdate")
-        .defer("created_at", "updated_at")
-        .distinct()
+        .values("measure_id", "name", "sd_minimum_bevtotaal", "sd_minimum_wvoorrbag")
     )
+
     return queryset
+
+def _get_df_data_publishstatistic()-> pd.DataFrame:
+    """get all observations necessary for calculation of statistic standarddeviation"""
+
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    measure_list = qsmeasure.values_list('name', flat=True)
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure_list)
+
+    if not (qsobservation):
+        return pd.DataFrame()
+
+    df_obs = convert_queryset_into_dataframe(qsobservation)
+    df_measure = convert_queryset_into_dataframe(qsmeasure)
+    df = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
+
+    return df
 
 
 def _select_df_mean(df: pd.DataFrame) -> pd.DataFrame:
@@ -83,10 +101,10 @@ def _select_df_mean(df: pd.DataFrame) -> pd.DataFrame:
 def _select_df_wijk_ggw(df: pd.DataFrame) -> pd.DataFrame:
     """Select only spatialdimension 'Wijk' and 'GGW-gebied'"""
     # TODO wat te doen met variabelen die geen std hebben omdat geen wijk en/of 22 gebied?
-    df_wijk_ggw = df[df["spatialdimensiontypename"].isin(["Wijk", "GGW-gebied"])][
+    df_wijk_ggw = df[df["spatialdimensiontype"].isin(["Wijk", "GGW-gebied"])][
         [
             "spatialdimensiondate",
-            "spatialdimensiontypename",
+            "spatialdimensiontype",
             "spatialdimensioncode",
             "temporaldimensiontype",
             "temporaldimensionstartdate",
@@ -114,7 +132,7 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     # split df in wijk en gebied22 - standarddeviation
     _df_wijk = (
-        _df[_df["spatialdimensiontypename"] == "Wijk"]
+        _df[_df["spatialdimensiontype"] == "Wijk"]
         .groupby(["temporaldimensionyear", "measure_id"])
         .agg({"value": "std"})
         .rename(columns={"value": "sd_wijk"})
@@ -123,7 +141,7 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
     _df_wijk["bron_wijk"] = "sdbc"
 
     _df_geb = (
-        _df[_df["spatialdimensiontypename"] == "GGW-gebied"]
+        _df[_df["spatialdimensiontype"] == "GGW-gebied"]
         .groupby(["temporaldimensionyear", "measure_id"])
         .agg({"value": "std"})
         .rename(columns={"value": "sd_geb"})
@@ -161,19 +179,14 @@ def publishstatistic() -> tuple:
     return: tuple(string, django.contrib.messages)
     """
 
-    logger.info("get all data necessary for calculation of statistic standarddeviation")
-    qsobservation = _get_qs_publishstatistic(Observation)
-    qscalcobs = _get_qs_publishstatistic(ObservationCalculated)
+    logger.info("get all data necessary for calculation of statistic standarddeviation")    
+    df = _get_df_data_publishstatistic()
 
-    if not (qsobservation or qscalcobs):
+    if len(df) == 0:
         return (
             f"There are no observations standarddeviation could be applied to",
             messages.ERROR,
         )
-
-    df_obs = convert_queryset_into_dataframe(qsobservation)
-    df_calc = convert_queryset_into_dataframe(qscalcobs)
-    df = pd.concat([df_obs, df_calc], ignore_index=True)
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
