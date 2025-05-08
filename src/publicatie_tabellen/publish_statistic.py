@@ -7,6 +7,13 @@ from django.db.models import F, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 
+from publicatie_tabellen.constants_settings import (
+    EXCLUDE_KLEURENPALET_SD,
+    KLEURENPALET,
+    SD_MIN_BEVTOTAAL,
+    SD_MIN_WVOORRBAG,
+    SP_CODE_AMSTERDAM,
+)
 from publicatie_tabellen.models import PublicationObservation, PublicationStatistic
 from publicatie_tabellen.utils import (
     convert_queryset_into_dataframe,
@@ -42,16 +49,16 @@ def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_list) -> QuerySet:
 
 
 def _get_qs_publishstatistic_measure(measuremodel)-> QuerySet:
-    """measures exclude kleurenpalet 9: geen kleuren /absolute aantallen; kleurenpalet 4: wit """
+    """measures exclude kleurenpalet, annotate var from extra_attr json field """
     queryset = (
         measuremodel.objects
-        .exclude(extra_attr__BBGA_kleurenpalet__in=[9, 4])
+        .exclude(**{f"extra_attr__{KLEURENPALET}__in": EXCLUDE_KLEURENPALET_SD})
         .annotate(
             sd_minimum_bevtotaal=Coalesce(
-                F("extra_attr__BBGA_sd_minimum_bev_totaal"), Value(None)
+                F(f"extra_attr__{SD_MIN_BEVTOTAAL}"), Value(None)
             ),
             sd_minimum_wvoorrbag=Coalesce(
-                F("extra_attr__BBGA_sd_minimum_wvoor_bag"), Value(None)
+                F(f"extra_attr__{SD_MIN_WVOORRBAG}"), Value(None)
             ),
             measure_id = F("id"),
         )
@@ -80,7 +87,7 @@ def _get_df_data_publishstatistic()-> pd.DataFrame:
 def _select_df_mean(df: pd.DataFrame) -> pd.DataFrame:
     """Mean of a measure is the city-avarage, thus spatialdimensioncode '0363' Amsterdam."""
     df_mean = (
-        df[df["spatialdimensioncode"] == "0363"][
+        df[df["spatialdimensioncode"] == SP_CODE_AMSTERDAM][
             [
                 "spatialdimensiondate",
                 "temporaldimensiontype",

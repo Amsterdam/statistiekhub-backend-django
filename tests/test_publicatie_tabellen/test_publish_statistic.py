@@ -4,6 +4,12 @@ import numpy as np
 import pytest
 from model_bakery import baker
 
+from publicatie_tabellen.constants_settings import (
+    EXCLUDE_KLEURENPALET_SD,
+    KLEURENPALET,
+    SD_MIN_BEVTOTAAL,
+    SD_MIN_WVOORRBAG,
+)
 from publicatie_tabellen.publish_observation import publishobservation
 from publicatie_tabellen.publish_statistic import (
     _get_df_data_publishstatistic,
@@ -58,7 +64,7 @@ def fill_ref_tabellen() -> dict:
 def fill_bev_won_obs(fill_ref_tabellen):
     fixture = fill_ref_tabellen
 
-    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=fixture["unit"], extra_attr={"BBGA_kleurenpalet": 3})
+    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=fixture["unit"], extra_attr={KLEURENPALET: 3})
     obsbev = baker.make(
         Observation,
         measure=measurebev,
@@ -87,7 +93,7 @@ def fill_bev_won_obs(fill_ref_tabellen):
         spatialdimension=fixture["spatialgem"],
         value=1000,
     )
-    measurewon = baker.make(Measure, name="WVOORRBAG", unit=fixture["unit"], extra_attr={"BBGA_kleurenpalet": 3})
+    measurewon = baker.make(Measure, name="WVOORRBAG", unit=fixture["unit"], extra_attr={KLEURENPALET: 3})
     obswon = baker.make(
         Observation,
         measure=measurewon,
@@ -121,11 +127,11 @@ def fill_bev_won_obs(fill_ref_tabellen):
 @pytest.mark.parametrize(
     " extra_attr, expected ",
     [
-        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_bev_totaal": 100}, (100, None)),
-        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_wvoor_bag": 150}, (None, 150)),
-        ({"BBGA_kleurenpalet": 4, "BBGA_sd_minimum_bev_totaal": 100}, (100, None)),
-        ({"BBGA_kleurenpalet": 9, "BBGA_sd_minimum_wvoor_bag": 150}, (None, 150)),
-        ({"BBGA_kleurenpalet": 3, "BBGA_sd_minimum_bev_totaal": 100, "BBGA_sd_minimum_wvoor_bag": 150}, (100, 150)),
+        ({KLEURENPALET: 3, SD_MIN_BEVTOTAAL: 100}, (100, None)),
+        ({KLEURENPALET: 3, SD_MIN_WVOORRBAG: 150}, (None, 150)),
+        ({KLEURENPALET: 4, SD_MIN_BEVTOTAAL: 100}, (100, None)),
+        ({KLEURENPALET: 9, SD_MIN_WVOORRBAG: 150}, (None, 150)),
+        ({KLEURENPALET: 3, SD_MIN_BEVTOTAAL: 100, SD_MIN_WVOORRBAG: 150}, (100, 150)),
     ]
 )
 @pytest.mark.django_db
@@ -142,7 +148,7 @@ def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected
     measure_list = qsmeasure.values_list('name', flat=True)
 
     if measure_list[::1] == []:
-        assert extra_attr["BBGA_kleurenpalet"] in [4,9]
+        assert extra_attr[KLEURENPALET] in [4,9]
     else:        
         assert measure_list[::1] == ['TEST']
         df_measure = convert_queryset_into_dataframe(qsmeasure)
@@ -154,11 +160,11 @@ def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected
 @pytest.mark.parametrize(
     " extra_attr, tempdim, spatialdim, expected",
     [
-        ({"BBGA_kleurenpalet": 3}, "temppeildatum", "spatialwijk", 1),
-        ({"BBGA_kleurenpalet": 9}, "temppeildatum", "spatialwijk", 0),
-        ({"BBGA_kleurenpalet": 4}, "temppeildatum", "spatialwijk", 0),
-        ({"BBGA_kleurenpalet": 3}, "tempjaar", "spatialwijk", 0),
-        ({"BBGA_kleurenpalet": 3}, "temppeildatum", "spatialbuurt", 0),
+        ({KLEURENPALET: 3}, "temppeildatum", "spatialwijk", 1),
+        ({KLEURENPALET: EXCLUDE_KLEURENPALET_SD[0]}, "temppeildatum", "spatialwijk", 0),
+        ({KLEURENPALET: EXCLUDE_KLEURENPALET_SD[1]}, "temppeildatum", "spatialwijk", 0),
+        ({KLEURENPALET: 3}, "tempjaar", "spatialwijk", 0),
+        ({KLEURENPALET: 3}, "temppeildatum", "spatialbuurt", 0),
         ({}, "temppeildatum", "spatialwijk", 0),
     ],
 )
@@ -254,70 +260,70 @@ def test_get_qs_for_bevmin_wonmin(fill_bev_won_obs):
     [
         (
             "BEVTOTAAL",
-            {"BBGA_sd_minimum_bev_totaal": 900, "BBGA_kleurenpalet": 3},
+            {SD_MIN_BEVTOTAAL: 900, KLEURENPALET: 3},
             "spatialwijk",
             10.0,
         ),
         (
             "WVOORRBAG",
-            {"BBGA_sd_minimum_wvoor_bag": 900, "BBGA_kleurenpalet": 3},
+            {SD_MIN_WVOORRBAG: 900, KLEURENPALET: 3},
             "spatialwijk",
             10.0,
         ),
         (
             "BEVTOTAAL",
-            {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
+            {SD_MIN_WVOORRBAG: 2000, KLEURENPALET: 3},
             "spatialwijk",
             10.0,
         ),
         (
             "WVOORRBAG",
-            {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
+            {SD_MIN_BEVTOTAAL: 2000, KLEURENPALET: 3},
             "spatialwijk",
             10.0,
         ),
         (
             "BEVTOTAAL",
-            {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
+            {SD_MIN_BEVTOTAAL: 2000, KLEURENPALET: 3},
             "spatialwijk",
             np.nan,
         ),
         (
             "WVOORRBAG",
-            {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
+            {SD_MIN_WVOORRBAG: 2000, KLEURENPALET: 3},
             "spatialwijk",
             np.nan,
         ),
         (
             "BEVTOTAAL",
-            {"BBGA_sd_minimum_bev_totaal": 900, "BBGA_kleurenpalet": 3},
+            {SD_MIN_BEVTOTAAL: 900, KLEURENPALET: 3},
             "spatialggw",
             10.0,
         ),
         (
             "WVOORRBAG",
-            {"BBGA_sd_minimum_wvoor_bag": 900, "BBGA_kleurenpalet": 3},
+            {SD_MIN_WVOORRBAG: 900, KLEURENPALET: 3},
             "spatialggw",
             10.0,
         ),
         (
             "BEVTOTAAL",
-            {"BBGA_sd_minimum_bev_totaal": 2000, "BBGA_kleurenpalet": 3},
+            {SD_MIN_BEVTOTAAL: 2000, KLEURENPALET: 3},
             "spatialggw",
             np.nan,
         ),
         (
             "WVOORRBAG",
-            {"BBGA_sd_minimum_wvoor_bag": 2000, "BBGA_kleurenpalet": 3},
+            {SD_MIN_WVOORRBAG: 2000, KLEURENPALET: 3},
             "spatialggw",
             np.nan,
         ),
         (
             "BEVTOTAAL",
             {
-                "BBGA_sd_minimum_bev_totaal": 2000,
-                "BBGA_sd_minimum_wvoor_bag": 2000,
-                "BBGA_kleurenpalet": 3,
+                SD_MIN_BEVTOTAAL: 2000,
+                SD_MIN_WVOORRBAG: 2000,
+                KLEURENPALET: 3,
             },
             "spatialggw",
             np.nan,
