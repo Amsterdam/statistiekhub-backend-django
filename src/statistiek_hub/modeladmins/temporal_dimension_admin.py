@@ -5,7 +5,7 @@ from statistiek_hub.resources.temporal_dimension_resource import (
     TemporalDimensionResource,
 )
 
-from .import_export_formats_mixin import ImportExportFormatsMixin
+from .admin_mixins import ImportExportFormatsMixin
 
 
 class TemporalDimensionAdmin(ImportExportFormatsMixin, admin.ModelAdmin):

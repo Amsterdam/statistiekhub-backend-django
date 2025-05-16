@@ -5,7 +5,7 @@ from leaflet.admin import LeafletGeoAdminMixin
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.resources.spatial_dimension_resource import SpatialDimensionResource
 
-from .import_export_formats_mixin import ImportExportFormatsMixin
+from .admin_mixins import ImportExportFormatsMixin
 
 
 class SourceDateFilter(admin.SimpleListFilter):
