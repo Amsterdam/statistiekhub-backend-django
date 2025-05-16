@@ -4,7 +4,7 @@ from import_export.tmp_storages import MediaStorage
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.resources.measure_resource import MeasureResource
 
-from .import_export_formats_mixin import ImportExportFormatsMixin
+from .admin_mixins import CheckPermissionUserMixin, ImportExportFormatsMixin
 
 
 class CalculationFilter(admin.SimpleListFilter):
@@ -31,7 +31,7 @@ class FilterInline(admin.TabularInline):
     extra = 0  # <=== For remove empty fields from admin view
 
 
-class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
+class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
     tmp_storage_class = MediaStorage
     list_display = (
         "id",
@@ -104,18 +104,7 @@ class MeasureAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
 
     inlines = [FilterInline]
 
-    def _get_user_groups(self, request):
-        # Collect user groups once
-        if not hasattr(request, '_cached_user_groups'):
-            request._cached_user_groups = request.user.groups.all()
-        return request._cached_user_groups
-
-    def has_change_permission(self, request, obj=None):
-        if obj is not None:
-            return obj.theme.group in self._get_user_groups(request)
-        return super().has_change_permission(request, obj)
-
-    def has_delete_permission(self, request, obj=None):
-        if obj is not None:
-            return obj.theme.group in self._get_user_groups(request)
-        return super().has_delete_permission(request, obj)
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ['name']
+        return []

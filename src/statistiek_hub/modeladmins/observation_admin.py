@@ -4,10 +4,10 @@ from import_export.tmp_storages import MediaStorage
 from statistiek_hub.models.observation import ObservationCalculated
 from statistiek_hub.resources.observation_resource import ObservationResource
 
-from .import_export_formats_mixin import ImportExportFormatsMixin
+from .admin_mixins import CheckPermissionUserMixin, ImportExportFormatsMixin
 
 
-class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
+class ObservationAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
     tmp_storage_class = MediaStorage
     list_display = (
         "id",
@@ -34,22 +34,7 @@ class ObservationAdmin(ImportExportFormatsMixin, admin.ModelAdmin):
             return  ["measure", "temporaldimension", "spatialdimension"]
         else:  # Add obj
             return []
-
-    def _get_user_groups(self, request):
-        # Collect user groups once
-        if not hasattr(request, '_cached_user_groups'):
-            request._cached_user_groups = request.user.groups.all()
-        return request._cached_user_groups
-
-    def has_change_permission(self, request, obj=None):
-        if obj is not None:
-            return obj.measure.theme.group in self._get_user_groups(request)
-        return super().has_change_permission(request, obj)
-
-    def has_delete_permission(self, request, obj=None):
-        if obj is not None:
-            return obj.measure.theme.group in self._get_user_groups(request)
-        return super().has_delete_permission(request, obj)    
+    
 
 
 @admin.register(ObservationCalculated)
