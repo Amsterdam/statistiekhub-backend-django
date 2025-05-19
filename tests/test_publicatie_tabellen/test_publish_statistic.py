@@ -132,6 +132,8 @@ def fill_bev_won_obs(fill_ref_tabellen):
         ({KLEURENPALET: 4, SD_MIN_BEVTOTAAL: 100}, (100, None)),
         ({KLEURENPALET: 9, SD_MIN_WVOORRBAG: 150}, (None, 150)),
         ({KLEURENPALET: 3, SD_MIN_BEVTOTAAL: 100, SD_MIN_WVOORRBAG: 150}, (100, 150)),
+        ({SD_MIN_BEVTOTAAL: 100, SD_MIN_WVOORRBAG: 150}, ()),
+        ({KLEURENPALET: 3}, (None, None)),
     ]
 )
 @pytest.mark.django_db
@@ -148,7 +150,10 @@ def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected
     measure_list = qsmeasure.values_list('name', flat=True)
 
     if measure_list[::1] == []:
-        assert extra_attr[KLEURENPALET] in [4,9]
+        if KLEURENPALET in extra_attr.keys():
+            assert extra_attr[KLEURENPALET] in [4,9]
+        else:
+            assert measure_list[::1] == []   
     else:        
         assert measure_list[::1] == ['TEST']
         df_measure = convert_queryset_into_dataframe(qsmeasure)
@@ -379,7 +384,7 @@ def test_set_small_regions_to_nan_if_minimum_observations(
     """set region value to np.nan if var_min is less than minimum_value"""
     f_ref_tabellen = fill_ref_tabellen
 
-    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=f_ref_tabellen["unit"])
+    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=f_ref_tabellen["unit"], extra_attr={KLEURENPALET: 3})
     obsbev = baker.make(
         Observation,
         measure=measurebev,
@@ -388,7 +393,7 @@ def test_set_small_regions_to_nan_if_minimum_observations(
         value=bev_value,
     )
 
-    measurevar = baker.make(Measure, name="VAR", unit=f_ref_tabellen["unit"])
+    measurevar = baker.make(Measure, name="VAR", unit=f_ref_tabellen["unit"], extra_attr={KLEURENPALET: 3})
     obsvar = baker.make(
         Observation,
         measure=measurevar,

@@ -104,7 +104,7 @@ def set_small_regions_to_nan_if_minimum(
         ]
     ]
 
-    if len(_df_var_min) == 0:
+    if len(_df_var_min) == 0 or len(dataframe) == 0:
         return dataframe
 
     hulp = dataframe.join(
