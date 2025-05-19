@@ -35,6 +35,7 @@ class ImportJobForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
+        self.import_job_models = getattr(settings, "IMPORT_EXPORT_JOB_MODELS", {})
 
         self.modifier = self.user.is_superuser
         if self.user.groups.filter(name='modifier_statistiekhub_tabellen').exists():
@@ -46,7 +47,7 @@ class ImportJobForm(forms.ModelForm):
         self.fields["format"].choices = self.instance.get_format_choices()
 
     def _get_model_choices(self) -> list:
-        _import_job_models = getattr(settings, "IMPORT_EXPORT_JOB_MODELS", {})
+        _import_job_models = self.import_job_models.copy()
         if not self.modifier:
             logger.info(f"user not in modifier-group")
             _import_job_models.pop("SpatialDimension")
