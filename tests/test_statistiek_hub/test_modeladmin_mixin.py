@@ -104,8 +104,6 @@ def test_no_obj(fill_db):
 
     permission = Permission.objects.get(codename='delete_filter')
     user.user_permissions.add(permission)
-    print(user.get_all_permissions())
-    
 
     request = RequestFactory().get('/')
     request.user = fixture["user"]
