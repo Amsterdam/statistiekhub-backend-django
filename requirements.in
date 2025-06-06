@@ -11,8 +11,10 @@ psycopg2-binary
 python-dateutil
 pandas
 timeout-decorator
-mozilla-django-oidc
 uwsgi
+
+# Amsterdam packages
+amsterdam-django-oidc
 
 # Azure
 azure-core
