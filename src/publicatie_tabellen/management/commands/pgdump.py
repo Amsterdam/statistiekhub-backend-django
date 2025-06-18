@@ -17,6 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             with transaction.atomic():
+                logger.info("start publicationtables command")
                 # calculate all publication-tables
                 updated = PublicationUpdatedAt.objects.order_by('-updated_at').first()
                 if not updated:
