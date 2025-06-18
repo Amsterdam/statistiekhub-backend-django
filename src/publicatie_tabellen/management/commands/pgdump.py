@@ -26,25 +26,32 @@ class Command(BaseCommand):
                 latest_change = ChangesLog.objects.order_by('-changed_at').first()
                 if latest_change.changed_at <= updated.updated_at:
                     logger.info("No changes in tables")
+                    changed = False
                     return  # Stop de transactie
                 
                 PublishFunction.run_all_publish_tables()
                 updated.save()
-            
+                changed = True
+
+        except Exception as e:
+            changed = False
+            logger.exception(
+                f"An exception in calculating all publicationtables: {e}"
+            )
+
+        if changed:  
+            try:               
                 # pg_dump tables
                 app_names = ["publicatie_tabellen",]
                 dump = PgDumpToStorage()
-                try:                    
-                    dump.start_dump(app_names)
-                    dump.upload_to_blob()
-                    dump.remove_dump()
                     
-                    logger.info("Completed DB dump")
-                except Exception as e:
-                    logger.exception(f"An exception occurred during pg_dump: {e}")
-                    raise  # transaction rollback
+                dump.start_dump(app_names)
+                dump.upload_to_blob()
+                dump.remove_dump()
+                
+                logger.info("Completed DB dump")
 
-        except Exception as e:
-            logger.exception(
-                f"An exception in dumping the publicationtables: {e}"
-            )
+            except Exception as e:
+                logger.exception(
+                    f"An exception occurred during pg_dump: {e}"
+                )
