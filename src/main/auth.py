@@ -16,9 +16,8 @@ def oidc_login(request, **kwargs):
 
 class OIDCAuthenticationBackend(amsterdam_django_oidc.OIDCAuthenticationBackend):
     def verify_claims(self, claims):
-        verified = super(OIDCAuthenticationBackend, self).verify_claims(claims)
-        has_roles = claims.get("roles")
-        return verified and has_roles
+        has_roles = bool(claims.get("roles", [])),
+        return has_roles
 
     def create_user(self, claims):
         user = super(OIDCAuthenticationBackend, self).create_user(claims)
