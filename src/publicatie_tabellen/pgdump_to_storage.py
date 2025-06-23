@@ -19,6 +19,8 @@ class PgDumpToStorage:
         os.makedirs(self.TMP_DIRECTORY, exist_ok=True)
         for app in app_names:
             for model in django.apps.apps.get_app_config(app).get_models():
+                if model.__name__ == "ChangesLog":
+                    continue
                 self._dump_model_to_csv_zip(model)
 
     def _dump_model_to_csv_zip(self, model):
