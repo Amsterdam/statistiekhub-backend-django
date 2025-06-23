@@ -27,14 +27,14 @@ from statistiek_hub.utils.truncate_model import truncate
 logger = logging.getLogger(__name__)
 
 
-def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_list) -> QuerySet:
+def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_str) -> QuerySet:
     """get queryset from cleaned obs publication model specificly for publishstatistic"""
     queryset = (
         cleaned_obsmodel.objects
         .filter(
             spatialdimensiontype__in=["Wijk", "GGW-gebied", "Gemeente"],
             temporaldimensiontype="Peildatum",
-            measure__in = measure_list,
+            measure = measure_str,
         )
         .annotate(measure_name = F("measure"),)
         .order_by("measure_name", "temporaldimensionyear", "temporaldimensionstartdate")
@@ -67,22 +67,6 @@ def _get_qs_publishstatistic_measure(measuremodel)-> QuerySet:
     )
 
     return queryset
-
-def _get_df_data_publishstatistic()-> pd.DataFrame:
-    """get all observations necessary for calculation of statistic standarddeviation"""
-
-    qsmeasure = _get_qs_publishstatistic_measure(Measure)
-    measure_list = qsmeasure.values_list('name', flat=True)
-    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure_list)
-
-    if not (qsobservation):
-        return pd.DataFrame()
-
-    df_obs = convert_queryset_into_dataframe(qsobservation)
-    df_measure = convert_queryset_into_dataframe(qsmeasure)
-    df = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
-
-    return df
 
 
 def _select_df_mean(df: pd.DataFrame) -> pd.DataFrame:
@@ -187,52 +171,58 @@ def publishstatistic() -> tuple:
     return: tuple(string, django.contrib.messages)
     """
 
-    logger.info("get all data necessary for calculation of statistic standarddeviation")    
-    df = _get_df_data_publishstatistic()
-
-    if len(df) == 0:
-        return (
-            f"There are no observations standarddeviation could be applied to",
-            messages.ERROR,
-        )
+    logger.info("get data necessary for calculation of statistic standarddeviation")
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    df_measure = convert_queryset_into_dataframe(qsmeasure)
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
+    truncate(PublicationStatistic)
+    measure_no_sd = []
 
-    logger.info("aanmaken df met gemiddelde")
-    df_mean = _select_df_mean(df)
+    for measure in qsmeasure:
+        # select observations
+        qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
+        df_obs = convert_queryset_into_dataframe(qsobservation)
+        df = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
 
-    logger.info("berekening standaarddeviatie op wijk en geb22")
-    df_wijk_ggw = _select_df_wijk_ggw(df)
-    _hulp1 = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", df_wijk_ggw)
-    _hulp2 = set_small_regions_to_nan_if_minimum(dfmin, "WVOORRBAG", _hulp1)
-    _hulp3 = _sd_berekening(_hulp2)
+        if len(df) == 0:
+            measure_no_sd.append(measure['name'])
+            continue
 
-    logger.info("alles samenvoegen tot statistic df")
-    dfstatistic = df_mean.join(
-        _hulp3.set_index(["temporaldimensionyear", "measure_id"]),
-        on=["temporaldimensionyear", "measure_id"],
-        how="left",
-    ).replace({np.nan: None})
-    measure_no_sd = dfstatistic[dfstatistic["standarddeviation"].isna()][
-        "measure_name"
-    ].values
-    # if there is no standarddeviation -> remove record
-    dfstatistic.dropna(subset=["standarddeviation"], inplace=True)
-    dfstatistic.rename(columns={"measure_name": "measure"}, inplace=True)
+        logger.info("aanmaken df met gemiddelde")
+        df_mean = _select_df_mean(df)
 
-    # gemiddelde en std afronden op 3 decimalen -> set on the model field
-    try:
-        truncate(PublicationStatistic)
+        logger.info("berekening standaarddeviatie op wijk en geb22")
+        df_wijk_ggw = _select_df_wijk_ggw(df)
+        _hulp1 = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", df_wijk_ggw)
+        _hulp2 = set_small_regions_to_nan_if_minimum(dfmin, "WVOORRBAG", _hulp1)
+        _hulp3 = _sd_berekening(_hulp2)
+
+        logger.info("alles samenvoegen tot statistic df")
+        dfstatistic = df_mean.join(
+            _hulp3.set_index(["temporaldimensionyear", "measure_id"]),
+            on=["temporaldimensionyear", "measure_id"],
+            how="left",
+        ).replace({np.nan: None})
+
+        if dfstatistic.empty or dfstatistic['standarddeviation'].isnull().values[0]:
+            # if there is no standarddeviation -> no save
+            measure_no_sd.append(measure['name'])
+            continue
+
+        dfstatistic.rename(columns={"measure_name": "measure"}, inplace=True)
+
+        # gemiddelde en std afronden op 3 decimalen -> set on the model field
         copy_dataframe(dfstatistic, PublicationStatistic)
-        extra = (
-            f", WARNING Not included: no standarddeviation for {measure_no_sd}"
-            if len(measure_no_sd) > 0
-            else ""
-        )
-        return (
-            f"All records for publication-statistic are imported{extra}",
-            messages.SUCCESS,
-        )
-    except:  # error
-        return (f"something went wrong; WARNING table is not updated!", messages.ERROR)
+
+    extra = (
+        f", WARNING Not included: no standarddeviation for {measure_no_sd}"
+        if len(measure_no_sd) > 0
+        else ""
+    )
+
+    return (
+        f"All records for publication-statistic are imported{extra}",
+        messages.SUCCESS,
+    )
