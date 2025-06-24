@@ -189,7 +189,7 @@ def publishstatistic() -> tuple:
             measure_no_sd.append(measure['name'])
             continue
 
-        logger.info("aanmaken df met gemiddelde")
+        logger.info(f"aanmaken df met gemiddelde voor {measure}")
         df_mean = _select_df_mean(df)
 
         logger.info("berekening standaarddeviatie op wijk en geb22")
@@ -198,7 +198,6 @@ def publishstatistic() -> tuple:
         _hulp2 = set_small_regions_to_nan_if_minimum(dfmin, "WVOORRBAG", _hulp1)
         _hulp3 = _sd_berekening(_hulp2)
 
-        logger.info("alles samenvoegen tot statistic df")
         dfstatistic = df_mean.join(
             _hulp3.set_index(["temporaldimensionyear", "measure_id"]),
             on=["temporaldimensionyear", "measure_id"],
