@@ -147,7 +147,6 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
         on=["temporaldimensionyear", "measure_id"],
         how="outer",
     )
-    df_wijk_geb.reset_index(inplace=True)
 
     # coalesce of std wijk and geb22
     df_wijk_geb["standarddeviation"] = df_wijk_geb["sd_wijk"].combine_first(
