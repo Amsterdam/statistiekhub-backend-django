@@ -202,13 +202,15 @@ def publishstatistic() -> tuple:
             _hulp3.set_index(["temporaldimensionyear", "measure_id"]),
             on=["temporaldimensionyear", "measure_id"],
             how="left",
-        ).replace({np.nan: None})
+        )
 
-        if dfstatistic.empty or dfstatistic['standarddeviation'].isnull().values[0]:
+        if dfstatistic.empty:
             # if there is no standarddeviation -> no save
             measure_no_sd.append(measure['name'])
             continue
 
+        # if there is no standarddeviation for specific temporaldimension -> remove record
+        dfstatistic.dropna(subset=["standarddeviation"], inplace=True)
         dfstatistic.rename(columns={"measure_name": "measure"}, inplace=True)
 
         # gemiddelde en std afronden op 3 decimalen -> set on the model field
