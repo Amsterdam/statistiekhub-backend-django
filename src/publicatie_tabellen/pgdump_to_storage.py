@@ -1,13 +1,12 @@
 import logging
 import os
 import shutil
+import zipfile
 
 import django.apps
 from django.conf import settings
 from django.db import connection
 from django.utils.module_loading import import_string as get_storage_class
-
-from publicatie_tabellen.utils import convert_queryset_into_dataframe
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +26,20 @@ class PgDumpToStorage:
         table_name = model._meta.db_table
         filepath = os.path.join(
             self.TMP_DIRECTORY, f"{table_name}.csv.zip"
-        )  # filename is model name
+        )  
+        csv_filename="data.csv"
+        select_query = f"SELECT * FROM {table_name}"
 
-        qs = model.objects.all()
-        df = convert_queryset_into_dataframe(qs)
-        df.to_csv(filepath, compression="zip", index=False, sep=';')
+        # Open the ZIP file for writing
+        with zipfile.ZipFile(filepath, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            # Open a writable stream inside the ZIP file for the CSV
+            with zip_file.open(csv_filename, "w") as csv_file:
+                # stream data directly into the ZIP
+                sql = f"COPY ({select_query}) TO STDOUT WITH CSV HEADER"
+                with connection.cursor() as cursor:
+                    cursor.copy_expert(sql, csv_file)
+
         logger.info(f"Successfully dumped {filepath}")
-
         return filepath
 
     def upload_to_blob(self):
