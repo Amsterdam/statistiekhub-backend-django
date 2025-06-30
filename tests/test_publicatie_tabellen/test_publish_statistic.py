@@ -10,10 +10,11 @@ from publicatie_tabellen.constants_settings import (
     SD_MIN_BEVTOTAAL,
     SD_MIN_WVOORRBAG,
 )
+from publicatie_tabellen.models import PublicationObservation
 from publicatie_tabellen.publish_observation import publishobservation
 from publicatie_tabellen.publish_statistic import (
-    _get_df_data_publishstatistic,
     _get_qs_publishstatistic_measure,
+    _get_qs_publishstatistic_obs,
     _select_df_wijk_ggw,
 )
 from publicatie_tabellen.utils import (
@@ -181,12 +182,12 @@ def test_get_df_data_publishstatistic(
     fixture = fill_ref_tabellen
 
 
-    measure = baker.make(
+    measuretest = baker.make(
         Measure, name="TEST", unit=fixture["unit"], extra_attr=extra_attr
     )
     obs = baker.make(
         Observation,
-        measure=measure,
+        measure=measuretest,
         temporaldimension=fixture[tempdim],
         spatialdimension=fixture[spatialdim],
         value=1000,
@@ -194,27 +195,34 @@ def test_get_df_data_publishstatistic(
 
     # fill publishobservation model
     _, _ = publishobservation()
-    dfobs = _get_df_data_publishstatistic()
 
-    assert len(dfobs) == expected
-    if len(dfobs) > 0:
-        assert dfobs["spatialdimensiontype"].unique()[0] in [
-            "Wijk",
-            "GGW-gebied",
-            "Gemeente",
-        ]
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    df_measure = convert_queryset_into_dataframe(qsmeasure)
 
-        # check all columns names
-        diff = (set(dfobs.columns.values.tolist()) - 
-                set(['id', 'spatialdimensiontype', 'spatialdimensiondate',
-        'spatialdimensioncode', 'spatialdimensionname', 'temporaldimensiontype',
-        'temporaldimensionstartdate', 'temporaldimensionenddate',
-        'temporaldimensionyear', 'measure_name', 'value', 'measure_id', 'name',
-        'sd_minimum_bevtotaal', 'sd_minimum_wvoorrbag']))
+    for measure in qsmeasure:
+        qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
+        df_obs = convert_queryset_into_dataframe(qsobservation)
+        df = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
 
-        assert len(diff) == 0
+        assert len(df) == expected
+        if len(df) > 0:
+            assert df["spatialdimensiontype"].unique()[0] in [
+                "Wijk",
+                "GGW-gebied",
+                "Gemeente",
+            ]
 
-    measure.delete()
+            # check all columns names
+            diff = (set(df.columns.values.tolist()) - 
+                    set(['id', 'spatialdimensiontype', 'spatialdimensiondate',
+            'spatialdimensioncode', 'spatialdimensionname', 'temporaldimensiontype',
+            'temporaldimensionstartdate', 'temporaldimensionenddate',
+            'temporaldimensionyear', 'measure_name', 'value', 'measure_id', 'name',
+            'sd_minimum_bevtotaal', 'sd_minimum_wvoorrbag']))
+
+            assert len(diff) == 0
+
+    measuretest.delete()
     obs.delete()
 
 
@@ -225,7 +233,13 @@ def test_select_df_wijk_ggw(fill_bev_won_obs):
     # fill publishobservation model
     _, _ = publishobservation()
 
-    dfobs = _get_df_data_publishstatistic()
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    df_measure = convert_queryset_into_dataframe(qsmeasure)
+    measure_first = qsmeasure.first()
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure_first["name"])
+    df_obs = convert_queryset_into_dataframe(qsobservation)
+    dfobs = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')    
+
     assert (
         dfobs["spatialdimensiontype"].unique().sort()
         == ["Wijk", "GGW-gebied", "Gemeente"].sort()
@@ -356,7 +370,14 @@ def test_set_small_regions_to_nan_if_minimum(
 
     # fill publishobservation model
     _, _ = publishobservation()
-    dfobs = _get_df_data_publishstatistic()
+    
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    df_measure = convert_queryset_into_dataframe(qsmeasure)
+    measure = qsmeasure.get(name = measurevar.name)
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
+    df_obs = convert_queryset_into_dataframe(qsobservation)
+    dfobs = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
+
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
     dfwijkggw = _select_df_wijk_ggw(dfobs)
@@ -404,9 +425,17 @@ def test_set_small_regions_to_nan_if_minimum_observations(
 
     # fill publishobservation model
     _, _ = publishobservation()
-    dfobs = _get_df_data_publishstatistic()
+
+    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    df_measure = convert_queryset_into_dataframe(qsmeasure)
+
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
+
+    measure = qsmeasure.get(name=measurevar.name)
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
+    df_obs = convert_queryset_into_dataframe(qsobservation)
+    dfobs = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
 
     df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
     assert (
@@ -416,6 +445,12 @@ def test_set_small_regions_to_nan_if_minimum_observations(
         is None
     )
 
+    measure = qsmeasure.get(name=measurebev.name)
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
+    df_obs = convert_queryset_into_dataframe(qsobservation)
+    dfobs = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
+
+    df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
     # dfobs is based on publicationobservation (cleaned-obs) so no nan in df
     if bev_value is not np.nan:
         assert (
@@ -424,6 +459,8 @@ def test_set_small_regions_to_nan_if_minimum_observations(
             )
             is None
         )
+
     measurebev.delete()
+    measurevar.delete()
     obsbev.delete()
     obsvar.delete()

@@ -23,7 +23,7 @@ from statistiek_hub.utils.truncate_model import truncate
 logger = logging.getLogger(__name__)
 
 
-def _get_qs_publishobservation(obsmodel) -> QuerySet:
+def _get_qs_publishobservation(obsmodel, measure) -> QuerySet:
     """get queryset from obsmodel specificly for publishobservations"""
 
     queryset = (
@@ -35,7 +35,7 @@ def _get_qs_publishobservation(obsmodel) -> QuerySet:
             "spatialdimension__type",
             "temporaldimension__type",
         )
-        .all()
+        .filter(measure=measure)
         .annotate(
             spatialdimensiontype=F("spatialdimension__type__name"),
             spatialdimensiondate=F("spatialdimension__source_date"),
@@ -124,13 +124,6 @@ def publishobservation() -> tuple:
     return: tuple(string, django.contrib.messages)
     """
 
-    qsobservation = _get_qs_publishobservation(Observation)
-    qscalcobs = _get_qs_publishobservation(ObservationCalculated)
-
-    df_obs = convert_queryset_into_dataframe(qsobservation)
-    df_calc = convert_queryset_into_dataframe(qscalcobs)
-    df = pd.concat([df_obs, df_calc], ignore_index=True)
-
     # get BEVTOTAAL for all types for sensitive rule 1: small regions to np.nan
     spatialdimtypes = SpatialDimensionType.objects.all().values_list("name", flat=True)
     qsmin = get_qs_for_bevmin_wonmin(Observation, measures=["BEVTOTAAL",], spatialdimensiontypes=spatialdimtypes)
@@ -141,11 +134,17 @@ def publishobservation() -> tuple:
     measure_no_data = []
 
     for measure in qsmeasure:
-        mdf = df[df["measure_id"] == measure.id].copy()
+        # select observations
+        qsobservation = _get_qs_publishobservation(Observation, measure)
+        if len(qsobservation) == 0:
+            qsobservation = _get_qs_publishobservation(ObservationCalculated, measure)
+        mdf = convert_queryset_into_dataframe(qsobservation)
+
         if len(mdf) == 0:
             measure_no_data.append(measure.name)
             continue
-
+        
+        logger.info(f"selected observations for {measure}: {len(mdf)}")
         if hasattr(measure, "filter"):
             dfobs = _get_df_with_filterrule(measure)
 

@@ -17,6 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             with transaction.atomic():
+                logger.info("start publicationtables command")
                 # calculate all publication-tables
                 updated = PublicationUpdatedAt.objects.order_by('-updated_at').first()
                 if not updated:
@@ -26,25 +27,31 @@ class Command(BaseCommand):
                 latest_change = ChangesLog.objects.order_by('-changed_at').first()
                 if latest_change.changed_at <= updated.updated_at:
                     logger.info("No changes in tables")
-                    return  # Stop de transactie
+                    return
                 
                 PublishFunction.run_all_publish_tables()
                 updated.save()
-            
-                # pg_dump tables
-                app_names = ["publicatie_tabellen",]
-                dump = PgDumpToStorage()
-                try:                    
-                    dump.start_dump(app_names)
-                    dump.upload_to_blob()
-                    dump.remove_dump()
-                    
-                    logger.info("Completed DB dump")
-                except Exception as e:
-                    logger.exception(f"An exception occurred during pg_dump: {e}")
-                    raise  # transaction rollback
+                changed = True
 
         except Exception as e:
             logger.exception(
-                f"An exception in dumping the publicationtables: {e}"
+                f"An exception in calculating all publicationtables: {e}"
             )
+            return
+
+        if changed:  
+            try:               
+                # pg_dump tables
+                app_names = ["publicatie_tabellen",]
+                dump = PgDumpToStorage()
+                    
+                dump.start_dump(app_names)
+                dump.upload_to_blob()
+                dump.remove_dump()
+                
+                logger.info("Completed DB dump")
+
+            except Exception as e:
+                logger.exception(
+                    f"An exception occurred during pg_dump: {e}"
+                )
