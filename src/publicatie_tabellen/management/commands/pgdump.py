@@ -27,18 +27,17 @@ class Command(BaseCommand):
                 latest_change = ChangesLog.objects.order_by('-changed_at').first()
                 if latest_change.changed_at <= updated.updated_at:
                     logger.info("No changes in tables")
-                    changed = False
-                    return  # Stop de transactie
+                    return
                 
                 PublishFunction.run_all_publish_tables()
                 updated.save()
                 changed = True
 
         except Exception as e:
-            changed = False
             logger.exception(
                 f"An exception in calculating all publicationtables: {e}"
             )
+            return
 
         if changed:  
             try:               

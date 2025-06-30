@@ -8,6 +8,8 @@ from django.conf import settings
 from django.db import connection
 from django.utils.module_loading import import_string as get_storage_class
 
+from publicatie_tabellen.models import ChangesLog
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,7 +20,7 @@ class PgDumpToStorage:
         os.makedirs(self.TMP_DIRECTORY, exist_ok=True)
         for app in app_names:
             for model in django.apps.apps.get_app_config(app).get_models():
-                if model.__name__ == "ChangesLog":
+                if isinstance(model, ChangesLog):
                     continue
                 self._dump_model_to_csv_zip(model)
 

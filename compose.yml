@@ -65,7 +65,7 @@ services:
       target: dev
     environment:
       <<: *base-app-env
-      LOG_LEVEL: "INFO"
+      LOG_LEVEL: "DEBUG"
       DEBUG: "True"
       DJANGO_LOG_LEVEL: "DEBUG"
       DJANGO_SUPERUSER_PASSWORD: "admin"
