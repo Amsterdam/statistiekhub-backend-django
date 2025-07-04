@@ -5,5 +5,10 @@
         <p>Laatste versie: {{ updated_at }}</p>
     </div>
     <br />
-    {{ block.super }}
+
+    {% if show_message %}
+    <p class="errornote">Voer een measure-naam in om resultaten te zien.</p>
+    {% endif %}
+
+    {{ block.super }}   
 {% endblock %}

@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django.http import HttpResponseRedirect
-from django.urls import path
 
 from publicatie_tabellen.models import (
     PublicationMeasure,
@@ -8,8 +6,7 @@ from publicatie_tabellen.models import (
     PublicationStatistic,
     PublicationUpdatedAt,
 )
-from publicatie_tabellen.publication_main import PublishFunction
-
+from statistiek_hub.modeladmins.admin_mixins import GenericDateFilter
 
 class NoAddDeleteChangePermission(admin.ModelAdmin):
     change_list_template = "publicatie_tabellen/changelist.html"
@@ -52,26 +49,51 @@ class PublicationMeasureTypeAdmin(NoAddDeleteChangePermission):
     search_fields = ["name"]
 
 
+class SpatialdimensionDateFilter(GenericDateFilter):
+    title = "spatialdimensiondate"
+    parameter_name = "spatialdimensiondate"
+    filter_field = "spatialdimensiondate"
+
 @admin.register(PublicationObservation)
 class PublicationObservationAdmin(NoAddDeleteChangePermission):
+    search_fields = ["measure"]
+    search_help_text = "search on measure name"
+
+    def changelist_view(self, request, extra_context=None):
+        # Controleer of er een zoekterm is
+        search_term = request.GET.get('q')
+        if not search_term:
+            # Voeg een melding toe aan de context
+            extra_context = extra_context or {}
+            extra_context['show_message'] = True
+        return super().changelist_view(request, extra_context=extra_context) 
+
+    def get_queryset(self, request):
+            # Controleer of er een zoekterm is opgegeven
+            search_term = request.GET.get('q')  # 'q' is de parameter die door het search field wordt gebruikt
+            if search_term:
+                # Als er een zoekterm is, gebruik de standaard queryset
+                return super().get_queryset(request)
+            else:
+                # Anders retourneer een lege queryset
+                return self.model.objects.none()
+
     list_display = (
-        "id",
         "measure",
         "value",
         "temporaldimensiontype",
         "temporaldimensionyear",
         "spatialdimensiontype",
         "spatialdimensioncode",
+        "spatialdimensiondate",
     )
 
     list_filter = (
         "temporaldimensiontype",
         "temporaldimensionyear",
         "spatialdimensiontype",
-        "spatialdimensiondate",
+        SpatialdimensionDateFilter,
     )
-    search_help_text = "search on measure name"
-    search_fields = ["measure"]
 
 
 @admin.register(PublicationStatistic)
