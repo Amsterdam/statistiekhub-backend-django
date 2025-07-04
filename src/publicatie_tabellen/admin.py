@@ -8,6 +8,7 @@ from publicatie_tabellen.models import (
 )
 from statistiek_hub.modeladmins.admin_mixins import GenericDateFilter
 
+
 class NoAddDeleteChangePermission(admin.ModelAdmin):
     change_list_template = "publicatie_tabellen/changelist.html"
 
@@ -53,6 +54,7 @@ class SpatialdimensionDateFilter(GenericDateFilter):
     title = "spatialdimensiondate"
     parameter_name = "spatialdimensiondate"
     filter_field = "spatialdimensiondate"
+
 
 @admin.register(PublicationObservation)
 class PublicationObservationAdmin(NoAddDeleteChangePermission):

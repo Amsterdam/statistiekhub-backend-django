@@ -2,9 +2,11 @@ from django.contrib import admin
 from import_export.tmp_storages import MediaStorage
 from leaflet.admin import LeafletGeoAdminMixin
 
+from statistiek_hub.modeladmins.admin_mixins import (
+    GenericDateFilter,
+    ImportExportFormatsMixin,
+)
 from statistiek_hub.resources.spatial_dimension_resource import SpatialDimensionResource
-
-from .admin_mixins import ImportExportFormatsMixin, GenericDateFilter
 
 
 class SourceDateFilter(GenericDateFilter):
