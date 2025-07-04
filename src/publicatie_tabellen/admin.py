@@ -58,6 +58,7 @@ class SpatialdimensionDateFilter(GenericDateFilter):
 
 @admin.register(PublicationObservation)
 class PublicationObservationAdmin(NoAddDeleteChangePermission):
+    list_per_page = 25  # Reduce the number of items per page
     search_fields = ["measure"]
     search_help_text = "search on measure name"
 
@@ -71,14 +72,20 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         return super().changelist_view(request, extra_context=extra_context) 
 
     def get_queryset(self, request):
-            # Controleer of er een zoekterm is opgegeven
-            search_term = request.GET.get('q')  # 'q' is de parameter die door het search field wordt gebruikt
-            if search_term:
-                # Als er een zoekterm is, gebruik de standaard queryset
-                return super().get_queryset(request)
-            else:
-                # Anders retourneer een lege queryset
-                return self.model.objects.none()
+        search_term = request.GET.get('q')
+        if search_term:
+            table_name = self.model._meta.db_table
+            raw_query = f"""
+                SELECT id
+                FROM {table_name}
+                WHERE measure LIKE %s
+            """
+
+            raw_queryset = self.model.objects.raw(raw_query, [search_term])
+            ids = [obj.id for obj in raw_queryset]
+            return self.model.objects.filter(id__in=ids)
+
+        return self.model.objects.none()
 
     list_display = (
         "measure",
@@ -88,13 +95,6 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         "spatialdimensiontype",
         "spatialdimensioncode",
         "spatialdimensiondate",
-    )
-
-    list_filter = (
-        "temporaldimensiontype",
-        "temporaldimensionyear",
-        "spatialdimensiontype",
-        SpatialdimensionDateFilter,
     )
 
 
