@@ -32,6 +32,14 @@ class PublicationMeasure(models.Model):
 
 
 class PublicationObservation(models.Model):
+    class Meta:
+        indexes = [
+            models.Index(
+                "measure",
+                name="measure_idx",
+            ),
+        ]
+
     spatialdimensiontype = models.CharField(max_length=50)
     spatialdimensiondate = models.DateField()
     spatialdimensioncode = models.CharField(max_length=100)
