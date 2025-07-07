@@ -1,4 +1,4 @@
-from django.contrib.admin import ModelAdmin
+from django.contrib import admin
 from import_export.admin import ExportActionMixin, ImportMixin
 from import_export.formats import base_formats
 
@@ -39,3 +39,25 @@ class CheckPermissionUserMixin:
             theme_group = obj.measure.theme.group if hasattr(obj, 'measure') else obj.theme.group
             return theme_group in self._get_user_groups(request)
         return super().has_delete_permission(request)
+    
+
+class DynamicListFilter(admin.SimpleListFilter):
+    title = 'Dynamic Field'  # Display name in the admin sidebar
+    parameter_name = 'dynamic_field'  # Query parameter name
+
+    filter_field = "source_date"
+
+    def lookups(self, request, model_admin):
+        # Get the current queryset
+        queryset = model_admin.get_queryset(request)
+        values = set(queryset.values_list(self.filter_field, flat=True).distinct())
+
+        # Return a list of tuples (value, display_name)
+        return [(str(value), str(value)) for value in values]
+
+    def queryset(self, request, queryset):
+        """ Filter the queryset based on the selected value. """
+        if self.value():
+            filter_kwargs = {self.filter_field: self.value()}
+            return queryset.filter(**filter_kwargs)
+        return queryset
