@@ -6,7 +6,7 @@ from publicatie_tabellen.models import (
     PublicationStatistic,
     PublicationUpdatedAt,
 )
-from statistiek_hub.modeladmins.admin_mixins import GenericDateFilter
+from statistiek_hub.modeladmins.admin_mixins import DynamicListFilter
 
 
 class NoAddDeleteChangePermission(admin.ModelAdmin):
@@ -50,10 +50,22 @@ class PublicationMeasureTypeAdmin(NoAddDeleteChangePermission):
     search_fields = ["name"]
 
 
-class SpatialdimensionDateFilter(GenericDateFilter):
+class SpatialdimensionDateFilter(DynamicListFilter):
     title = "spatialdimensiondate"
     parameter_name = "spatialdimensiondate"
     filter_field = "spatialdimensiondate"
+
+
+class TemporaldimensionYearFilter(DynamicListFilter):
+    title = "temporaldimensionyear"
+    parameter_name = "temporaldimensionyear"
+    filter_field = "temporaldimensionyear"
+
+
+class SpatialdimensionTypeFilter(DynamicListFilter):
+    title = "spatialdimensiontype"
+    parameter_name = "spatialdimensiontype"
+    filter_field = "spatialdimensiontype"
 
 
 @admin.register(PublicationObservation)
@@ -80,8 +92,7 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
                 FROM {table_name}
                 WHERE measure LIKE %s
             """
-
-            raw_queryset = self.model.objects.raw(raw_query, [search_term])
+            raw_queryset = self.model.objects.raw(raw_query, [search_term.upper()])
             ids = [obj.id for obj in raw_queryset]
             return self.model.objects.filter(id__in=ids)
 
@@ -96,6 +107,8 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         "spatialdimensioncode",
         "spatialdimensiondate",
     )
+
+    list_filter = (TemporaldimensionYearFilter, SpatialdimensionTypeFilter, SpatialdimensionDateFilter,)
 
 
 @admin.register(PublicationStatistic)

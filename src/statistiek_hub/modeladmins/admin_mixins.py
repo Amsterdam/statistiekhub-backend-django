@@ -41,30 +41,23 @@ class CheckPermissionUserMixin:
         return super().has_delete_permission(request)
     
 
-class GenericDateFilter(admin.SimpleListFilter):
-    title = "date filter"
-    parameter_name = "date_field"
+class DynamicListFilter(admin.SimpleListFilter):
+    title = 'Dynamic Field'  # Display name in the admin sidebar
+    parameter_name = 'dynamic_field'  # Query parameter name
 
-    # The field to filter on, defaulting to "source_date"
     filter_field = "source_date"
 
     def lookups(self, request, model_admin):
-        """
-        Choices to propose all distinct values of the filter_field in the related model.
-        """
-        dates = list(
-            model_admin.model.objects.order_by(self.filter_field)
-            .values_list(self.filter_field, flat=True)
-            .distinct()
-        )
-        # Create a list of tuples for the filter dropdown
-        return [(str(date), str(date)) for date in dates]
+        # Get the current queryset
+        queryset = model_admin.get_queryset(request)
+        values = set(queryset.values_list(self.filter_field, flat=True).distinct())
+
+        # Return a list of tuples (value, display_name)
+        return [(str(value), str(value)) for value in values]
 
     def queryset(self, request, queryset):
-        """
-        Filter the queryset based on the selected value.
-        """
-        if self.value():  # If a value is selected, filter the queryset
+        """ Filter the queryset based on the selected value. """
+        if self.value():
             filter_kwargs = {self.filter_field: self.value()}
             return queryset.filter(**filter_kwargs)
-        return queryset        
+        return queryset
