@@ -11,20 +11,15 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import json
-
-#import logging
 import os
 from pathlib import Path
 from urllib.parse import urljoin
 
 from azure.identity import WorkloadIdentityCredential
-
-#from azure.monitor.opentelemetry import configure_azure_monitor
 from csp.constants import NONCE, SELF
 
 from .azure_settings import Azure
 
-#from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 azure = Azure()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -80,7 +75,7 @@ THIRD_PARTY_APPS = [
     "leaflet",
     "storages",
     "csp",
-    "mozilla_django_oidc", # load after django.contrib.auth!"
+    "mozilla_django_oidc",  # load after django.contrib.auth!"
 ]
 LOCAL_APPS = [
     "statistiek_hub",
@@ -142,22 +137,29 @@ IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
 # import_export_job
 def resource_observation():
     from statistiek_hub.resources.observation_resource import ObservationResource
+
     return ObservationResource
+
 
 def resource_measure():
     from statistiek_hub.resources.measure_resource import MeasureResource
+
     return MeasureResource
+
 
 def resource_spatialdimension():
     from statistiek_hub.resources.spatial_dimension_resource import (
         SpatialDimensionResource,
     )
+
     return SpatialDimensionResource
+
 
 def resource_temporaldimension():
     from statistiek_hub.resources.temporal_dimension_resource import (
         TemporalDimensionResource,
     )
+
     return TemporalDimensionResource
 
 
@@ -216,7 +218,11 @@ DATABASE_USER = os.getenv("DATABASE_USER", "statistiek_hub")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD", "insecure")
 DATABASE_PORT = os.getenv("DATABASE_PORT", "5432")
 SCHEMA = os.getenv("DB_SCHEMA", "public")
-DATABASE_OPTIONS = {"options": f"-c search_path={SCHEMA}", "sslmode": "allow", "connect_timeout": 5}
+DATABASE_OPTIONS = {
+    "options": f"-c search_path={SCHEMA}",
+    "sslmode": "allow",
+    "connect_timeout": 5,
+}
 
 
 if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
@@ -238,13 +244,13 @@ DATABASES = {
 
 # Django-storages for Django > 4.2
 STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # -----Azure Storageaccount settings
 if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
@@ -273,9 +279,9 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
                 "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
                 "azure_container": "django",
             },
-     },
-}
-    STORAGES |= STORAGE_AZURE #update storages with storage_azure
+        },
+    }
+    STORAGES |= STORAGE_AZURE  # update storages with storage_azure
 
 # -----Queue
 JOB_QUEUE_NAME = "job-queue"
@@ -341,27 +347,9 @@ FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 
 
 # Configure OpenTelemetry to use Azure Monitor with the specified connection string
-APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
-
-# if APPLICATIONINSIGHTS_CONNECTION_STRING:
-#     configure_azure_monitor(
-#         logger_name="root",
-#         instrumentation_options={
-#             "azure_sdk": {"enabled": False},
-#             "django": {"enabled": True}, 
-#             "fastapi": {"enabled": False},
-#             "flask": {"enabled": False},
-#             "psycopg2": {"enabled": False},
-#             "requests": {"enabled": True},
-#             "urllib": {"enabled": True},
-#             "urllib3": {"enabled": True},
-#         },
-#         resource=Resource.create({SERVICE_NAME: "Statistiekhub"}),
-#     )
-
-#     logger = logging.getLogger("root")
-#     logger.info("OpenTelemetry has been enabled")
-
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"
+)
 
 # Django Logging settings
 LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
@@ -421,7 +409,7 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-         # Log all unhandled exceptions
+        # Log all unhandled exceptions
         "django.request": {
             "level": LOG_LEVEL,
             "handlers": ["console"],
@@ -451,11 +439,47 @@ LEAFLET_CONFIG = {
 
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
-        "default-src": [SELF,],
-        "frame-ancestors": [SELF,],
+        "default-src": [
+            SELF,
+        ],
+        "frame-ancestors": [
+            SELF,
+        ],
         "script-src": [SELF, NONCE],
-        "img-src": [SELF, "data:",],
+        "img-src": [
+            SELF,
+            "data:",
+        ],
         "style-src": [SELF, NONCE],
-        "connect-src": [SELF,],
+        "connect-src": [
+            SELF,
+        ],
     },
 }
+
+
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+resource = Resource(attributes={"service.name": "statistiekhub-backend-django"})
+
+trace.set_tracer_provider(TracerProvider(resource=resource))
+tracer = trace.get_tracer(__name__)
+
+exporter_name = os.environ.get("OTEL_EXPORTER", "otlp")
+if exporter_name == "otlp":
+    otlp_exporter = OTLPSpanExporter()
+    span_processor = BatchSpanProcessor(otlp_exporter)
+    trace.get_tracer_provider().add_span_processor(span_processor)
+else:
+    pass
+
+DjangoInstrumentor().instrument()
+Psycopg2Instrumentor().instrument()
+RequestsInstrumentor().instrument()
