@@ -24,7 +24,9 @@ azure-keyvault
 azure-keyvault-secrets
 azure-storage-queue
 
-# OpenTelemetry
-azure-monitor-opentelemetry
-azure-monitor-opentelemetry-exporter
-opentelemetry-sdk
+# OTEL
+opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-instrumentation-django
+opentelemetry-instrumentation-psycopg2
+opentelemetry-instrumentation-logging
+opentelemetry-instrumentation-requests

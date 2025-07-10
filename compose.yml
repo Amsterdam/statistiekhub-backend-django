@@ -1,25 +1,24 @@
-x-app: &base-app
-  build:
-    context: .  
-  depends_on:
-    database:
-      condition: service_healthy
-    azurite:
-      condition: service_healthy
-  volumes:
-    - .:/app
-  environment: &base-app-env
-    SECRET_KEY: "insecure"
-    AUTHORIZATION_TOKEN: "auth-token"
-    GET_AUTHORIZATION_TOKEN: "get-auth-token"
-    AZURITE_QUEUE_CONNECTION_STRING: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1;'
-    OIDC_BASE_URL: "https://login.microsoftonline.com/72fca1b1-2c2e-4376-a445-294d80196804"
-    OIDC_RP_CLIENT_ID: 
-    OIDC_RP_CLIENT_SECRET:
-    OIDC_RP_SCOPES:
-    OIDC_OP_ISSUER:
-    OIDC_VERIFY_AUDIENCE: true
-    OIDC_TRUSTED_AUDIENCES:
+x-common-depends-on: &common-depends-on
+  database:
+    condition: service_healthy
+  azurite:
+    condition: service_healthy
+
+x-common-env: &common-env
+  SECRET_KEY: "insecure"
+  AUTHORIZATION_TOKEN: "auth-token"
+  GET_AUTHORIZATION_TOKEN: "get-auth-token"
+  AZURITE_QUEUE_CONNECTION_STRING: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1;'
+  OIDC_BASE_URL: "https://login.microsoftonline.com/72fca1b1-2c2e-4376-a445-294d80196804"
+  OIDC_RP_CLIENT_ID:
+  OIDC_RP_CLIENT_SECRET:
+  OIDC_RP_SCOPES:
+  OIDC_OP_ISSUER:
+  OIDC_VERIFY_AUDIENCE: true
+  OIDC_TRUSTED_AUDIENCES:
+  OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST: ".*"
+  OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE: ".*"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
 
 services:
   database:
@@ -30,7 +29,6 @@ services:
       POSTGRES_DB: statistiek_hub
       POSTGRES_USER: statistiek_hub
       POSTGRES_PASSWORD: insecure
-    #command: postgres -c datestyle='iso, dmy'
     healthcheck:
       test: pg_isready -U statistiek_hub -d statistiek_hub
       interval: 10s
@@ -47,42 +45,79 @@ services:
       interval: 1s
       retries: 30
 
+  otel-collector:
+    build:
+      context: otel-collector
+    image: ${REGISTRY:-localhost:5000}/${REPOSITORY:-opdrachten/statistiekhub-otel-collector}:${VERSION:-latest}
+    volumes:
+      - ./otel-collector/config.local.yaml:/etc/otelcol-contrib/config.yaml
+    depends_on:
+      - jaeger
+    ports:
+      - "4317:4317"
+
+  jaeger:
+    image: jaegertracing/jaeger:2.2.0
+    ports:
+      # ui
+      - "16686:16686"
+      # grpc
+      - "14317:4317"
+    environment:
+      LOG_LEVEL: debug
+
   app:
-    <<: *base-app
     image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-opdrachten/statistiekhub}:${VERSION:-latest}
     build:
       context: .
       target: app 
     environment:
+      <<: *common-env
       DEBUG: false
       DJANGO_SETTINGS_MODULE: main.settings
+    depends_on:
+      <<: *common-depends-on
+      jaeger:
+        condition: service_started
+    volumes:
+      - .:/app
     command: /app/deploy/docker-run.sh
 
   dev:
-    <<: *base-app
     build:
       context: .
       target: dev
     environment:
-      <<: *base-app-env
+      <<: *common-env
       LOG_LEVEL: "DEBUG"
       DEBUG: "True"
       DJANGO_LOG_LEVEL: "DEBUG"
       DJANGO_SUPERUSER_PASSWORD: "admin"
       DJANGO_SUPERUSER_USERNAME: "admin"
       DJANGO_SUPERUSER_EMAIL: "admin@amsterdam.nl"
+    depends_on:
+      <<: *common-depends-on
+      jaeger:
+        condition: service_started
+    volumes:
+      - .:/app
     command: python manage.py runserver 0.0.0.0:8000
 
   test:
-    <<: *base-app
     build:
       context: .
       target: tests
     environment:
-      <<: *base-app-env
+      <<: *common-env
       DJANGO_SETTINGS_MODULE: "main.settings"
       OIDC_RP_CLIENT_ID: tests
       OIDC_RP_CLIENT_SECRET: tests
+      OTEL_EXPORTER: "none"
+      OTEL_SDK_DISABLED: true
+    depends_on:
+      <<: *common-depends-on
+    volumes:
+      - .:/app
 
   linting:
     build:
