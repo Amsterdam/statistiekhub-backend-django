@@ -13,21 +13,32 @@ exporters:
       insecure: true
 
 processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 180
+    spike_limit_mib: 30
+
   batch:
+    timeout: 1s
+    send_batch_size: 256
+    send_batch_max_size: 512
+
+  probabilistic_sampler:
+    sampling_percentage: 100
 
 service:
   telemetry:
     logs:
-      level: DEBUG
+      level: INFO
   pipelines:
     logs:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch]
       exporters:
         - debug
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, probabilistic_sampler, batch]
       exporters:
         - debug
         - otlp/jaeger
