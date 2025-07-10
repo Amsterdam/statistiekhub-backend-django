@@ -118,7 +118,8 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
             return self.readonly_fields
 
     actions = (
-        admin_actions.run_import_job_action,
+        admin_actions.run_import_job_action_dry,
+        admin_actions.run_import_job_action
     )
 
     def save_model(self, request, obj, form, change):
