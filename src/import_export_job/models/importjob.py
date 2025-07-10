@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 class ImportJob(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    created_by = models.ForeignKey(User, models.RESTRICT)
+
     file = models.FileField(
         verbose_name=_("File to be imported"),
         upload_to="django-import-jobs",

@@ -1,11 +1,9 @@
 import os
-import shutil
-import tempfile
 
 import pytest
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.core.files.storage import Storage, default_storage
 from django.urls import reverse
 from model_bakery import baker
 
@@ -16,8 +14,8 @@ from tests.temp_storage import temporary_media_root
 @pytest.mark.django_db
 def test_blob_link(client, temporary_media_root):
     """ test the get_blob url """
-    
-    job = ImportJob(file='test.json')
+    creator = baker.make(User)
+    job = ImportJob(file='test.json', created_by=creator)
 
     test_html = "<html><body><h1>Change Summary</h1></body></html>"
     test_file = ContentFile(test_html.encode('utf-8'), name='test.html')

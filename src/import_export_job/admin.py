@@ -78,8 +78,8 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "file_link",
         "errors",
         "change_summary_link",
+        "created_by_full_name",
         "imported",
-        "updated_at",
         "created_at",
     )
     readonly_fields = (
@@ -91,7 +91,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "created_at",
         "processing_initiated",
     )
-    exclude = ("job_status",)
+    exclude = ("job_status", 'created_by',)
 
     list_filter = ("model", "imported")
 
@@ -120,3 +120,11 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
     actions = (
         admin_actions.run_import_job_action,
     )
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # Only set the user when the object is created
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def created_by_full_name(self, obj):
+        return obj.created_by.get_full_name()
