@@ -43,6 +43,7 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
     )
     list_filter = (
         "theme",
+        "source",
         CalculationFilter,
         "sensitive",
         "deprecated",

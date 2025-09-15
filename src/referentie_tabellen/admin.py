@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
 from referentie_tabellen.models import (
+    Source,
     SpatialDimensionType,
     TemporalDimensionType,
     Theme,
@@ -52,3 +53,9 @@ class SpatialDimensionTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "source", "id")
     list_filter = ("source",)
     ordering = ("id",)
+
+@admin.register(Source)
+class SourceAdmin(admin.ModelAdmin):
+    list_display = ("name", "name_long", "id")
+    list_filter = ("name",)
+    ordering = ("name_long",)
