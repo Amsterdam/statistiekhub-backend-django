@@ -193,7 +193,7 @@ FORCE_SCRIPT_NAME = BASE_URL
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "statistiek_hub/templates"), ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -439,21 +439,12 @@ LEAFLET_CONFIG = {
 
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
-        "default-src": [
-            SELF,
-        ],
-        "frame-ancestors": [
-            SELF,
-        ],
+        "default-src": [SELF],
+        "frame-ancestors": [SELF],
         "script-src": [SELF, NONCE],
-        "img-src": [
-            SELF,
-            "data:",
-        ],
+        "img-src": [SELF, "data:", "https://t1.data.amsterdam.nl"],
         "style-src": [SELF, NONCE],
-        "connect-src": [
-            SELF,
-        ],
+        "connect-src": [SELF],
     },
 }
 
