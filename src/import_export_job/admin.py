@@ -83,15 +83,16 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "created_at",
     )
     readonly_fields = (
+        "file_link",
         "job_status_info",
-        "change_summary",
+        "change_summary_link",
         "imported",
         "errors",       
         "updated_at",
         "created_at",
         "processing_initiated",
     )
-    exclude = ("job_status", 'created_by',)
+    exclude = ("file", "change_summary", "job_status", 'created_by',)
 
     list_filter = ("model", "imported")
 
@@ -109,13 +110,6 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
 
     change_summary_link.short_description = models.ImportJob._meta.get_field('change_summary').verbose_name
 
-    def get_readonly_fields(
-        self, request: HttpRequest, obj: Any | None = ...
-    ) -> list[str] | tuple[Any, ...]:
-        if obj:
-            return ("file",) + self.readonly_fields
-        else:
-            return self.readonly_fields
 
     actions = (
         admin_actions.run_import_job_action_dry,
