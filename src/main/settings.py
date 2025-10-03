@@ -44,23 +44,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = (
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
 
 # Application definition
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "django.contrib.gis",
-    "statistiek_hub",
-    "referentie_tabellen",
-    "publicatie_tabellen",
-    "import_export",
-    "import_export_job",
-    "leaflet",
-]
-
-# Application definition
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
