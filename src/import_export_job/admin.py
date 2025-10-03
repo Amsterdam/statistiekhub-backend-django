@@ -1,12 +1,10 @@
 # Copyright (C) 2019 o.s. Auto*Mat
 import logging
-from typing import Any
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.core.cache import cache
-from django.http.request import HttpRequest
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
