@@ -76,6 +76,7 @@ THIRD_PARTY_APPS = [
     "storages",
     "csp",
     "mozilla_django_oidc",  # load after django.contrib.auth!"
+    "silk",
 ]
 LOCAL_APPS = [
     "statistiek_hub",
@@ -93,6 +94,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "silk.middleware.SilkyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mozilla_django_oidc.middleware.SessionRefresh",
@@ -474,3 +476,9 @@ else:
 DjangoInstrumentor().instrument()
 Psycopg2Instrumentor().instrument()
 RequestsInstrumentor().instrument()
+
+# Silk Settings
+
+SILKY_PYTHON_PROFILER = True
+SILKY_META = True
+SILKY_ANALYZE_QUERIES = True

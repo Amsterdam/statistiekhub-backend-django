@@ -5,6 +5,9 @@
 
 PYTHON = python3
 
+UID:=$(shell id --user)
+GID:=$(shell id --group)
+
 dc = docker compose
 run = $(dc) run --remove-orphans --rm -u ${UID}:${GID}
 manage = $(run) dev python manage.py

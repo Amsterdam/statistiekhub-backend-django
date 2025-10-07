@@ -30,3 +30,6 @@ opentelemetry-instrumentation-django
 opentelemetry-instrumentation-psycopg2
 opentelemetry-instrumentation-logging
 opentelemetry-instrumentation-requests
+
+# Profiling
+django-silk[formatting]
