@@ -20,6 +20,7 @@ omit = [
     "*/apps.py",
     "*/models.py",
     "*/utils/timer.py",
+    "*/admin.py",
 ]
 
 [tool.coverage.report]
