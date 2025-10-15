@@ -1,7 +1,6 @@
 import os
 
 import pytest
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.urls import reverse
@@ -27,4 +26,5 @@ def test_blob_link(client, temporary_media_root):
     response = client.get(url)
     assert response.status_code == 200
 
-    assert b"<html>" in response.content
+    retrieved_content = b"".join(response.streaming_content)
+    assert b"<html>" in retrieved_content
