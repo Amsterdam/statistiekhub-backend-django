@@ -126,7 +126,13 @@ def publishobservation() -> tuple:
 
     # get BEVTOTAAL for all types for sensitive rule 1: small regions to np.nan
     spatialdimtypes = SpatialDimensionType.objects.all().values_list("name", flat=True)
-    qsmin = get_qs_for_bevmin_wonmin(Observation, measures=["BEVTOTAAL",], spatialdimensiontypes=spatialdimtypes)
+    qsmin = get_qs_for_bevmin_wonmin(
+        Observation,
+        measures=[
+            "BEVTOTAAL",
+        ],
+        spatialdimensiontypes=spatialdimtypes,
+    )
     dfmin = convert_queryset_into_dataframe(qsmin)
 
     truncate(PublicationObservation)
@@ -143,7 +149,7 @@ def publishobservation() -> tuple:
         if len(mdf) == 0:
             measure_no_data.append(measure.name)
             continue
-        
+
         logger.info(f"selected observations for {measure}: {len(mdf)}")
         if hasattr(measure, "filter"):
             dfobs = _get_df_with_filterrule(measure)
@@ -165,18 +171,22 @@ def publishobservation() -> tuple:
             )
             logger.info("sensitiverules applied")
             # apply rule 1: Over gebieden met minder dan 50 inwoners rapporteren we geen privacygevoelige indicatoren
-            mdf = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", mdf, minimum_value=50)
+            mdf = set_small_regions_to_nan_if_minimum(
+                dfmin, "BEVTOTAAL", mdf, minimum_value=50
+            )
             logger.info("sensitive less 50 inwoners applied")
 
         # remove the by filter and sensitive introduced np.nan values
-        mdf.dropna(subset=['value'], inplace=True)
+        mdf.dropna(subset=["value"], inplace=True)
 
         if len(mdf) == 0:
             measure_no_data.append(measure.name)
             continue
-        
+
         # round value to decimals
-        mdf["value"] = mdf.apply(lambda x: round_to_decimal(x.value, x.decimals), axis=1)
+        mdf["value"] = mdf.apply(
+            lambda x: round_to_decimal(x.value, x.decimals), axis=1
+        )
         logger.info("decimals are set")
 
         mdf.rename(columns={"measure_name": "measure"}, inplace=True)

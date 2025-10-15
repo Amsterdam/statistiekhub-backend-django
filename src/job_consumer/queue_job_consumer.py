@@ -73,7 +73,7 @@ class AzureJobQueueConsumer:
             return
 
         # Run task
-        try: 
+        try:
             run_import_job(job["key"], job["dry_run"])
         except:
             raise Exception("Failed ")

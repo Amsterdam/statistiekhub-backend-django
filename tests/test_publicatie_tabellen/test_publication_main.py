@@ -133,4 +133,3 @@ def test_fill_observationcalculated_divide_by_zero(
     measure_var1.delete()
     obs_base.delete()
     obs_var1.delete()
-

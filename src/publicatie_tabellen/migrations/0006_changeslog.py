@@ -6,20 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('publicatie_tabellen', '0005_log_table_model_changes'),
+        ("publicatie_tabellen", "0005_log_table_model_changes"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ChangesLog',
+            name="ChangesLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('table_name', models.CharField(max_length=255, unique=True)),
-                ('changed_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("table_name", models.CharField(max_length=255, unique=True)),
+                ("changed_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'db_table': 'changes_log',
-                'managed': False,
+                "db_table": "changes_log",
+                "managed": False,
             },
         ),
     ]

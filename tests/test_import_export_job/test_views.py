@@ -13,17 +13,17 @@ from tests.temp_storage import temporary_media_root
 
 @pytest.mark.django_db
 def test_blob_link(client, temporary_media_root):
-    """ test the get_blob url """
+    """test the get_blob url"""
     creator = baker.make(User)
-    job = ImportJob(file='test.json', created_by=creator)
+    job = ImportJob(file="test.json", created_by=creator)
 
     test_html = "<html><body><h1>Change Summary</h1></body></html>"
-    test_file = ContentFile(test_html.encode('utf-8'), name='test.html')
-    job.change_summary.save('test.html', test_file)
-    
+    test_file = ContentFile(test_html.encode("utf-8"), name="test.html")
+    job.change_summary.save("test.html", test_file)
+
     assert os.path.exists(job.change_summary.path)
 
-    url = reverse('get_blob', args=[job.change_summary.path])
+    url = reverse("get_blob", args=[job.change_summary.path])
     response = client.get(url)
     assert response.status_code == 200
 

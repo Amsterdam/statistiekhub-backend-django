@@ -24,7 +24,7 @@ class TestJobConsumer:
         self.queue_client.clear_messages()
         assert self.queue_message_count(self.queue_client) == 0
 
-        store_job_in_queue( job_pk=1, dry_run=False)
+        store_job_in_queue(job_pk=1, dry_run=False)
         assert self.queue_message_count(self.queue_client) == 1
 
         message_iterator = self.queue_client.receive_messages(max_messages=1)
@@ -32,7 +32,6 @@ class TestJobConsumer:
             job = json.loads(message.content)
             assert job["key"] == 1
             assert job["dry_run"] == False
-
 
     @pytest.mark.django_db(transaction=True)
     def test_AzureJobQueueConsumer(self):

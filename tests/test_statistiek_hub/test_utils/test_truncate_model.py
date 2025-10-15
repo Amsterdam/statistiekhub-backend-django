@@ -18,5 +18,4 @@ def test_truncate():
     assert PublicationStatistic.objects.all().count() == 0
     # test id reset
     stat.save()
-    assert  PublicationStatistic.objects.get(pk=1) == stat
-        
+    assert PublicationStatistic.objects.get(pk=1) == stat

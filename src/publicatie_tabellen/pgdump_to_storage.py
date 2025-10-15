@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class PgDumpToStorage:
     TMP_DIRECTORY = "/tmp/pgdump"
 
-    def start_dump(self, app_names:list):
+    def start_dump(self, app_names: list):
         os.makedirs(self.TMP_DIRECTORY, exist_ok=True)
         for app in app_names:
             for model in django.apps.apps.get_app_config(app).get_models():
@@ -26,10 +26,8 @@ class PgDumpToStorage:
 
     def _dump_model_to_csv_zip(self, model):
         table_name = model._meta.db_table
-        filepath = os.path.join(
-            self.TMP_DIRECTORY, f"{table_name}.csv.zip"
-        )  
-        csv_filename="data.csv"
+        filepath = os.path.join(self.TMP_DIRECTORY, f"{table_name}.csv.zip")
+        csv_filename = "data.csv"
         select_query = f"SELECT * FROM {table_name}"
 
         # Open the ZIP file for writing
@@ -49,7 +47,9 @@ class PgDumpToStorage:
         for file in os.listdir(self.TMP_DIRECTORY):
             filepath = os.path.join(self.TMP_DIRECTORY, file)
             with open(filepath, "rb") as f:
-                storage.save_without_postfix(name=os.path.join("pgdump", file), content=f)
+                storage.save_without_postfix(
+                    name=os.path.join("pgdump", file), content=f
+                )
             logger.info(f"Successfully uploaded {filepath} to blob")
 
     def remove_dump(self):
@@ -60,25 +60,24 @@ class PgDumpToStorage:
 
 
 class OverwriteStorage:
-    """ Set storage to pgdump container
-        and overwrite existing files instead of using hash postfixes."""
+    """Set storage to pgdump container
+    and overwrite existing files instead of using hash postfixes."""
 
     def __init__(self, *args, **kwargs):
-        if hasattr(settings, 'STORAGE_AZURE'):
+        if hasattr(settings, "STORAGE_AZURE"):
             # Gebruik de 'pgdump' opslagconfiguratie
-            storage_class = get_storage_class(settings.STORAGES['pgdump']['BACKEND'])
-            storage_options = settings.STORAGES['pgdump']['OPTIONS']
+            storage_class = get_storage_class(settings.STORAGES["pgdump"]["BACKEND"])
+            storage_options = settings.STORAGES["pgdump"]["OPTIONS"]
         else:
             # Gebruik de standaard opslagconfiguratie
-            storage_class = get_storage_class(settings.STORAGES['default']['BACKEND'])
+            storage_class = get_storage_class(settings.STORAGES["default"]["BACKEND"])
             storage_options = {}
-        
-        self.storage = storage_class(**storage_options)
 
+        self.storage = storage_class(**storage_options)
 
     def __getattr__(self, name):
         return getattr(self.storage, name)
-    
+
     def save_without_postfix(self, name, content):
         if self.exists(name):
             self.delete(name)

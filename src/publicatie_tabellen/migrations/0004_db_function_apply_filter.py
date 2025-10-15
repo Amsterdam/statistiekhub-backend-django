@@ -7,9 +7,11 @@ from publicatie_tabellen.db_functions.function_apply_filter import function_appl
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("publicatie_tabellen", "0003_publicationupdatedat"),     
+        ("publicatie_tabellen", "0003_publicationupdatedat"),
     ]
 
     operations = [
-            migrations.RunSQL(function_apply_filter, ('DROP FUNCTION public.apply_filter;')),
+        migrations.RunSQL(
+            function_apply_filter, ("DROP FUNCTION public.apply_filter;")
+        ),
     ]

@@ -8,7 +8,8 @@ log = logging.getLogger(__name__)
 
 
 class AzureStorage:
-    ''' singleton Storage BlobServiceClient'''
+    """singleton Storage BlobServiceClient"""
+
     _instance = None
     _client = None
 
@@ -19,13 +20,13 @@ class AzureStorage:
 
     @staticmethod
     def _create_azure_blob_service_client() -> BlobServiceClient:
-        if hasattr(settings, 'STORAGE_AZURE'):
+        if hasattr(settings, "STORAGE_AZURE"):
             account_name = settings.STORAGE_AZURE["default"]["OPTIONS"]["account_name"]
             credential = DefaultAzureCredential()
 
             blob_service_client = BlobServiceClient(
                 account_url=f"https://{account_name}.blob.core.windows.net",
-                credential=credential
+                credential=credential,
             )
 
             return blob_service_client
@@ -35,4 +36,3 @@ class AzureStorage:
         if cls._client is None:
             cls._client = cls._create_azure_blob_service_client()
         return cls._client
-        

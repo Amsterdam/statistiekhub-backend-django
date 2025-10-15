@@ -62,6 +62,7 @@ def test_round_to_decimal(test_value, test_decimals, expected):
     result = round_to_decimal(test_value, test_decimals)
     assert result == expected
 
+
 @pytest.mark.django_db
 def test_convert_queryset_into_dataframe(qs=None, model=Measure):
     """converts a queryset into a dataframe"""

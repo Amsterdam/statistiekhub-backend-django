@@ -16,10 +16,9 @@ class NoAddDeleteChangePermission(admin.ModelAdmin):
         extra_context = extra_context or {}
         if instance := PublicationUpdatedAt.objects.first():
             updated_at = instance.updated_at
-            extra_context['updated_at'] = updated_at.strftime("%d %B %Y, %I:%M %p")
-        
-        return super().changelist_view(request, extra_context=extra_context)
+            extra_context["updated_at"] = updated_at.strftime("%d %B %Y, %I:%M %p")
 
+        return super().changelist_view(request, extra_context=extra_context)
 
     def has_add_permission(self, request) -> bool:
         return False
@@ -76,15 +75,15 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
 
     def changelist_view(self, request, extra_context=None):
         # Controleer of er een zoekterm is
-        search_term = request.GET.get('q')
+        search_term = request.GET.get("q")
         if not search_term:
             # Voeg een melding toe aan de context
             extra_context = extra_context or {}
-            extra_context['show_message'] = True
-        return super().changelist_view(request, extra_context=extra_context) 
+            extra_context["show_message"] = True
+        return super().changelist_view(request, extra_context=extra_context)
 
     def get_queryset(self, request):
-        search_term = request.GET.get('q')
+        search_term = request.GET.get("q")
         if search_term:
             table_name = self.model._meta.db_table
             raw_query = f"""
@@ -92,8 +91,10 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
                 FROM {table_name}
                 WHERE measure LIKE %s
             """
-            escaped_search_term = search_term.replace('_', r'\_')
-            raw_queryset = self.model.objects.raw(raw_query, [escaped_search_term.upper()])
+            escaped_search_term = search_term.replace("_", r"\_")
+            raw_queryset = self.model.objects.raw(
+                raw_query, [escaped_search_term.upper()]
+            )
             ids = [obj.id for obj in raw_queryset]
             return self.model.objects.filter(id__in=ids)
 
@@ -109,7 +110,11 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         "spatialdimensiondate",
     )
 
-    list_filter = (TemporaldimensionYearFilter, SpatialdimensionTypeFilter, SpatialdimensionDateFilter,)
+    list_filter = (
+        TemporaldimensionYearFilter,
+        SpatialdimensionTypeFilter,
+        SpatialdimensionDateFilter,
+    )
 
 
 @admin.register(PublicationStatistic)

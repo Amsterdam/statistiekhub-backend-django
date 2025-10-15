@@ -13,6 +13,7 @@ from import_export_job import admin_actions, models
 
 logger = logging.getLogger(__name__)
 
+
 class JobWithStatusMixin:
     @admin.display(description=_("Job status info"))
     def job_status_info(self, obj):
@@ -32,11 +33,11 @@ class ImportJobForm(forms.ModelForm):
         fields = "__all__"
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
+        self.user = kwargs.pop("user")
         self.import_job_models = getattr(settings, "IMPORT_EXPORT_JOB_MODELS", {})
 
         self.modifier = self.user.is_superuser
-        if self.user.groups.filter(name='modifier_statistiekhub_tabellen').exists():
+        if self.user.groups.filter(name="modifier_statistiekhub_tabellen").exists():
             self.modifier = True
 
         super().__init__(*args, **kwargs)
@@ -50,7 +51,7 @@ class ImportJobForm(forms.ModelForm):
             logger.info(f"user not in modifier-group")
             _import_job_models.pop("SpatialDimension")
             _import_job_models.pop("TemporalDimension")
-            
+
         return [(x, x) for x in _import_job_models.keys()]
 
 
@@ -64,7 +65,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
 
         class AdminFormWithUser(Form):
             def __new__(cls, *args, **kwargs):
-                kwargs['user'] = request.user
+                kwargs["user"] = request.user
                 return Form(*args, **kwargs)
 
         return AdminFormWithUser
@@ -85,33 +86,41 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "job_status_info",
         "change_summary_link",
         "imported",
-        "errors",       
+        "errors",
         "updated_at",
         "created_at",
         "processing_initiated",
     )
-    exclude = ("file", "change_summary", "job_status", 'created_by',)
+    exclude = (
+        "file",
+        "change_summary",
+        "job_status",
+        "created_by",
+    )
 
     list_filter = ("model", "imported")
 
     def file_link(self, obj):
-        url = reverse('get_blob', args=[obj.file.name])
+        url = reverse("get_blob", args=[obj.file.name])
         return mark_safe(f'<a href="{url}" target="_blank" >{obj.file.name}</a>')
 
-    file_link.short_description = models.ImportJob._meta.get_field('file').verbose_name
+    file_link.short_description = models.ImportJob._meta.get_field("file").verbose_name
 
     def change_summary_link(self, obj):
         if obj.change_summary:
-            url = reverse('get_blob', args=[obj.change_summary.name])
-            return mark_safe(f'<a href="{url}" target="_blank" >{obj.change_summary.name}</a>')
+            url = reverse("get_blob", args=[obj.change_summary.name])
+            return mark_safe(
+                f'<a href="{url}" target="_blank" >{obj.change_summary.name}</a>'
+            )
         return "-"
 
-    change_summary_link.short_description = models.ImportJob._meta.get_field('change_summary').verbose_name
-
+    change_summary_link.short_description = models.ImportJob._meta.get_field(
+        "change_summary"
+    ).verbose_name
 
     actions = (
         admin_actions.run_import_job_action_dry,
-        admin_actions.run_import_job_action
+        admin_actions.run_import_job_action,
     )
 
     def save_model(self, request, obj, form, change):

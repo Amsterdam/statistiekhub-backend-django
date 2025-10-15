@@ -15,7 +15,9 @@ from statistiek_hub.models.observation import ObservationCalculated
 from statistiek_hub.resources.observation_resource import ObservationResource
 
 
-class ObservationAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
+class ObservationAdmin(
+    ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin
+):
     tmp_storage_class = MediaStorage
 
     search_help_text = "search on measure name"
@@ -56,13 +58,15 @@ class ObservationAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin
 
     resource_classes = [ObservationResource]
 
-    def get_paginator(self, request, queryset, per_page, orphans=0, allow_empty_first_page=True):
+    def get_paginator(
+        self, request, queryset, per_page, orphans=0, allow_empty_first_page=True
+    ):
         return self.paginator(
             queryset,
             per_page,
             orphans=orphans,
             allow_empty_first_page=allow_empty_first_page,
-            max_offset=self.pagination_max_offset
+            max_offset=self.pagination_max_offset,
         )
 
     def changelist_view(self, request, extra_context=None):
@@ -72,12 +76,13 @@ class ObservationAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin
             messages.error(
                 request,
                 f"Page {e.requested_page} is not available (maximum page allowed: {e.max_pages}). "
-                f"Please use search or filters to find specific records."
+                f"Please use search or filters to find specific records.",
             )
 
             from django.http import HttpResponseRedirect
+
             query_params = request.GET.copy()
-            query_params['p'] = e.max_pages
+            query_params["p"] = e.max_pages
             return HttpResponseRedirect(f"{request.path}?{query_params.urlencode()}")
 
     def get_search_results(self, request, queryset, search_term):
@@ -93,7 +98,7 @@ class ObservationAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin
         # Gets run as a subquery
         matching_measure_id_qs = Measure.objects.filter(
             name__icontains=search_term
-        ).values_list('id', flat=True)
+        ).values_list("id", flat=True)
 
         # Filter observations by these measure IDs
         queryset = queryset.filter(measure_id__in=matching_measure_id_qs)

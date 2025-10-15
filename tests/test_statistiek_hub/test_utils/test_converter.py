@@ -12,7 +12,7 @@ class TestConverter:
             ("1", "float", float(1)),
             ("test", "float", "test"),
             ("4", "set", "4"),
-            ("NA", "float", ''),
+            ("NA", "float", ""),
             ("12,4", "float", 12.4),
         ],
     )
@@ -23,6 +23,5 @@ class TestConverter:
     def test_set_stringfields_to_upper(self):
         df = pd.DataFrame({"col1": ["A", "b", "c", "dgh"], "col2": [5, 2, 7, "gtt"]})
         result = set_stringfields_to_upper(df)
-        assert result["col1"].tolist() == ['A', 'B', 'C', 'DGH']
+        assert result["col1"].tolist() == ["A", "B", "C", "DGH"]
         assert result["col2"].tolist() == [5, 2, 7, "GTT"]
-

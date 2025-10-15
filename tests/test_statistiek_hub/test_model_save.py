@@ -15,8 +15,10 @@ class TestModelSave:
     @pytest.mark.django_db
     def test_save_temporaldimension_cbs_date(self):
         """cbs_date should result in year+1"""
-        tempdimtype = baker.make(TemporalDimensionType,  name="Peildatum")
-        cbs_date = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
+        tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
+        cbs_date = baker.make(
+            TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
+        )
         assert TemporalDimension.objects.first().year == 2024
 
         cbs_date.delete()
@@ -33,24 +35,24 @@ class TestModelSave:
 
     @pytest.mark.django_db
     def test_save_observation_validationerror(self):
-        """ percentage bigger than 200 -> result in validationerror"""
+        """percentage bigger than 200 -> result in validationerror"""
 
-        unit_var = baker.make(Unit, name="percentage", code='P')
+        unit_var = baker.make(Unit, name="percentage", code="P")
         measure_var = baker.make(Measure, name="VAR", unit=unit_var)
 
         tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
-        temp = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
+        temp = baker.make(
+            TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
+        )
         spatial = baker.make(SpatialDimension)
 
         # check the specific error message
         with pytest.raises(ValidationError) as excinfo:
             baker.make(
-            Observation,
-            measure=measure_var,
-            temporaldimension= temp,
-            spatialdimension= spatial,
-            value=205,
+                Observation,
+                measure=measure_var,
+                temporaldimension=temp,
+                spatialdimension=spatial,
+                value=205,
             )
-        assert 'Percentage is more than 200' in str(excinfo.value)
-
-
+        assert "Percentage is more than 200" in str(excinfo.value)

@@ -92,8 +92,8 @@ def importjob_post_save(sender, instance, **kwargs):
         transaction.on_commit(
             partial(
                 store_job_in_queue,
-                 job_pk=instance.pk,
-                 dry_run= getattr(settings, "IMPORT_DRY_RUN_FIRST_TIME", True),
+                job_pk=instance.pk,
+                dry_run=getattr(settings, "IMPORT_DRY_RUN_FIRST_TIME", True),
             )
         )
 
@@ -122,6 +122,6 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
                     )
                 )
 
-        #TODO remove job from queue if exists
+        # TODO remove job from queue if exists
 
         ImportJob.objects.filter(id=instance.id).delete()

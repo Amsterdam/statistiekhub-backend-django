@@ -9,9 +9,10 @@ def test_create_cursor_success():
     with connection.cursor() as cursor:
         assert cursor is not None
 
+
 @pytest.mark.django_db(transaction=True)
 def test_create_cursor_interface_error():
-    connection.close()      
+    connection.close()
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
@@ -20,6 +21,7 @@ def test_create_cursor_interface_error():
     except InterfaceError:
         pytest.fail("InterfaceError: De verbinding kon niet opnieuw worden geopend.")
 
+
 @pytest.mark.django_db(transaction=True)
 def test_async_unsafe_decorator():
     async def async_test():
@@ -27,4 +29,7 @@ def test_async_unsafe_decorator():
         try:
             await sync_to_async(connection.cursor)()
         except RuntimeError as e:
-            assert str(e) == "You cannot call this from an async context - use a thread or sync_to_async."
+            assert (
+                str(e)
+                == "You cannot call this from an async context - use a thread or sync_to_async."
+            )

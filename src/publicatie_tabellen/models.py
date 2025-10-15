@@ -75,4 +75,4 @@ class ChangesLog(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'changes_log'
+        db_table = "changes_log"

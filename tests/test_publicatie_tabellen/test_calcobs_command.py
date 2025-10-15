@@ -12,7 +12,10 @@ class TestCalcObsCommand:
         Check the flow when an error is raised
         """
 
-        with patch('publicatie_tabellen.publication_main.PublishFunction.fill_observationcalculated', side_effect=Exception("Failure message")):
+        with patch(
+            "publicatie_tabellen.publication_main.PublishFunction.fill_observationcalculated",
+            side_effect=Exception("Failure message"),
+        ):
             try:
                 call_command("calcobs")
             except Exception as e:

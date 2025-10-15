@@ -54,7 +54,6 @@ load_fixtures:  migrate                  ## Load initial data into database by d
 	import_temporaldimensiontype.json \
 	import_spatialdimensiontype.json
 
-
 test: lint							## Execute tests
 	$(run) test pytest -m 'not integration' $(ARGS)
 
@@ -98,10 +97,10 @@ lintfix:                            ## Execute lint fixes
 	$(run) linting autoflake /app/src --recursive --in-place --remove-unused-variables --remove-all-unused-imports --quiet
 	$(run) linting isort /app/src/$(APP) /app/tests/$(APP)
 
-
 lint:                               ## Execute lint checks
+	$(run) linting black --diff --check /app/src/$(APP) /app/tests/$(APP)
 	$(run) linting autoflake /app/src --check --recursive --quiet
-	$(run) linting isort --skip migrations --diff --check /app/src/$(APP) /app/tests/$(APP)
+	$(run) linting isort --diff --check /app/src/$(APP) /app/tests/$(APP)
 
 diff:
 	@python3 ./deploy/diff.py

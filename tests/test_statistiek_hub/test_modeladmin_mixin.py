@@ -12,7 +12,7 @@ from statistiek_hub.models.measure import Measure
 
 
 @pytest.fixture
-def fill_db()-> dict:
+def fill_db() -> dict:
     group = baker.make(Group)
     user = baker.make(User, groups=[group])
 
@@ -25,7 +25,7 @@ def fill_db()-> dict:
     }
 
 
-class DummyAdmin(CheckPermissionUserMixin, admin.ModelAdmin):  
+class DummyAdmin(CheckPermissionUserMixin, admin.ModelAdmin):
     pass
 
 
@@ -34,7 +34,7 @@ def test_get_user_groups_caching():
     group = baker.make(Group)
     user = baker.make(User, groups=[group])
 
-    request = RequestFactory().get('/')
+    request = RequestFactory().get("/")
     request.user = user
 
     mixin = CheckPermissionUserMixin()
@@ -42,7 +42,7 @@ def test_get_user_groups_caching():
     groups_second = mixin._get_user_groups(request)
 
     assert list(groups_first) == list(groups_second)
-    assert hasattr(request, '_cached_user_groups')
+    assert hasattr(request, "_cached_user_groups")
 
     group.delete()
     user.delete()
@@ -52,7 +52,7 @@ def test_get_user_groups_caching():
 def test_has_permission_with_theme_group(fill_db):
     fixture = fill_db
 
-    request = RequestFactory().get('/')
+    request = RequestFactory().get("/")
     request.user = fixture["user"]
 
     obj = fixture["measure"]
@@ -66,7 +66,7 @@ def test_has_permission_with_theme_group(fill_db):
 def test_has_permission_with_measure_group(fill_db):
     fixture = fill_db
 
-    request = RequestFactory().get('/')
+    request = RequestFactory().get("/")
     request.user = fixture["user"]
 
     obj = baker.make(Filter, measure=fixture["measure"])
@@ -83,12 +83,12 @@ def test_has_permission_denied(fill_db):
 
     non_group = baker.make(Group)
     non_theme = baker.make(Theme, name="THEME2", group=non_group)
-    measure=fixture["measure"]
-    measure.theme=non_theme
+    measure = fixture["measure"]
+    measure.theme = non_theme
     assert measure.theme.name == "THEME2"
     obj = baker.make(Filter, measure=measure)
 
-    request = RequestFactory().get('/')
+    request = RequestFactory().get("/")
     request.user = fixture["user"]
 
     mixin = CheckPermissionUserMixin()
@@ -102,12 +102,12 @@ def test_no_obj(fill_db):
 
     user = fixture["user"]
 
-    permission = Permission.objects.get(codename='delete_filter')
+    permission = Permission.objects.get(codename="delete_filter")
     user.user_permissions.add(permission)
 
-    request = RequestFactory().get('/')
+    request = RequestFactory().get("/")
     request.user = fixture["user"]
 
     admin_instance = DummyAdmin(model=Filter, admin_site=AdminSite())
     assert admin_instance.has_change_permission(request) is False
-    assert admin_instance.has_delete_permission(request) is True    
+    assert admin_instance.has_delete_permission(request) is True

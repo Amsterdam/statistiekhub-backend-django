@@ -16,17 +16,17 @@ admin.site.unregister(User)
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     """Custom UserAdmin"""
+
     fieldsets = (
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('groups',)}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ("Personal info", {"fields": ("first_name", "last_name", "email")}),
+        ("Permissions", {"fields": ("groups",)}),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
 
     def get_fieldsets(self, request, obj=None):
         if not request.user.is_superuser:
             return self.fieldsets
         return super().get_fieldsets(request, obj)
-    
 
 
 # referentie tabellen
@@ -53,6 +53,7 @@ class SpatialDimensionTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "source", "id")
     list_filter = ("source",)
     ordering = ("id",)
+
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):

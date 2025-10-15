@@ -11,10 +11,15 @@ from publicatie_tabellen.db_functions.function_calculate_observations import (
 class Migration(migrations.Migration):
     dependencies = [
         ("publicatie_tabellen", "0001_initial"),
-        ("statistiek_hub", "0001_initial"),     
+        ("statistiek_hub", "0001_initial"),
     ]
 
     operations = [
-        migrations.RunSQL(function_calculate_observation, ('DROP FUNCTION public.calculate_observation;')),
-        migrations.RunSQL(function_apply_filter, ('DROP FUNCTION public.apply_filter;')),
+        migrations.RunSQL(
+            function_calculate_observation,
+            ("DROP FUNCTION public.calculate_observation;"),
+        ),
+        migrations.RunSQL(
+            function_apply_filter, ("DROP FUNCTION public.apply_filter;")
+        ),
     ]
