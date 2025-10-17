@@ -19,6 +19,7 @@ class MeasureThemeFilter(SimpleListFilter):
             return queryset.filter(measure__theme_id=self.value())
         return queryset
 
+
 class TemporalTypeFilter(SimpleListFilter):
     title = "temporal dimension type"
     parameter_name = "temporal_type"
@@ -30,6 +31,7 @@ class TemporalTypeFilter(SimpleListFilter):
         if self.value():
             return queryset.filter(temporaldimension__type_id=self.value())
         return queryset
+
 
 class SpatialTypeFilter(SimpleListFilter):
     title = "spatial dimension type"

@@ -8,12 +8,17 @@ from main.utils_azure_storage import AzureStorage
 
 logger = logging.getLogger(__name__)
 
+
 def get_blob(request, blob_name):
-    if  hasattr(settings, 'STORAGE_AZURE'):
+    if hasattr(settings, "STORAGE_AZURE"):
         try:
             blob_service_client = AzureStorage.get_blob_service_client()
-            container_name = settings.STORAGE_AZURE["default"]["OPTIONS"]["azure_container"]
-            blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+            container_name = settings.STORAGE_AZURE["default"]["OPTIONS"][
+                "azure_container"
+            ]
+            blob_client = blob_service_client.get_blob_client(
+                container=container_name, blob=blob_name
+            )
             blob_data = blob_client.download_blob().readall()
 
             return HttpResponse(blob_data, content_type="text/html")
@@ -23,8 +28,8 @@ def get_blob(request, blob_name):
     else:
         file_path = os.path.join(settings.MEDIA_ROOT, blob_name)
         if os.path.exists(file_path):
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 file_data = f.read()
             return HttpResponse(file_data, content_type="text/html")
         else:
-            raise Http404(f"File {blob_name} niet gevonden in media directory")        
+            raise Http404(f"File {blob_name} niet gevonden in media directory")

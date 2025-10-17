@@ -7,8 +7,8 @@ def convert_str(value: str, to: str = "float"):
         # clean up if necessary
         value = value.replace(",", ".")
 
-        if value  in ['NA', 'Null']:
-            value = ''
+        if value in ["NA", "Null"]:
+            value = ""
 
         # convert to float
         try:
@@ -20,6 +20,6 @@ def convert_str(value: str, to: str = "float"):
 
 
 def set_stringfields_to_upper(df: pd.DataFrame) -> pd.DataFrame:
-    """ set all stringfields in the dataframe to upper"""
+    """set all stringfields in the dataframe to upper"""
     df = df.map(lambda x: x.upper() if isinstance(x, str) else x)
     return df

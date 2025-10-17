@@ -4,9 +4,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('publicatie_tabellen', '0004_db_function_apply_filter'),
+        ("publicatie_tabellen", "0004_db_function_apply_filter"),
     ]
-
 
     operations = [
         migrations.RunSQL(
@@ -21,8 +20,8 @@ class Migration(migrations.Migration):
                 RETURN NEW;
             END;
             $$ LANGUAGE plpgsql;
-            """
-        , ('DROP FUNCTION IF EXISTS public.log_table_changes;')
+            """,
+            ("DROP FUNCTION IF EXISTS public.log_table_changes;"),
         ),
         migrations.RunSQL(
             """
@@ -36,8 +35,7 @@ class Migration(migrations.Migration):
                         EXECUTE format('CREATE TRIGGER table_changes_trigger AFTER INSERT OR UPDATE OR DELETE ON %I FOR EACH STATEMENT EXECUTE FUNCTION log_table_changes()', r.table_name);
                 END LOOP;
             END $$;
-            """
-        ,
+            """,
             """
             DO $$ 
             DECLARE r RECORD;
@@ -50,7 +48,7 @@ class Migration(migrations.Migration):
                     EXECUTE format('DROP TRIGGER IF EXISTS table_changes_trigger ON %I', r.table_name);
                 END LOOP;
             END $$;
-            """
+            """,
         ),
         migrations.RunSQL(
             """
@@ -60,7 +58,7 @@ class Migration(migrations.Migration):
                 changed_at TIMESTAMP,
                 CONSTRAINT unique_table_operation UNIQUE (table_name)
             );
-            """
-        , ('DROP TABLE IF EXISTS public.changes_log;')
+            """,
+            ("DROP TABLE IF EXISTS public.changes_log;"),
         ),
     ]

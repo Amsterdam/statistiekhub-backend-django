@@ -58,10 +58,13 @@ def _run_import_job(import_job, dry_run=True):
 
     update_status("2/4", "Processing import data")
     resource = model_config.resource()
-    
+
     skip_diff = resource._meta.skip_diff or resource._meta.skip_html_diff
 
-    result = resource.import_data(dataset, dry_run=dry_run, )
+    result = resource.import_data(
+        dataset,
+        dry_run=dry_run,
+    )
     update_status("3/4", "Generating import summary")
 
     if result.has_errors() or result.has_validation_errors():
@@ -76,7 +79,7 @@ def _run_import_job(import_job, dry_run=True):
         ContentFile(content.encode("utf-8")),
     )
 
-    if not dry_run and (import_job.errors==""):
+    if not dry_run and (import_job.errors == ""):
         import_job.imported = timezone.now()
 
     update_status("4/4", "Import job finished")
@@ -87,7 +90,7 @@ def run_import_job(pk, dry_run=True):
     logger.info(f"Importing {pk} dry-run {dry_run}")
     import_job = models.ImportJob.objects.get(pk=pk)
 
-    try:        
+    try:
         _run_import_job(import_job, dry_run)
     except Exception as e:
         logger.info(f"error op _run_import_job {pk}: {e}")

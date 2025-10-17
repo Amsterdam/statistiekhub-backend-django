@@ -16,10 +16,9 @@ class PublishFunction:
     def __init__(self, model=None) -> None:
         self.model = model
 
-
     @classmethod
     def run_all_publish_tables(cls):
-        """ runs all three publish tables """
+        """runs all three publish tables"""
 
         instance = cls()
 
@@ -33,7 +32,7 @@ class PublishFunction:
         except Exception as e:
             raise Exception(f"Error op obs calculated table: {e}")
         logger.info("publishobservationcalculated table succesfull")
-            
+
         obs_message, obs_succes = publishobservation()
         if not obs_succes:
             raise Exception(f"Error op publishobservations: {obs_message}")
@@ -43,7 +42,6 @@ class PublishFunction:
         if not statistic_succes:
             raise Exception(f"Error op publishstatistic: {statistic_message}")
         logger.info("publishstatistic table succesfull")
-
 
     def fill_observationcalculated(self):
         """fill model ObservationCalculated with observations calculated by the calculation-query of the measure"""

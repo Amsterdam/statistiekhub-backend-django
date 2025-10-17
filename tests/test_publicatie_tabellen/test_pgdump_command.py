@@ -15,9 +15,15 @@ from referentie_tabellen.models import Theme
 
 
 class TestPgDumpToStorage:
-    @patch("publicatie_tabellen.pgdump_to_storage.PgDumpToStorage._dump_model_to_csv_zip")
+    @patch(
+        "publicatie_tabellen.pgdump_to_storage.PgDumpToStorage._dump_model_to_csv_zip"
+    )
     def test_start_dump(self, mock_dump):
-        PgDumpToStorage().start_dump(["publicatie_tabellen",])
+        PgDumpToStorage().start_dump(
+            [
+                "publicatie_tabellen",
+            ]
+        )
         assert os.path.isdir(PgDumpToStorage.TMP_DIRECTORY)
         assert mock_dump.called
 
@@ -32,9 +38,9 @@ class TestPgDumpToStorage:
         count = Theme.objects.all().count()
 
         assert os.path.isfile(filepath)
-        df = pd.read_csv(filepath, sep=';', compression='zip')
+        df = pd.read_csv(filepath, sep=";", compression="zip")
         # check if file contains all rows
-        assert len(df) == count        
+        assert len(df) == count
         os.remove(filepath)
 
     def test_upload_to_blob(self):
@@ -59,7 +65,7 @@ class TestPgdumpCommand:
         current_time = datetime.datetime.now()
 
         # change something in the db to be sure for the database trigger on statistiek_hub models
-        baker.make( Theme, name="TEST")
+        baker.make(Theme, name="TEST")
 
         call_command("pgdump")
 
@@ -79,13 +85,14 @@ class TestPgdumpCommand:
 
         current_time = datetime.datetime.now()
 
-        with patch('publicatie_tabellen.publication_main.publishmeasure', side_effect=Exception("Failure message")):
+        with patch(
+            "publicatie_tabellen.publication_main.publishmeasure",
+            side_effect=Exception("Failure message"),
+        ):
             try:
                 call_command("pgdump")
             except Exception as e:
                 assert "Failure message" in str(e)
 
         assert PublicationUpdatedAt.objects.all().count() == 0
-        assert not os.path.exists(os.path.join(settings.MEDIA_ROOT, "pgdump")) 
-
-        
+        assert not os.path.exists(os.path.join(settings.MEDIA_ROOT, "pgdump"))

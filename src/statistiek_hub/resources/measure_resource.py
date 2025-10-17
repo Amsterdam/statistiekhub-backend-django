@@ -93,4 +93,6 @@ class MeasureResource(ModelResource):
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("name",)
         use_bulk = True
-        instance_loader_class = CachedInstanceLoader # only works when there is one import_id_fields field
+        instance_loader_class = (
+            CachedInstanceLoader  # only works when there is one import_id_fields field
+        )

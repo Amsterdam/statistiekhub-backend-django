@@ -6,12 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('publicatie_tabellen', '0006_changeslog'),
+        ("publicatie_tabellen", "0006_changeslog"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='publicationobservation',
-            index=models.Index(models.F('measure'), name='measure_idx'),
+            model_name="publicationobservation",
+            index=models.Index(models.F("measure"), name="measure_idx"),
         ),
     ]

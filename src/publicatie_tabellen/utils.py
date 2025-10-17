@@ -12,11 +12,12 @@ def round_to_base(x, base=5):
 
 
 def round_to_decimal(x, decimal):
-    """ banker's rounding: when a number is exactly halfway between two possible rounding amounts, it is rounded to the nearest even number.
-    Use of package decimal because python round() doesnt give secure rounding half to even due to uncertainty with floats """
+    """banker's rounding: when a number is exactly halfway between two possible rounding amounts, it is rounded to the nearest even number.
+    Use of package decimal because python round() doesnt give secure rounding half to even due to uncertainty with floats
+    """
 
     number = Decimal(str(x))
-    dec_str= '1' if decimal == 0 else '0.' + '0' * (decimal - 1) + '1'
+    dec_str = "1" if decimal == 0 else "0." + "0" * (decimal - 1) + "1"
     rounded_number = number.quantize(Decimal(dec_str), rounding=ROUND_HALF_EVEN)
 
     return float(rounded_number)
@@ -54,11 +55,12 @@ def copy_dataframe(dataframe: pd.DataFrame, copy_to_model):
     copy_to_model.objects.bulk_create(new_item_list)
 
 
-def get_qs_for_bevmin_wonmin(obsmodel, 
-                              measures:list=["BEVTOTAAL", "WVOORRBAG"],
-                              spatialdimensiontypes:list=["Wijk", "GGW-gebied"],
-                              temporaldimensiontype:str="Peildatum"
-                              ) -> QuerySet:
+def get_qs_for_bevmin_wonmin(
+    obsmodel,
+    measures: list = ["BEVTOTAAL", "WVOORRBAG"],
+    spatialdimensiontypes: list = ["Wijk", "GGW-gebied"],
+    temporaldimensiontype: str = "Peildatum",
+) -> QuerySet:
     """get queryset of observations with only measures bevtotaal and wvoorrbag (default),
     for spatialdimensiontype wijk and ggw-gebied (default)
     and temporaldimensiontype 'Peildatum' (default)
@@ -87,7 +89,10 @@ def get_qs_for_bevmin_wonmin(obsmodel,
 
 
 def set_small_regions_to_nan_if_minimum(
-    dfmin: pd.DataFrame, var_min: str, dataframe: pd.DataFrame, minimum_value: int=None
+    dfmin: pd.DataFrame,
+    var_min: str,
+    dataframe: pd.DataFrame,
+    minimum_value: int = None,
 ) -> pd.DataFrame:
     """set region value to np.nan if var_min is less than minimum_value :
     remove value observation if sd_minimum_bevtotaal or sd_minimum_wvoorrbag condition is not met
@@ -117,8 +122,14 @@ def set_small_regions_to_nan_if_minimum(
 
     #'value' vervangen door onbekend als te klein
     if minimum_value:
-        hulp.loc[((hulp["varc"] < minimum_value) & (hulp['measure_name'] != var_min)), "value"] = np.nan
+        hulp.loc[
+            ((hulp["varc"] < minimum_value) & (hulp["measure_name"] != var_min)),
+            "value",
+        ] = np.nan
     else:
         minimum_value = f"sd_minimum_{var_min.lower()}"
-        hulp.loc[((hulp["varc"] < hulp[minimum_value]) & (hulp['measure_name'] != var_min)), "value"] = np.nan
+        hulp.loc[
+            ((hulp["varc"] < hulp[minimum_value]) & (hulp["measure_name"] != var_min)),
+            "value",
+        ] = np.nan
     return hulp.drop("varc", axis=1)

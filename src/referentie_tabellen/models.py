@@ -41,6 +41,7 @@ class TemporalDimensionType(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+
 class Source(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)

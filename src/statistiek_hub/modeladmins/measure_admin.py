@@ -13,17 +13,17 @@ class CalculationFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return (
-            ('true', 'Yes'),
-            ('false', 'No'),
+            ("true", "Yes"),
+            ("false", "No"),
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'true':
-            return queryset.exclude(calculation='')
-        elif self.value() == 'false':
-            return queryset.filter(calculation='')
+        if self.value() == "true":
+            return queryset.exclude(calculation="")
+        elif self.value() == "false":
+            return queryset.filter(calculation="")
         return queryset
-    
+
 
 class FilterInline(admin.TabularInline):
     model = Filter
@@ -31,7 +31,9 @@ class FilterInline(admin.TabularInline):
     extra = 0  # <=== For remove empty fields from admin view
 
 
-class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
+class MeasureAdmin(
+    ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin
+):
     tmp_storage_class = MediaStorage
     list_display = (
         "id",
@@ -54,7 +56,7 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
     resource_classes = [MeasureResource]
 
     search_help_text = "search on measure name"
-    search_fields = ["name",  "id"]
+    search_fields = ["name", "id"]
 
     fieldsets = (
         (
@@ -107,5 +109,5 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['name']
+            return ["name"]
         return []

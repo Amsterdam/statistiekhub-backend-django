@@ -6,16 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('referentie_tabellen', '0002_theme_group'),
+        ("referentie_tabellen", "0002_theme_group"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Source',
+            name="Source",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('name_long', models.CharField(blank=True, max_length=100, null=True)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("name", models.CharField(max_length=50, unique=True)),
+                ("name_long", models.CharField(blank=True, max_length=100, null=True)),
             ],
         ),
     ]

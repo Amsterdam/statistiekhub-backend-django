@@ -47,12 +47,11 @@ class FilterResource(ModelResource):
 
             if error:
                 errors["measure_names"] = error
-                
+
         if errors:
             # to speed validation -> if errors empty dataset so no row's will be checked
             del dataset[0 : len(dataset)]
             raise ValidationError(errors)
-
 
     class Meta:
         model = Filter

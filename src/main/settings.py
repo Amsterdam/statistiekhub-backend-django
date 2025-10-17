@@ -176,7 +176,9 @@ FORCE_SCRIPT_NAME = BASE_URL
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "statistiek_hub/templates"), ],
+        "DIRS": [
+            os.path.join(BASE_DIR, "statistiek_hub/templates"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

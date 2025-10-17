@@ -115,9 +115,24 @@ def test_get_df_with_filterrule(
 @pytest.mark.parametrize(
     "filter, basis_start_date, var_start_date, expected_start_date",
     [
-        ("( $BASE < 10 )", datetime.date(2023, 4, 10), datetime.date(2023, 1, 10), "Peildatum: 2023-01-10-->2023-01-10"),
-        ("( $BASE < 10 )", datetime.date(2023, 12, 10), datetime.date(2023, 10, 10), "Peildatum: 2023-10-10-->2023-10-10"),
-        ("( $BASE < 10 )", datetime.date(2023, 12, 4), datetime.date(2023, 12, 29), "Peildatum: 2023-12-29-->2023-12-29"),
+        (
+            "( $BASE < 10 )",
+            datetime.date(2023, 4, 10),
+            datetime.date(2023, 1, 10),
+            "Peildatum: 2023-01-10-->2023-01-10",
+        ),
+        (
+            "( $BASE < 10 )",
+            datetime.date(2023, 12, 10),
+            datetime.date(2023, 10, 10),
+            "Peildatum: 2023-10-10-->2023-10-10",
+        ),
+        (
+            "( $BASE < 10 )",
+            datetime.date(2023, 12, 4),
+            datetime.date(2023, 12, 29),
+            "Peildatum: 2023-12-29-->2023-12-29",
+        ),
     ],
 )
 @pytest.mark.django_db
@@ -138,9 +153,7 @@ def test_get_df_filterrule_with_difftempdate(
     measure_base = baker.make(Measure, name="BASE", unit=fixture["unit"])
     measure_var = baker.make(Measure, name="VAR", unit=fixture["unit"])
 
-    filter_var = baker.make(
-        Filter, measure=measure_var, rule=filter, value_new=None
-    )
+    filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=None)
 
     obs_base = baker.make(
         Observation,
@@ -171,6 +184,7 @@ def test_get_df_filterrule_with_difftempdate(
     temp1.delete()
     temp2.delete()
 
+
 @pytest.mark.parametrize(
     "decimals, base_value, expected",
     [
@@ -188,11 +202,9 @@ def test_get_df_filterrule_with_difftempdate(
     ],
 )
 @pytest.mark.django_db
-def test_set_decimals(
-    fill_ref_tabellen, decimals, base_value, expected
-):
+def test_set_decimals(fill_ref_tabellen, decimals, base_value, expected):
     """apply set decimals on the value's of a measure
-    return:  """
+    return:"""
     fixture = fill_ref_tabellen
 
     unit = baker.make(Unit, name="percentage")
@@ -208,7 +220,7 @@ def test_set_decimals(
 
     publishobservation()
 
-    result = PublicationObservation.objects.values_list('value', flat = True)
+    result = PublicationObservation.objects.values_list("value", flat=True)
     assert list(result) == expected
 
     measure.delete()

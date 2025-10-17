@@ -9,7 +9,14 @@ class PageLimitExceeded(Exception):
 
 
 class LimitedPaginator(Paginator):
-    def __init__(self, object_list, per_page, orphans=0, allow_empty_first_page=True, max_offset=5_000):
+    def __init__(
+        self,
+        object_list,
+        per_page,
+        orphans=0,
+        allow_empty_first_page=True,
+        max_offset=5_000,
+    ):
         super().__init__(object_list, per_page, orphans, allow_empty_first_page)
         self.max_offset = max_offset
 

@@ -1,4 +1,5 @@
 """Utilities set for data processing"""
+
 from datetime import datetime
 
 from dateutil.relativedelta import *
@@ -61,15 +62,15 @@ def add_timedelta(date: datetime, delta: str = None):
     match str(delta):
         case "Dag":
             delta_date = date + relativedelta(days=+1)
-        case  "Week":
+        case "Week":
             delta_date = date + relativedelta(weeks=+1)
-        case  "Maand":
+        case "Maand":
             delta_date = date + relativedelta(months=+1)
-        case  "Kwartaal":
+        case "Kwartaal":
             delta_date = date + relativedelta(months=+3)
-        case  "Jaar":
+        case "Jaar":
             delta_date = date + relativedelta(years=+1)
-        case  "Peildatum":
+        case "Peildatum":
             delta_date = date
 
     return delta_date
@@ -88,10 +89,10 @@ def convert_to_date(date: str = None) -> datetime.date:
     return _date
 
 
-def set_year(date:  datetime.date) -> int:
-    """ return year from date with custom mapping for 31-12 dates"""
+def set_year(date: datetime.date) -> int:
+    """return year from date with custom mapping for 31-12 dates"""
 
     if date.day == 31 and date.month == 12:
-        return (date.year +  1)
+        return date.year + 1
     else:
         return date.year

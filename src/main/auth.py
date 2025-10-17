@@ -8,6 +8,7 @@ from django.urls import reverse
 
 log = logging.getLogger(__name__)
 
+
 def oidc_login(request, **kwargs):
     oidc_authentication_init = reverse("oidc_authentication_init")
     redirect = f'{oidc_authentication_init}?next={request.GET.get("next", "")}'
@@ -16,7 +17,7 @@ def oidc_login(request, **kwargs):
 
 class OIDCAuthenticationBackend(amsterdam_django_oidc.OIDCAuthenticationBackend):
     def verify_claims(self, claims):
-        has_roles = bool(claims.get("roles", [])),
+        has_roles = (bool(claims.get("roles", [])),)
         return has_roles
 
     def create_user(self, claims):
@@ -48,7 +49,7 @@ class OIDCAuthenticationBackend(amsterdam_django_oidc.OIDCAuthenticationBackend)
                         try:
                             group = Group.objects.get(name=django_group_name)
                         except Group.DoesNotExist:
-                            pass 
+                            pass
                         else:
                             user.groups.add(group)
                     case "application-admin":

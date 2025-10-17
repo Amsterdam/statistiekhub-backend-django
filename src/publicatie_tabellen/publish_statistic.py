@@ -1,6 +1,5 @@
 import logging
 
-import numpy as np
 import pandas as pd
 from django.contrib import messages
 from django.db.models import F, Value
@@ -30,29 +29,40 @@ logger = logging.getLogger(__name__)
 def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_str) -> QuerySet:
     """get queryset from cleaned obs publication model specificly for publishstatistic"""
     queryset = (
-        cleaned_obsmodel.objects
-        .filter(
+        cleaned_obsmodel.objects.filter(
             spatialdimensiontype__in=["Wijk", "GGW-gebied", "Gemeente"],
             temporaldimensiontype="Peildatum",
-            measure = measure_str,
+            measure=measure_str,
         )
-        .annotate(measure_name = F("measure"),)
+        .annotate(
+            measure_name=F("measure"),
+        )
         .order_by("measure_name", "temporaldimensionyear", "temporaldimensionstartdate")
         .distinct()
-        .values('id', 'spatialdimensiontype', 'spatialdimensiondate',
-                'spatialdimensioncode', 'spatialdimensionname', 'temporaldimensiontype',
-                'temporaldimensionstartdate', 'temporaldimensionenddate',
-                'temporaldimensionyear', 'measure_name', 'value')
-    )    
+        .values(
+            "id",
+            "spatialdimensiontype",
+            "spatialdimensiondate",
+            "spatialdimensioncode",
+            "spatialdimensionname",
+            "temporaldimensiontype",
+            "temporaldimensionstartdate",
+            "temporaldimensionenddate",
+            "temporaldimensionyear",
+            "measure_name",
+            "value",
+        )
+    )
 
     return queryset
 
 
-def _get_qs_publishstatistic_measure(measuremodel)-> QuerySet:
-    """measures exclude kleurenpalet, annotate var from extra_attr json field """
+def _get_qs_publishstatistic_measure(measuremodel) -> QuerySet:
+    """measures exclude kleurenpalet, annotate var from extra_attr json field"""
     queryset = (
-        measuremodel.objects
-        .filter(extra_attr__has_key=KLEURENPALET) #only objects where the key exists
+        measuremodel.objects.filter(
+            extra_attr__has_key=KLEURENPALET
+        )  # only objects where the key exists
         .exclude(**{f"extra_attr__{KLEURENPALET}__in": EXCLUDE_KLEURENPALET_SD})
         .annotate(
             sd_minimum_bevtotaal=Coalesce(
@@ -61,7 +71,7 @@ def _get_qs_publishstatistic_measure(measuremodel)-> QuerySet:
             sd_minimum_wvoorrbag=Coalesce(
                 F(f"extra_attr__{SD_MIN_WVOORRBAG}"), Value(None)
             ),
-            measure_id = F("id"),
+            measure_id=F("id"),
         )
         .values("measure_id", "name", "sd_minimum_bevtotaal", "sd_minimum_wvoorrbag")
     )
@@ -181,12 +191,16 @@ def publishstatistic() -> tuple:
 
     for measure in qsmeasure:
         # select observations
-        qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
+        qsobservation = _get_qs_publishstatistic_obs(
+            PublicationObservation, measure["name"]
+        )
         df_obs = convert_queryset_into_dataframe(qsobservation)
-        df = df_obs.merge(df_measure, how='left', left_on="measure_name", right_on='name')
+        df = df_obs.merge(
+            df_measure, how="left", left_on="measure_name", right_on="name"
+        )
 
         if len(df) == 0:
-            measure_no_sd.append(measure['name'])
+            measure_no_sd.append(measure["name"])
             continue
 
         logger.info(f"aanmaken df met gemiddelde voor {measure}")
@@ -206,7 +220,7 @@ def publishstatistic() -> tuple:
 
         if dfstatistic.empty:
             # if there is no standarddeviation -> no save
-            measure_no_sd.append(measure['name'])
+            measure_no_sd.append(measure["name"])
             continue
 
         # if there is no standarddeviation for specific temporaldimension -> remove record
