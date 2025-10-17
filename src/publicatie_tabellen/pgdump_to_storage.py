@@ -4,9 +4,8 @@ import shutil
 import zipfile
 
 import django.apps
-from django.conf import settings
+from django.core.files.storage import InvalidStorageError, default_storage, storages
 from django.db import connection
-from django.utils.module_loading import import_string as get_storage_class
 
 from publicatie_tabellen.models import ChangesLog
 
@@ -64,16 +63,10 @@ class OverwriteStorage:
     and overwrite existing files instead of using hash postfixes."""
 
     def __init__(self, *args, **kwargs):
-        if hasattr(settings, "STORAGE_AZURE"):
-            # Gebruik de 'pgdump' opslagconfiguratie
-            storage_class = get_storage_class(settings.STORAGES["pgdump"]["BACKEND"])
-            storage_options = settings.STORAGES["pgdump"]["OPTIONS"]
-        else:
-            # Gebruik de standaard opslagconfiguratie
-            storage_class = get_storage_class(settings.STORAGES["default"]["BACKEND"])
-            storage_options = {}
-
-        self.storage = storage_class(**storage_options)
+        try:
+            self.storage = storages["pgdump"]
+        except InvalidStorageError:
+            self.storage = default_storage
 
     def __getattr__(self, name):
         return getattr(self.storage, name)
