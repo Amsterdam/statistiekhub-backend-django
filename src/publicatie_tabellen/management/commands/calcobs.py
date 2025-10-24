@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Dump publication-tables to storagecontainer pgdump"
+    help = "Populates tabel observationcalculated"
 
     def handle(self, *args, **options) -> None:
         with tracer.start_as_current_span("calcobs") as span:
