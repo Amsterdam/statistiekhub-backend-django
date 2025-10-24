@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 from django.contrib import messages
-from django.db.models import F, Value
+from django.db.models import Case, F, Value, When
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 
@@ -66,10 +66,22 @@ def _get_qs_publishstatistic_measure(measuremodel) -> QuerySet:
         .exclude(**{f"extra_attr__{KLEURENPALET}__in": EXCLUDE_KLEURENPALET_SD})
         .annotate(
             sd_minimum_bevtotaal=Coalesce(
-                F(f"extra_attr__{SD_MIN_BEVTOTAAL}"), Value(None)
+                Case(
+                    # If the field is an empty string, set it to None
+                    When(**{f"extra_attr__{SD_MIN_BEVTOTAAL}": ""}, then=Value(None)),
+                    # Otherwise, use the field value
+                    default=F(f"extra_attr__{SD_MIN_BEVTOTAAL}"),
+                ),
+                Value(None),
             ),
             sd_minimum_wvoorrbag=Coalesce(
-                F(f"extra_attr__{SD_MIN_WVOORRBAG}"), Value(None)
+                Case(
+                    # If the field is an empty string, set it to None
+                    When(**{f"extra_attr__{SD_MIN_WVOORRBAG}": ""}, then=Value(None)),
+                    # Otherwise, use the field value
+                    default=F(f"extra_attr__{SD_MIN_WVOORRBAG}"),
+                ),
+                Value(None),
             ),
             measure_id=F("id"),
         )
