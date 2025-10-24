@@ -25,6 +25,20 @@ class TestModelSave:
         assert not TemporalDimension.objects.exists()
 
     @pytest.mark.django_db
+    def test_clean_raises_validation_error(self):
+        """temporaltype doesnt exist"""
+        tempdimtype = baker.make(TemporalDimensionType, name="bestaatniet")
+
+        temp_date = TemporalDimension(
+            startdate=datetime.date(2023, 12, 31), type=tempdimtype
+        )
+
+        with pytest.raises(ValidationError) as e:
+            temp_date.clean()
+
+        assert "Type bestaat niet in add_timedelta function" in str(e.value)
+
+    @pytest.mark.django_db
     def test_save_measure_name_upper(self):
         """name should be saved upper"""
         name_upper = baker.make(Measure, name="test2")
