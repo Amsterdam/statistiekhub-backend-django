@@ -1,11 +1,13 @@
 # Copyright (C) 2019 o.s. Auto*Mat
 import logging
+from typing import Any
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.core.cache import cache
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -82,7 +84,6 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "created_at",
     )
     readonly_fields = (
-        "file_link",
         "job_status_info",
         "change_summary_link",
         "imported",
@@ -92,7 +93,7 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         "processing_initiated",
     )
     exclude = (
-        "file",
+        "file_link",
         "change_summary",
         "job_status",
         "created_by",
@@ -122,6 +123,12 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
         admin_actions.run_import_job_action_dry,
         admin_actions.run_import_job_action,
     )
+
+    def get_readonly_fields(self, request, obj: Any | None = ...):
+        if obj:
+            return ("file",) + self.readonly_fields
+        else:
+            return self.readonly_fields
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:  # Only set the user when the object is created
