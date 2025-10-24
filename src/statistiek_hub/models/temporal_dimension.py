@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 from referentie_tabellen.models import TemporalDimensionType
 from statistiek_hub.utils.datetime import add_timedelta, set_year
@@ -32,11 +32,13 @@ class TemporalDimension(models.Model):
         # calculate enddate
         self.enddate = add_timedelta(self.startdate, self.type)
         if not self.enddate:
-            print('add_timedelta bestaat niet')
-            raise ValidationError('Type bestaat niet in add_timedelta function, neem contact op als de Type opgenomen dient te worden in de add_timedelta function')
+            print("add_timedelta bestaat niet")
+            raise ValidationError(
+                "Type bestaat niet in add_timedelta function, neem contact op als de Type opgenomen dient te worden in de add_timedelta function"
+            )
         return super().clean()
 
-    def save(self, *args, **kwargs):        
+    def save(self, *args, **kwargs):
         # set year
         self.year = set_year(self.startdate)
 
