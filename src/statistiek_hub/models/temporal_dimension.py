@@ -34,14 +34,12 @@ class TemporalDimension(models.Model):
     def clean(self):
         # check enddate
         if not self.calc_enddate():
-            print("add_timedelta bestaat niet")
             raise ValidationError(
                 "Type bestaat niet in add_timedelta function, neem contact op als de Type opgenomen dient te worden in de add_timedelta function"
             )
 
     def save(self, *args, **kwargs):
         self.calc_enddate()
-        # set year
         self.year = set_year(self.startdate)
 
         self.name = f"{self.type}: {self.startdate.strftime('%Y-%m-%d')}-->{self.enddate.strftime('%Y-%m-%d')}"
