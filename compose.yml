@@ -8,7 +8,7 @@ x-common-env: &common-env
   SECRET_KEY: "insecure"
   AUTHORIZATION_TOKEN: "auth-token"
   GET_AUTHORIZATION_TOKEN: "get-auth-token"
-  AZURITE_QUEUE_CONNECTION_STRING: 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1;'
+  AZURITE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;"
   OIDC_BASE_URL: "https://login.microsoftonline.com/72fca1b1-2c2e-4376-a445-294d80196804"
   OIDC_RP_CLIENT_ID:
   OIDC_RP_CLIENT_SECRET:
@@ -34,7 +34,7 @@ services:
       interval: 10s
       timeout: 1s
       retries: 5
-  
+
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     ports:
@@ -58,10 +58,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 256M
         reservations:
-          cpus: '0.05'
+          cpus: "0.05"
           memory: 128M
 
   jaeger:
@@ -78,7 +78,7 @@ services:
     image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-opdrachten/statistiekhub}:${VERSION:-latest}
     build:
       context: .
-      target: app 
+      target: app
     environment:
       <<: *common-env
       DEBUG: false
@@ -110,6 +110,31 @@ services:
     volumes:
       - .:/app
     command: python manage.py runserver 0.0.0.0:8000
+
+  job-consumer:
+    build:
+      context: .
+      target: dev
+    environment:
+      <<: *common-env
+      LOG_LEVEL: "DEBUG"
+      DEBUG: "True"
+      DJANGO_LOG_LEVEL: "DEBUG"
+      OTEL_SDK_DISABLED: true
+    depends_on:
+      <<: *common-depends-on
+    volumes:
+      - .:/app
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    user: 1000:1000
+    command: python manage.py consume_jobs
 
   test:
     build:

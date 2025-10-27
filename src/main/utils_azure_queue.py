@@ -31,11 +31,9 @@ class AzureQueue:
                 queue_name=settings.JOB_QUEUE_NAME,
             )
 
-        elif AZURITE_QUEUE_CONNECTION_STRING := os.getenv(
-            "AZURITE_QUEUE_CONNECTION_STRING"
-        ):  # for local development
+        elif hasattr(settings, "AZURITE_CONNECTION_STRING"):  # for local development
             queue_service_client = QueueServiceClient.from_connection_string(
-                AZURITE_QUEUE_CONNECTION_STRING
+                settings.AZURITE_CONNECTION_STRING
             )
             try:
                 queue_service_client.create_queue(settings.JOB_QUEUE_NAME)
