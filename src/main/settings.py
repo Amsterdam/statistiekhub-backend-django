@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import json
 import os
 from pathlib import Path
 from urllib.parse import urljoin
@@ -237,36 +236,38 @@ STORAGES = {
     },
 }
 
-# -----Azure Storageaccount settings
-if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
-    credential = WorkloadIdentityCredential()
-    STORAGE_AZURE = {
-        "default": {
-            "BACKEND": "storages.backends.azure_storage.AzureStorage",
-            "OPTIONS": {
-                "token_credential": credential,
-                "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
-                "azure_container": "django",
-            },
-        },
-        "pgdump": {
-            "BACKEND": "storages.backends.azure_storage.AzureStorage",
-            "OPTIONS": {
-                "token_credential": credential,
-                "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
-                "azure_container": "pgdump",
-            },
-        },
-        "import_export": {
-            "BACKEND": "storages.backends.azure_storage.AzureStorage",
-            "OPTIONS": {
-                "token_credential": credential,
-                "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
-                "azure_container": "django",
-            },
-        },
+# Configure Azure storage if credentials are available
+AZURITE_CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
+if AZURITE_CONNECTION_STRING and not os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
+    # Using connection string (Azurite or development)
+    azure_auth = {"connection_string": AZURITE_CONNECTION_STRING}
+elif os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
+    # Using workload identity (production)
+    azure_auth = {
+        "token_credential": WorkloadIdentityCredential(),
+        "account_name": os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
     }
-    STORAGES |= STORAGE_AZURE  # update storages with storage_azure
+else:
+    azure_auth = None
+
+if azure_auth:
+    azure_backend = "storages.backends.azure_storage.AzureStorage"
+    STORAGES.update(
+        {
+            "default": {
+                "BACKEND": azure_backend,
+                "OPTIONS": {**azure_auth, "azure_container": "django"},
+            },
+            "pgdump": {
+                "BACKEND": azure_backend,
+                "OPTIONS": {**azure_auth, "azure_container": "pgdump"},
+            },
+            "import_export": {
+                "BACKEND": azure_backend,
+                "OPTIONS": {**azure_auth, "azure_container": "django"},
+            },
+        }
+    )
 
 # -----Queue
 JOB_QUEUE_NAME = "job-queue"
@@ -340,21 +341,25 @@ APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
 LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
 DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "WARNING").upper()
 
-base_log_fmt = {"time": "%(asctime)s", "name": "%(name)s", "level": "%(levelname)s"}
-log_fmt = base_log_fmt.copy()
-log_fmt["message"] = "%(message)s"
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "json": {"format": json.dumps(log_fmt)},
+        # For production, will be used if DEBUG is False
+        "json": {
+            "format": '{"time": "%(asctime)s", "name": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}',
+        },
+        # For development, will be used if DEBUG is True
+        "verbose": {
+            "format": "{levelname} {asctime} [{name}] {funcName}:{lineno} - {message}",
+            "style": "{",
+        },
     },
     "handlers": {
         "console": {
             "level": LOG_LEVEL,
             "class": "logging.StreamHandler",
-            "formatter": "json",
+            "formatter": "verbose" if DEBUG else "json",
         },
     },
     "root": {
@@ -362,43 +367,18 @@ LOGGING = {
         "level": LOG_LEVEL,
     },
     "loggers": {
-        "django.db": {
-            "handlers": ["console"],
-            "level": LOG_LEVEL,
+        # Silence Azure logging as it is very verbose, only show warnings or higher
+        "azure": {
+            "level": "WARNING",
+            "propagate": True,
+        },
+        "urllib3": {
+            "level": "WARNING",
+            "propagate": True,
         },
         "django.db.backends": {
-            "handlers": ["console"],
-            "level": LOG_LEVEL,
-        },
-        "django": {
-            "handlers": ["console"],
-            "level": LOG_LEVEL,
-        },
-        "statistiek_hub": {
-            "level": LOG_LEVEL,
-            "handlers": ["console"],
-            "propagate": False,
-        },
-        "referentie_tabellen": {
-            "level": LOG_LEVEL,
-            "handlers": ["console"],
-            "propagate": False,
-        },
-        "publicatie_tabellen": {
-            "level": LOG_LEVEL,
-            "handlers": ["console"],
-            "propagate": False,
-        },
-        "import_export_job": {
-            "level": LOG_LEVEL,
-            "handlers": ["console"],
-            "propagate": False,
-        },
-        # Log all unhandled exceptions
-        "django.request": {
-            "level": LOG_LEVEL,
-            "handlers": ["console"],
-            "propagate": False,
+            "level": "INFO",
+            "propagate": True,
         },
     },
 }

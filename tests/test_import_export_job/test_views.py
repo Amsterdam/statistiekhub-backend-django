@@ -1,9 +1,9 @@
 import os
 
 import pytest
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.urls import reverse
 from model_bakery import baker
 
@@ -21,10 +21,11 @@ def test_blob_link(client, temporary_media_root):
     test_file = ContentFile(test_html.encode("utf-8"), name="test.html")
     job.change_summary.save("test.html", test_file)
 
-    assert os.path.exists(job.change_summary.path)
+    assert default_storage.exists(job.change_summary.name)
 
-    url = reverse("get_blob", args=[job.change_summary.path])
+    url = reverse("get_blob", args=[job.change_summary.name])
     response = client.get(url)
     assert response.status_code == 200
 
-    assert b"<html>" in response.content
+    retrieved_content = b"".join(response.streaming_content)
+    assert b"<html>" in retrieved_content

@@ -1,8 +1,10 @@
 import os
 
 import pytest
+from azure.storage.blob import BlobServiceClient
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage, storages
 from model_bakery import baker
 
 from import_export_job.models import ImportJob
@@ -40,7 +42,6 @@ def get_test_import_observation_file_content():
 
 @pytest.mark.django_db
 def test_get_format(mock_default_formats):
-
     job = baker.make(ImportJob, format="mock/type")
 
     result = get_format(job)
@@ -51,25 +52,26 @@ def test_get_format(mock_default_formats):
 
 
 @pytest.mark.django_db
-def test_delete_file_on_job_delete(temporary_media_root):
+def test_delete_file_on_job_delete():
     job = baker.make(
         ImportJob,
         format="semicolon text/csv",
         model="Observation",
         file=ContentFile(get_test_import_observation_file_content(), "mock_file1.csv"),
     )
-    file_path = job.file.path
-    assert os.path.exists(file_path)
+
+    file_name = job.file.name
+    assert default_storage.exists(file_name)
 
     _run_import_job(job, dry_run=True)
 
-    summary_path = job.change_summary.path
-    assert os.path.exists(summary_path)
+    summary_name = job.change_summary.name
+    assert default_storage.exists(summary_name)
 
     job.delete()
 
-    assert not os.path.exists(file_path)
-    assert not os.path.exists(summary_path)
+    assert not default_storage.exists(file_name)
+    assert not default_storage.exists(summary_name)
     assert not ImportJob.objects.filter(id=job.id).exists()
     assert len(ImportJob.objects.all()) == 0
 
@@ -82,7 +84,7 @@ def test_run_import_job(temporary_media_root):
         model="Observation",
         file=ContentFile(get_test_import_observation_file_content(), "mock_file2.csv"),
     )
-    assert os.path.exists(import_job.file.path)
+    assert default_storage.exists(import_job.file.name)
 
     _run_import_job(import_job, dry_run=True)
 
