@@ -1,4 +1,6 @@
 x-common-depends-on: &common-depends-on
+  migrate:
+    condition: service_completed_successfully
   database:
     condition: service_healthy
   azurite:
@@ -20,15 +22,20 @@ x-common-env: &common-env
   OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_RESPONSE: ".*"
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
 
+volumes:
+  db_data:
+
 services:
   database:
     image: postgis/postgis:15-3.4
     ports:
-      - "5432"
+      - "5432:5432"
     environment:
       POSTGRES_DB: statistiek_hub
       POSTGRES_USER: statistiek_hub
       POSTGRES_PASSWORD: insecure
+    volumes:
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: pg_isready -U statistiek_hub -d statistiek_hub
       interval: 10s
@@ -150,9 +157,29 @@ services:
       OTEL_EXPORTER: "none"
       OTEL_SDK_DISABLED: true
     depends_on:
-      <<: *common-depends-on
+      database:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
     volumes:
       - .:/app
+
+  migrate:
+    build:
+      context: .
+      target: app
+    environment:
+      SECRET_KEY: "insecure"
+      DJANGO_SETTINGS_MODULE: main.settings
+      OTEL_SDK_DISABLED: true
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    user: 1000:1000
+    command: python manage.py migrate --noinput
+    restart: "no"
 
   linting:
     build:
