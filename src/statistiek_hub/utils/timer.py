@@ -1,5 +1,8 @@
+import logging
 import time
 from functools import wraps
+
+logger = logging.getLogger(__name__)
 
 
 def timeit(func):
@@ -9,7 +12,9 @@ def timeit(func):
         result = func(*args, **kwargs)
         end_time = time.perf_counter()
         total_time = end_time - start_time
-        print(f"------------- Function {func.__name__} Took {total_time:.4f} seconds")
+        logger.debug(
+            f"------------- Function {func.__name__} Took {total_time:.4f} seconds"
+        )
         return result
 
     return timeit_wrapper

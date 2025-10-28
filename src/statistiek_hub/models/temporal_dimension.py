@@ -1,8 +1,12 @@
+import logging
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
 from referentie_tabellen.models import TemporalDimensionType
 from statistiek_hub.utils.datetime import add_timedelta, set_year
+
+logger = logging.getLogger(__name__)
 
 
 class TemporalDimension(models.Model):
@@ -33,8 +37,9 @@ class TemporalDimension(models.Model):
 
     def clean(self):
         # check enddate
-        if not self.calc_enddate():
-            print("add_timedelta bestaat niet")
+        self.calc_enddate()
+        if not self.enddate:
+            logger.info("add_timedelta bestaat niet")
             raise ValidationError(
                 "Type bestaat niet in add_timedelta function, neem contact op als de Type opgenomen dient te worden in de add_timedelta function"
             )
