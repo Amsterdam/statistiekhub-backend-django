@@ -89,6 +89,7 @@ services:
         condition: service_started
     volumes:
       - .:/app
+    user: 1000:1000
     command: /app/deploy/docker-run.sh
 
   dev:
@@ -109,6 +110,7 @@ services:
         condition: service_started
     volumes:
       - .:/app
+    user: 1000:1000
     command: python manage.py runserver 0.0.0.0:8000
 
   job-consumer:
