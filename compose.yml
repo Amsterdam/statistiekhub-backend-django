@@ -23,6 +23,7 @@ x-common-env: &common-env
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
 
 volumes:
+  azurite_data:
   db_data:
 
 services:
@@ -47,6 +48,13 @@ services:
     ports:
       - "10000:10000"  # Blob service
       - "10001:10001"  # Queue service
+    volumes:
+      - azurite_data:/data
+    command: >
+      azurite 
+      -l /data 
+      --blobHost 0.0.0.0 
+      --queueHost 0.0.0.0
     healthcheck:
       test: nc 127.0.0.1 10000 -z
       interval: 1s
