@@ -32,7 +32,7 @@ class CustomUserAdmin(UserAdmin):
 # referentie tabellen
 @admin.register(TemporalDimensionType)
 class TemporalDimensionTypeAdmin(admin.ModelAdmin):
-    list_display = ("name", "id")
+    list_display = ("name", "type", "id")
     ordering = ("id",)
 
 

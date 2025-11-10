@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from referentie_tabellen.models import Theme, Unit
+from referentie_tabellen.referentie_choices import TEMPORALTYPE_OPTION_CHOICES
 from statistiek_hub.validations import check_code_in_name, validate_calculation_string
 
 from .dimension import Dimension
@@ -19,11 +20,15 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     definition_uk = models.TextField(blank=True, default="")
     description = models.TextField(blank=True, default="")
     calculation = models.CharField(
-        max_length=200, blank=True, default="", validators=[validate_calculation_string]
+        max_length=200,
+        blank=True,
+        default="",
+        help_text="sql berekeningsregel, alleen invullen voor een berekende variabele",
+        validators=[validate_calculation_string],
     )
     sensitive = models.BooleanField(
         default=False,
-        help_text="gevoeligedata - afronden en groepsonthulling toepassen",
+        help_text="gevoeligedata - afronden op veelvouden van 5 of 90% en gebieden met minder dan 50 inwoners worden leeg gemaakt",
     )
     unit = models.ForeignKey(Unit, models.RESTRICT)
     decimals = models.IntegerField(default=0)
@@ -38,6 +43,10 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     deprecated_date = models.DateField(blank=True, null=True)
     deprecated_reason = models.TextField(
         blank=True, default="", help_text="toelichting"
+    )
+    temporaltype = models.IntegerField(
+        choices=TEMPORALTYPE_OPTION_CHOICES,
+        default=1,
     )
 
     def __str__(self):

@@ -1,6 +1,8 @@
 from django.contrib.auth.models import Group
 from django.db import models
 
+from referentie_tabellen.referentie_choices import TEMPORALTYPE_OPTION_CHOICES
+
 
 class Unit(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -37,6 +39,10 @@ class SpatialDimensionType(models.Model):
 class TemporalDimensionType(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
+    type = models.IntegerField(
+        choices=TEMPORALTYPE_OPTION_CHOICES,
+        default=2,
+    )
 
     def __str__(self):
         return f"{self.name}"

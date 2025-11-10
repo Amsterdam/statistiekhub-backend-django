@@ -45,13 +45,14 @@ class MeasureAdmin(
     )
     list_filter = (
         "theme",
-        "source",
+        "temporaltype",
         CalculationFilter,
         "sensitive",
         "deprecated",
         "unit",
         "created_at",
         "updated_at",
+        "source",
     )
     resource_classes = [MeasureResource]
 
@@ -75,6 +76,8 @@ class MeasureAdmin(
                     "unit",
                     "decimals",
                     "source",
+                    "temporaltype",
+                    "sensitive",
                 ),
             },
         ),
@@ -87,7 +90,6 @@ class MeasureAdmin(
                     "description",
                     "parent",
                     "dimension",
-                    "sensitive",
                 ),
             },
         ),
