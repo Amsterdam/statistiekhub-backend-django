@@ -1,18 +1,13 @@
-# Copyright (C) 2019 o.s. Auto*Mat
-
 import logging
-from functools import partial
 
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.db import models, transaction
+from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from import_export_job.utils import DEFAULT_FORMATS
-from job_consumer.job_tools import store_job_in_queue
 
 logger = logging.getLogger(__name__)
 
@@ -89,13 +84,10 @@ def importjob_post_save(sender, instance, **kwargs):
     if not instance.processing_initiated:
         instance.processing_initiated = timezone.now()
         instance.save()
-        transaction.on_commit(
-            partial(
-                store_job_in_queue,
-                job_pk=instance.pk,
-                dry_run=getattr(settings, "IMPORT_DRY_RUN_FIRST_TIME", True),
-            )
-        )
+
+        from import_export_job.tasks import run_import_job
+
+        run_import_job.delay_on_commit(instance.pk, True)
 
 
 @receiver(post_delete, sender=ImportJob)

@@ -21,6 +21,8 @@ omit = [
     "*/models.py",
     "*/utils/timer.py",
     "*/admin.py",
+    "/app/src/main/celery.py",
+    "/app/src/main/kombu/transport/*"
 ]
 
 [tool.coverage.report]

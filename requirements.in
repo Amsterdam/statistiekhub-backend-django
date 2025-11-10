@@ -26,7 +26,12 @@ azure-storage-queue
 
 # OTEL
 opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-instrumentation-celery
 opentelemetry-instrumentation-django
-opentelemetry-instrumentation-psycopg2
 opentelemetry-instrumentation-logging
+opentelemetry-instrumentation-psycopg2
 opentelemetry-instrumentation-requests
+
+# Celery
+celery
+django-celery-results

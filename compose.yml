@@ -55,6 +55,7 @@ services:
       -l /data 
       --blobHost 0.0.0.0 
       --queueHost 0.0.0.0
+      --loose
     healthcheck:
       test: nc 127.0.0.1 10000 -z
       interval: 1s
@@ -128,30 +129,29 @@ services:
     user: 1000:1000
     command: python manage.py runserver 0.0.0.0:8000
 
-  job-consumer:
+  celery:
     build:
       context: .
-      target: dev
+      target: app
     environment:
       <<: *common-env
-      LOG_LEVEL: "DEBUG"
-      DEBUG: "True"
-      DJANGO_LOG_LEVEL: "DEBUG"
+      DEBUG: true
+      DJANGO_SETTINGS_MODULE: main.settings
       OTEL_SDK_DISABLED: true
     depends_on:
       <<: *common-depends-on
     volumes:
       - .:/app
+    user: 1000:1000
+    command: celery -A main worker -l INFO
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "0.6"
+          memory: 1G
         reservations:
-          cpus: "0.25"
-          memory: 256M
-    user: 1000:1000
-    command: python manage.py consume_jobs
+          cpus: "0.3"
+          memory: 512M
 
   test:
     build:
@@ -164,6 +164,7 @@ services:
       OIDC_RP_CLIENT_SECRET: tests
       OTEL_EXPORTER: "none"
       OTEL_SDK_DISABLED: true
+      CELERY_TASK_ALWAYS_EAGER: true
     depends_on:
       database:
         condition: service_healthy
@@ -188,6 +189,14 @@ services:
     user: 1000:1000
     command: python manage.py migrate --noinput
     restart: "no"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512mb
+        reservations:
+          cpus: "0.25"
+          memory: 256M
 
   linting:
     build:
@@ -196,3 +205,4 @@ services:
     volumes:
       - ./src:/app/src
       - ./tests:/app/tests
+    user: 1000:1000
