@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from django.db import models
 
-from referentie_tabellen.referentie_choices import TEMPORALTYPE_OPTION_CHOICES
+from referentie_tabellen.referentie_choices import TemporaltypeChoices
 
 
 class Unit(models.Model):
@@ -40,8 +40,8 @@ class TemporalDimensionType(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
     type = models.IntegerField(
-        choices=TEMPORALTYPE_OPTION_CHOICES,
-        default=2,
+        choices= TemporaltypeChoices.choices,
+        default= TemporaltypeChoices.PERIODE,
     )
 
     def __str__(self):

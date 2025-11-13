@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from referentie_tabellen.models import Theme, Unit
-from referentie_tabellen.referentie_choices import TEMPORALTYPE_OPTION_CHOICES
+from referentie_tabellen.referentie_choices import TemporaltypeChoices
 from statistiek_hub.validations import check_code_in_name, validate_calculation_string
 
 from .dimension import Dimension
@@ -45,8 +45,8 @@ class Measure(TimeStampMixin, AddErrorFuncion):
         blank=True, default="", help_text="toelichting"
     )
     temporaltype = models.IntegerField(
-        choices=TEMPORALTYPE_OPTION_CHOICES,
-        default=1,
+        choices= TemporaltypeChoices.choices,
+        default= TemporaltypeChoices.PEILDATUM,
     )
 
     def __str__(self):
