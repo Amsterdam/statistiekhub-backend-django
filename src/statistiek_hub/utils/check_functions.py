@@ -89,7 +89,6 @@ def check_temporaldimensiontype_observation_vs_measure(
 
     # measures in observations that differ
     diff_df = df_compare[df_compare["type__type"] != df_compare["temporaltype"]]
-    print(diff_df.head())
 
     if len(diff_df) > 0:
         error = f"Measures {list(diff_df["measure"])} do not match their predefined temporaltype"
