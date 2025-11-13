@@ -40,8 +40,8 @@ class TemporalDimensionType(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(unique=True, max_length=50)
     type = models.IntegerField(
-        choices= TemporaltypeChoices.choices,
-        default= TemporaltypeChoices.PERIODE,
+        choices=TemporaltypeChoices.choices,
+        default=TemporaltypeChoices.PERIODE,
     )
 
     def __str__(self):

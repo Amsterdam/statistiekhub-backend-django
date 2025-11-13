@@ -2,7 +2,6 @@ import datetime
 
 import pandas as pd
 import pytest
-from django.core.management import call_command
 from tablib import Dataset
 
 from referentie_tabellen.models import TemporalDimensionType

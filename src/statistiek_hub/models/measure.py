@@ -45,8 +45,8 @@ class Measure(TimeStampMixin, AddErrorFuncion):
         blank=True, default="", help_text="toelichting"
     )
     temporaltype = models.IntegerField(
-        choices= TemporaltypeChoices.choices,
-        default= TemporaltypeChoices.PEILDATUM,
+        choices=TemporaltypeChoices.choices,
+        default=TemporaltypeChoices.PEILDATUM,
     )
 
     def __str__(self):
