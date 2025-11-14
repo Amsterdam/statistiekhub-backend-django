@@ -2,6 +2,7 @@
 import logging
 import os
 
+from celery import shared_task
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -86,7 +87,8 @@ def _run_import_job(import_job, dry_run=True):
     import_job.save()
 
 
-def run_import_job(pk, dry_run=True):
+@shared_task
+def run_import_job(pk: int, dry_run: bool = True):
     logger.info(f"Importing {pk} dry-run {dry_run}")
     import_job = models.ImportJob.objects.get(pk=pk)
 

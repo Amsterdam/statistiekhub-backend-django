@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from azure.identity import WorkloadIdentityCredential
 from csp.constants import NONCE, SELF
@@ -23,6 +23,13 @@ azure = Azure()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _env_to_bool(value: str) -> bool:
+    """Helper function to convert environment variables into boolean"""
+    if not isinstance(value, str):
+        return False
+    return value.lower() in ("1", "t", "true")
 
 
 # Quick-start development settings - unsuitable for production
@@ -58,13 +65,13 @@ THIRD_PARTY_APPS = [
     "storages",
     "csp",
     "mozilla_django_oidc",  # load after django.contrib.auth!"
+    "django_celery_results",
 ]
 LOCAL_APPS = [
     "statistiek_hub",
     "referentie_tabellen",
     "publicatie_tabellen",
     "import_export_job",
-    "job_consumer",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -269,10 +276,6 @@ if azure_auth:
         }
     )
 
-# -----Queue
-JOB_QUEUE_NAME = "job-queue"
-IMPORT_DRY_RUN_FIRST_TIME = True
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -439,3 +442,55 @@ else:
 DjangoInstrumentor().instrument()
 Psycopg2Instrumentor().instrument()
 RequestsInstrumentor().instrument()
+
+# Celery
+from urllib.parse import quote_plus
+
+if AZURITE_CONNECTION_STRING and not os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
+
+    def _azure_connection_string_to_broker_url(connection_string):
+        parts = {}
+        for part in connection_string.split(";"):
+            if "=" in part:
+                key, value = part.split("=", 1)
+                parts[key.strip()] = value.strip()
+
+        account_name = parts.get("AccountName")
+        account_key = parts.get("AccountKey")
+        queue_endpoint = parts.get("QueueEndpoint")
+
+        if not all([account_name, account_key, queue_endpoint]):
+            raise ValueError(
+                "Connection string must contain AccountName, AccountKey, and QueueEndpoint"
+            )
+
+        # Parse the QueueEndpoint to get host and port
+        parsed = urlparse(queue_endpoint)
+        host = parsed.hostname or "127.0.0.1"
+        port = parsed.port or 10001
+
+        return f"azurestoragequeue://{account_name}:{quote_plus(account_key)}@{host}:{port}"
+
+    CELERY_BROKER_URL = _azure_connection_string_to_broker_url(
+        AZURITE_CONNECTION_STRING
+    )
+elif os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
+    CELERY_BROKER_URL = "azurestoragequeue://workloadidentitycredential@"
+
+CELERY_TIMEZONE = "UTC"
+CELERY_ACCEPT_CONTENT = ["json"]
+
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TASK_DEFAULT_QUEUE = (
+    "celery-job-queue"  # was JOB_QUEUE_NAME in the previous situation
+)
+CELERY_TASK_RESULT_EXPIRES = 5 * 60
+CELERY_TASK_ALWAYS_EAGER = _env_to_bool(os.getenv("CELERY_TASK_ALWAYS_EAGER", "False"))
+CELERY_TASK_DEFAULT_PRIORITY = 5
+
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_RESULT_EXTENDED = True
+
+# Import/Export Job settings
+IMPORT_DRY_RUN_FIRST_TIME = _env_to_bool(os.getenv("IMPORT_DRY_RUN_FIRST_TIME", "True"))
