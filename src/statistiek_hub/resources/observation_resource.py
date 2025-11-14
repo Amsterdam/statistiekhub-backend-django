@@ -9,6 +9,7 @@ from statistiek_hub.models.temporal_dimension import TemporalDimension
 from statistiek_hub.utils.check_functions import (
     check_exists_in_model,
     check_missing_fields,
+    check_temporaldimensiontype_observation_vs_measure,
 )
 from statistiek_hub.utils.converter import convert_str, set_stringfields_to_upper
 from statistiek_hub.utils.datetime import convert_to_date
@@ -40,7 +41,7 @@ class ObservationResource(ModelResource):
         else:
             # load querysets into pandas df
             dfmeasure = set_stringfields_to_upper(
-                pd.DataFrame(list(Measure.objects.values("id", "name")))
+                pd.DataFrame(list(Measure.objects.values("id", "name", "temporaltype")))
             )
 
             dfspatialdim = set_stringfields_to_upper(
@@ -57,7 +58,7 @@ class ObservationResource(ModelResource):
                 pd.DataFrame(
                     list(
                         TemporalDimension.objects.select_related("type").values(
-                            "id", "startdate", "type__name"
+                            "id", "startdate", "type__name", "type__type"
                         )
                     )
                 )
@@ -100,6 +101,11 @@ class ObservationResource(ModelResource):
                     error = check_exists_in_model(**check[key])
                     if error:
                         errors[key] = error
+
+            # check temporaldimensiontype of observation with measure
+            errors["temporaltype"] = check_temporaldimensiontype_observation_vs_measure(
+                df_main=df_main, dftemporaldim=dftemporaldim, dfmeasure=dfmeasure
+            )
 
         if errors:
             # to speed validation -> if errors empty dataset so no row's will be checked

@@ -1,37 +1,50 @@
-[   {
+[
+{
   "model": "referentie_tabellen.temporaldimensiontype",
+  "pk": 1,
   "fields": {
-    "name": "Peildatum"
+    "name": "Peildatum",
+    "type": 1
   }
 },
-  {
-    "model": "referentie_tabellen.temporaldimensiontype",
-    "fields": {
-      "name": "Dag"
-    }
-  },
-  {
-    "model": "referentie_tabellen.temporaldimensiontype",
-    "fields": {
-      "name": "Week"
-    }
-  },
-  {
-    "model": "referentie_tabellen.temporaldimensiontype",
-    "fields": {
-      "name": "Maand"
-    }
-  },
-  {
-    "model": "referentie_tabellen.temporaldimensiontype",
-    "fields": {
-      "name": "Kwartaal"
-    }
-  },
-  {
-    "model": "referentie_tabellen.temporaldimensiontype",
-    "fields": {
-      "name": "Jaar"
-    }
+{
+  "model": "referentie_tabellen.temporaldimensiontype",
+  "pk": 2,
+  "fields": {
+    "name": "Dag",
+    "type": 2
   }
+},
+{
+  "model": "referentie_tabellen.temporaldimensiontype",
+  "pk": 3,
+  "fields": {
+    "name": "Week",
+    "type": 2
+  }
+},
+{
+  "model": "referentie_tabellen.temporaldimensiontype",
+  "pk": 4,
+  "fields": {
+    "name": "Maand",
+    "type": 2
+  }
+},
+{
+  "model": "referentie_tabellen.temporaldimensiontype",
+  "pk": 5,
+  "fields": {
+    "name": "Kwartaal",
+    "type": 2
+  }
+},
+{
+  "model": "referentie_tabellen.temporaldimensiontype",
+  "pk": 6,
+  "fields": {
+    "name": "Jaar",
+    "type": 2
+  }
+}
 ]
