@@ -13,7 +13,7 @@ from statistiek_hub.models.measure import Measure
 
 @pytest.fixture
 def fill_db() -> dict:
-    group = baker.make(Group)
+    group = baker.make(Group, name="theme_group_1")
     user = baker.make(User, groups=[group])
 
     theme = baker.make(Theme, name="THEME1", group=group)
@@ -81,7 +81,7 @@ def test_has_permission_with_measure_group(fill_db):
 def test_has_permission_denied(fill_db):
     fixture = fill_db
 
-    non_group = baker.make(Group)
+    non_group = baker.make(Group, name="theme_group_2")
     non_theme = baker.make(Theme, name="THEME2", group=non_group)
     measure = fixture["measure"]
     measure.theme = non_theme
