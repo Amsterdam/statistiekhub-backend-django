@@ -1,10 +1,11 @@
 import datetime
 
 import pytest
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from model_bakery import baker
 
-from referentie_tabellen.models import TemporalDimensionType, Unit
+from referentie_tabellen.models import TemporalDimensionType, Theme, Unit
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
@@ -41,7 +42,9 @@ class TestModelSave:
     @pytest.mark.django_db
     def test_save_measure_name_upper(self):
         """name should be saved upper"""
-        name_upper = baker.make(Measure, name="test2")
+        name_upper = baker.make(
+            Measure, name="test2", theme=baker.make(Theme, group=baker.make(Group))
+        )
         assert Measure.objects.first().name == "TEST2"
 
         name_upper.delete()
@@ -52,7 +55,12 @@ class TestModelSave:
         """percentage bigger than 200 -> result in validationerror"""
 
         unit_var = baker.make(Unit, name="percentage", code="P")
-        measure_var = baker.make(Measure, name="VAR", unit=unit_var)
+        measure_var = baker.make(
+            Measure,
+            name="VAR",
+            unit=unit_var,
+            theme=baker.make(Theme, group=baker.make(Group)),
+        )
 
         tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
         temp = baker.make(

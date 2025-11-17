@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
+from django.contrib.auth.models import Group
 from model_bakery import baker
 
 from publicatie_tabellen.models import PublicationObservation
@@ -11,7 +12,7 @@ from publicatie_tabellen.publish_observation import (
     _get_df_with_filterrule,
     publishobservation,
 )
-from referentie_tabellen.models import TemporalDimensionType, Unit
+from referentie_tabellen.models import TemporalDimensionType, Theme, Unit
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
@@ -79,8 +80,18 @@ def test_get_df_with_filterrule(
     return: dataframe with value corrected by filterrule"""
     fixture = fill_ref_tabellen
 
-    measure_base = baker.make(Measure, name="BASE", unit=fixture["unit"])
-    measure_var = baker.make(Measure, name="VAR", unit=fixture["unit"])
+    measure_base = baker.make(
+        Measure,
+        name="BASE",
+        unit=fixture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
+    measure_var = baker.make(
+        Measure,
+        name="VAR",
+        unit=fixture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
 
     filter_var = baker.make(
         Filter, measure=measure_var, rule=filter, value_new=value_new
@@ -150,8 +161,18 @@ def test_get_df_filterrule_with_difftempdate(
         TemporalDimension, startdate=var_start_date, type=fixture["tempdimtype"]
     )
 
-    measure_base = baker.make(Measure, name="BASE", unit=fixture["unit"])
-    measure_var = baker.make(Measure, name="VAR", unit=fixture["unit"])
+    measure_base = baker.make(
+        Measure,
+        name="BASE",
+        unit=fixture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
+    measure_var = baker.make(
+        Measure,
+        name="VAR",
+        unit=fixture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
 
     filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=None)
 
@@ -208,7 +229,13 @@ def test_set_decimals(fill_ref_tabellen, decimals, base_value, expected):
     fixture = fill_ref_tabellen
 
     unit = baker.make(Unit, name="percentage")
-    measure = baker.make(Measure, name="BASE", unit=unit, decimals=decimals)
+    measure = baker.make(
+        Measure,
+        name="BASE",
+        unit=unit,
+        decimals=decimals,
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
 
     obs = baker.make(
         Observation,
