@@ -1,10 +1,11 @@
 import datetime
 
 import pytest
+from django.contrib.auth.models import Group
 from model_bakery import baker
 
 from publicatie_tabellen.publication_main import PublishFunction
-from referentie_tabellen.models import TemporalDimensionType, Unit
+from referentie_tabellen.models import TemporalDimensionType, Theme, Unit
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation, ObservationCalculated
 from statistiek_hub.models.spatial_dimension import SpatialDimension
@@ -49,10 +50,24 @@ def test_fill_observationcalculated(
     ficture = fill_ref_tabellen
 
     measure_calc = baker.make(
-        Measure, name="CALCVAR", calculation=calculation, unit=ficture["unit"]
+        Measure,
+        name="CALCVAR",
+        calculation=calculation,
+        unit=ficture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
     )
-    measure_base = baker.make(Measure, name="BASE", unit=ficture["unit"])
-    measure_var1 = baker.make(Measure, name="VAR1", unit=ficture["unit"])
+    measure_base = baker.make(
+        Measure,
+        name="BASE",
+        unit=ficture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
+    measure_var1 = baker.make(
+        Measure,
+        name="VAR1",
+        unit=ficture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
 
     obs_base = baker.make(
         Observation,
@@ -101,10 +116,24 @@ def test_fill_observationcalculated_divide_by_zero(
     ficture = fill_ref_tabellen
 
     measure_calc = baker.make(
-        Measure, name="CALCVAR", calculation=calculation, unit=ficture["unit"]
+        Measure,
+        name="CALCVAR",
+        calculation=calculation,
+        unit=ficture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
     )
-    measure_base = baker.make(Measure, name="BASE", unit=ficture["unit"])
-    measure_var1 = baker.make(Measure, name="VAR1", unit=ficture["unit"])
+    measure_base = baker.make(
+        Measure,
+        name="BASE",
+        unit=ficture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
+    measure_var1 = baker.make(
+        Measure,
+        name="VAR1",
+        unit=ficture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
 
     obs_base = baker.make(
         Observation,

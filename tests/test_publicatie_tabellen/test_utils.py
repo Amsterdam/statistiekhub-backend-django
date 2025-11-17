@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from django.contrib.auth.models import Group
 from model_bakery import baker
 
 from publicatie_tabellen.models import PublicationMeasure, PublicationObservation
@@ -12,6 +13,7 @@ from publicatie_tabellen.utils import (
     round_to_base,
     round_to_decimal,
 )
+from referentie_tabellen.models import Theme
 from statistiek_hub.models.measure import Measure
 
 sample_statistic = {
@@ -66,7 +68,9 @@ def test_round_to_decimal(test_value, test_decimals, expected):
 @pytest.mark.django_db
 def test_convert_queryset_into_dataframe(qs=None, model=Measure):
     """converts a queryset into a dataframe"""
-    name_test = baker.make(model, name="TEST")
+    name_test = baker.make(
+        model, name="TEST", theme=baker.make(Theme, group=baker.make(Group))
+    )
     qs = model.objects.all()
 
     df = convert_queryset_into_dataframe(qs)
@@ -81,7 +85,12 @@ def test_convert_queryset_into_dataframe(qs=None, model=Measure):
 @pytest.mark.django_db
 def test_copy_queryset(model=Measure, copy_to_model=PublicationMeasure):
     """copy queryset into the copy_to_model"""
-    name_test = baker.make(model, name="TEST", label="aangemaakt")
+    name_test = baker.make(
+        model,
+        name="TEST",
+        label="aangemaakt",
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
     qs_tosave = _get_qs_publishmeasure(model)
 
     copy_queryset(qs_tosave, copy_to_model)
