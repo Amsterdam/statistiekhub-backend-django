@@ -222,12 +222,11 @@ if os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
 
 DATABASES = {
     "default": {
-        "ENGINE": "custom_db_backend",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": DATABASE_NAME,
         "USER": DATABASE_USER,
         "PASSWORD": DATABASE_PASSWORD,
         "HOST": DATABASE_HOST,
-        "CONN_MAX_AGE": 60 * 5,
         "PORT": DATABASE_PORT,
         "OPTIONS": DATABASE_OPTIONS,
     },
