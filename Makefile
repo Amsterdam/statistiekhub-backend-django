@@ -28,7 +28,7 @@ requirements: pip-tools             ## Upgrade requirements (in requirements.in)
 upgrade: requirements install       ## Run 'requirements' and 'install' targets
 
 build:                              ## Build docker image
-	$(dc) build --no-cache
+	$(dc) build
 
 push: build                         ## Push docker image to registry
 	$(dc) push
