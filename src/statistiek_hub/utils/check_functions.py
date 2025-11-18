@@ -1,5 +1,7 @@
 import pandas as pd
 
+from statistiek_hub.utils.converter import set_stringfields_to_upper
+
 
 def check_exists_in_model(
     dataset: pd.DataFrame, dfmodel: pd.DataFrame, column: list, field: list
@@ -66,8 +68,13 @@ def check_missing_fields(fields: list, expected: list):
 def check_temporaldimensiontype_observation_vs_measure(
     df_main: pd.DataFrame, dftemporaldim: pd.DataFrame, dfmeasure: pd.DataFrame
 ):
-    df_main_nodup = df_main[["measure", "temporal_type"]].drop_duplicates()
-    dftemporaldim_nodup = dftemporaldim[["type__name", "type__type"]].drop_duplicates()
+    df_main_nodup = set_stringfields_to_upper(
+        df_main[["measure", "temporal_type"]].drop_duplicates()
+    )
+
+    dftemporaldim_nodup = set_stringfields_to_upper(
+        dftemporaldim[["type__name", "type__type"]].drop_duplicates()
+    )
 
     # join to get temporaldimensiontype.type on observation
     df_main_type = pd.merge(
