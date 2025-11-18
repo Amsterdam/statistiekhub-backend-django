@@ -103,9 +103,12 @@ class ObservationResource(ModelResource):
                         errors[key] = error
 
             # check temporaldimensiontype of observation with measure
-            errors["temporaltype"] = check_temporaldimensiontype_observation_vs_measure(
-                df_main=df_main, dftemporaldim=dftemporaldim, dfmeasure=dfmeasure
-            )
+            if error := check_temporaldimensiontype_observation_vs_measure(
+                df_main=df_main,
+                dftemporaldim=dftemporaldim,
+                dfmeasure=dfmeasure,
+            ):
+                errors["temporaltype"] = error
 
         if errors:
             # to speed validation -> if errors empty dataset so no row's will be checked

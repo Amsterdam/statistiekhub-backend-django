@@ -32,7 +32,7 @@ dataset.append(
         "Stadsdeel",
         "20220324",
         "20180101",
-        "Peildatum",
+        "peildatum",
         "BEVMAN",
         "6876",
         datetime.date(2022, 3, 24),
@@ -46,7 +46,7 @@ dataset.append(
         "20220324",
         "20191001",
         "Dag",
-        "BEVMAN",
+        "BEVVROUW",
         "5000",
         datetime.date(2022, 3, 24),
         datetime.datetime(2019, 10, 1, 0, 0),
@@ -68,7 +68,7 @@ testinput = [
     {
         "dataset": dataset.df,
         "dfmodel": pd.DataFrame(
-            [[1, "BEVTOTAAL"], [2, "BEVMAN"]], columns=["id", "name"]
+            [[1, "BEVTOTAAL"], [2, "BEVMAN"], [3, "BEVVROUW"]], columns=["id", "name"]
         ),
         "column": ["measure"],
         "field": ["name"],
@@ -76,7 +76,9 @@ testinput = [
     },
     {
         "dataset": dataset.df,
-        "dfmodel": pd.DataFrame([[1, "TEST"], [2, "BEVMAN"]], columns=["id", "name"]),
+        "dfmodel": pd.DataFrame(
+            [[1, "TEST"], [2, "BEVMAN"], [3, "BEVVROUW"]], columns=["id", "name"]
+        ),
         "column": ["measure"],
         "field": ["name"],
         "expected": "Niet terug",
@@ -140,10 +142,10 @@ class TestCheck_functions:
         result = check_missing_fields(test_input, test_expected)
         assert result[0:33] == test_result
 
-    def test_check_temporaldimensiontype_observation_vs_measure(self):
+    def test_check_temporaldimensiontype_observation_vs_measure_error(self):
 
         dfmeasure = pd.DataFrame(
-            [[1, "BEVTOTAAL", 1], [2, "BEVMAN", 2]],
+            [[1, "BEVTOTAAL", 1], [2, "BEVMAN", 2], [3, "BEVVROUW", 2]],
             columns=["id", "name", "temporaltype"],
         )
 
@@ -159,4 +161,25 @@ class TestCheck_functions:
                 df_main=df_main, dftemporaldim=dftemporaldim, dfmeasure=dfmeasure
             )[:19]
             == "Measures ['BEVMAN']"
+        )
+
+    def test_check_temporaldimensiontype_observation_vs_measure_correct(self):
+
+        dfmeasure = pd.DataFrame(
+            [[1, "BEVTOTAAL", 1], [2, "BEVMAN", 1], [3, "BEVVROUW", 2]],
+            columns=["id", "name", "temporaltype"],
+        )
+
+        dftemporaldim = pd.DataFrame(
+            [[1, "Peildatum", 1], [2, "Jaar", 2], [3, "Dag", 2]],
+            columns=["id", "type__name", "type__type"],
+        )
+
+        df_main = dataset.df
+
+        assert (
+            check_temporaldimensiontype_observation_vs_measure(
+                df_main=df_main, dftemporaldim=dftemporaldim, dfmeasure=dfmeasure
+            )
+            == False  # no error
         )
