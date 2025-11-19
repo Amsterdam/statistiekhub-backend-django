@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 from django.core.exceptions import ValidationError
 from import_export.resources import ModelResource
@@ -14,11 +16,14 @@ from statistiek_hub.utils.check_functions import (
 from statistiek_hub.utils.converter import convert_str, set_stringfields_to_upper
 from statistiek_hub.utils.datetime import convert_to_date
 
+logger = logging.getLogger(__name__)
+
 
 class ObservationResource(ModelResource):
     delete_instance_empty_row_value = set()
 
     def before_import(self, dataset, **kwargs):
+        logger.info("ObservationResource before_import called")
         # check major error's first on Dataset (instead of row by row)
 
         errors = {}
@@ -149,6 +154,8 @@ class ObservationResource(ModelResource):
         # Converteer de DataFrame terug naar een Tablib dataset
         dataset.df = df_main
 
+        logger.info("ObservationResource before_import done")
+
     def skip_row(self, instance, original, row, import_validation_errors=None):
         """Skip rows with empty value, after deleting database-obj if not empty
         necessary so empty value import overwrites database-obj otherwise database-obj keeps wrong value
@@ -161,11 +168,25 @@ class ObservationResource(ModelResource):
             return super().skip_row(instance, original, row, import_validation_errors)
 
     def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
+        logger.info("ObservationResource after_import called")
+
         Observation.objects.filter(id__in=self.delete_instance_empty_row_value).delete()
         self.delete_instance_empty_row_value = set()
+
+        logger.info("ObservationResource after_import done")
+
+    def import_row(self, row, instance_loader, **kwargs):
+        logger.info(f"ObservationResource import_row called for row: {row}")
+        return super().import_row(row, instance_loader, **kwargs)
+
+    def import_data(self, *args, **kwargs):
+        return super().import_data(*args, **kwargs)
 
     class Meta:
         model = Observation
         skip_unchanged = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("measure", "spatialdimension", "temporaldimension")
+
+        use_bulk = True
+        batch_size = 1000

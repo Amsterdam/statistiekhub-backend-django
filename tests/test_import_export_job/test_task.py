@@ -7,8 +7,8 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage, storages
 from model_bakery import baker
 
+from import_export_job.job import _run_import_job, get_format
 from import_export_job.models import ImportJob
-from import_export_job.tasks import _run_import_job, get_format
 from tests.temp_storage import temporary_media_root
 
 
@@ -21,10 +21,10 @@ class MockFormat:
 
 @pytest.fixture
 def mock_default_formats(monkeypatch):
-    from import_export_job import tasks
+    from import_export_job import job
 
     monkeypatch.setattr(
-        tasks,
+        job,
         "DEFAULT_FORMATS",
         [
             MockFormat(),

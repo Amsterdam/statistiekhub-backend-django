@@ -85,9 +85,9 @@ def importjob_post_save(sender, instance, **kwargs):
         instance.processing_initiated = timezone.now()
         instance.save()
 
-        from import_export_job.tasks import run_import_job
+        from import_export_job.tasks import import_job_celery_task
 
-        run_import_job.delay_on_commit(instance.pk, True)
+        import_job_celery_task.delay_on_commit(instance.pk, True)
 
 
 @receiver(post_delete, sender=ImportJob)
