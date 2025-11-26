@@ -1,6 +1,7 @@
 # Author: Timothy Hobbs <timothy <at> hobbs.cz>
 import logging
 import os
+from io import StringIO
 
 from celery import shared_task
 from django.conf import settings
@@ -37,11 +38,12 @@ def get_format(job):
             break
 
 
-def _run_import_job(import_job, dry_run=True):
-    def update_status(step, message):
-        change_job_status(import_job, "import", f"{step} {message}", dry_run)
+def _update_status(step, message, import_job, dry_run):
+    change_job_status(import_job, "import", f"{step} {message}", dry_run)
 
-    update_status("1/4", "Import started")
+
+def _run_import_job(import_job, dry_run=True):
+    _update_status("1/4", "Import started", import_job, dry_run)
     import_job.errors = ""
 
     model_config = ModelConfig(**importables[import_job.model])
@@ -57,7 +59,7 @@ def _run_import_job(import_job, dry_run=True):
     except Exception as e:
         raise Exception("Error reading file" + str(e)) from e
 
-    update_status("2/4", "Processing import data")
+    _update_status("2/4", "Processing import data", import_job, dry_run)
     resource = model_config.resource()
 
     skip_diff = resource._meta.skip_diff or resource._meta.skip_html_diff
@@ -66,7 +68,7 @@ def _run_import_job(import_job, dry_run=True):
         dataset,
         dry_run=dry_run,
     )
-    update_status("3/4", "Generating import summary")
+    _update_status("3/4", "Generating import summary", import_job, dry_run)
 
     if result.has_errors() or result.has_validation_errors():
         import_job.errors = "ERRORS zie change_summary"
@@ -83,7 +85,48 @@ def _run_import_job(import_job, dry_run=True):
     if not dry_run and (import_job.errors == ""):
         import_job.imported = timezone.now()
 
-    update_status("4/4", "Import job finished")
+    _update_status("4/4", "Import job finished", import_job, dry_run)
+    import_job.save()
+
+
+def _run_observation_import_job(import_job, dry_run=True):
+    """
+    Run the custom Observation import job
+    """
+    _update_status(
+        "1/4", "Import started (Custom Observation import)", import_job, dry_run
+    )
+
+    try:
+        data = import_job.file.read()
+        if isinstance(data, bytes):
+            data = data.decode("utf8")
+    except UnicodeDecodeError as e:
+        raise UnicodeDecodeError("Imported file has a wrong encoding" + str(e)) from e
+    except Exception as e:
+        raise Exception("Error reading file" + str(e)) from e
+
+    _update_status(
+        "2/4", "Processing import data (Custom Observation import)", import_job, dry_run
+    )
+
+    from statistiek_hub.csv_import.observation import import_csv
+
+    import_csv(filepath_or_buffer=StringIO(data), dry_run=dry_run)
+
+    _update_status(
+        "3/4",
+        "Skipped: Generating import summary (Custom Observation import)",
+        import_job,
+        dry_run,
+    )
+
+    if not dry_run and (import_job.errors == ""):
+        import_job.imported = timezone.now()
+
+    _update_status(
+        "4/4", "Import job finished (Custom Observation import)", import_job, dry_run
+    )
     import_job.save()
 
 
@@ -93,7 +136,11 @@ def run_import_job(pk: int, dry_run: bool = True):
     import_job = models.ImportJob.objects.get(pk=pk)
 
     try:
-        _run_import_job(import_job, dry_run)
+        logger.info(f"{import_job.model.lower() == "observation"=}")
+        if import_job.model.lower() == "observation":
+            _run_observation_import_job(import_job, dry_run)
+        else:
+            _run_import_job(import_job, dry_run)
     except Exception as e:
         logger.info(f"error op _run_import_job {pk}: {e}")
         import_job.errors += _("Import error %s") % e + "\n"
