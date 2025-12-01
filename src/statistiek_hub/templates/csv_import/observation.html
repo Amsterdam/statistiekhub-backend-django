@@ -1,0 +1,172 @@
+{% extends "csv_import/base.html" %}
+{% load humanize i18n tz %}
+{% load custom_filter %}
+
+{% block header%}
+    {% language "nl-nl" %}
+    <div>
+        <h2>{% trans "Observation import summary" %}</h2>
+        <div>
+            <table border="1">
+                <tr>
+                    <td>
+                        <strong>File name</strong>
+                    </td>
+                    <td>
+                        {{ csv_name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Date</strong>
+                    </td>
+                    <td>
+                        {% now "j F Y, g:i a" %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Dry-run</strong>
+                    </td>
+                    <td>
+                        {{ dry_run }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Total rows</strong>
+                    </td>
+                    <td>
+                        {{ total_rows|intcomma|default:"0" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Inserted rows</strong>
+                    </td>
+                    <td>
+                        {{ inserted_data|length|intcomma|default:"0" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Updated rows</strong>
+                    </td>
+                    <td>
+                        {{ updated_data|length|intcomma|default:"0" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Deleted rows</strong>
+                    </td>
+                    <td>
+                        {{ deleted_data|length|intcomma|default:"0" }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {% endlanguage %}
+{% endblock header %}
+
+{% block content %}
+    {% block errors %}
+        {% language "nl-nl" %}
+        {%  if errors %}
+        <div class="errors">
+            <h2>{% trans "Errors" %}</h2>
+            <ul>
+                {% for error in errors  %}
+                <li>
+                    {{ error }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endlanguage %}
+    {% endblock errors %}
+
+    {% block result %}
+        {% language "nl-nl" %}
+        {% if inserted_data %}
+        <div>
+            <h3>Inserted Rows ({{ inserted_data|length|intcomma }} total)</h3>
+            <div>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            {% for column in inserted_data.0.keys %}
+                            <th>{{ column|lower }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in inserted_data %}
+                        <tr>
+                            {% for column in row.keys %}
+                            <td>{{ row|lookup:column|default:"-" }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if updated_data %}
+        <div>
+            <h3>Updated Rows ({{ updated_data|length|intcomma }} total)</h3>
+            <div>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            {% for column in updated_data.0.keys %}
+                            <th>{{ column|title }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in updated_data %}
+                        <tr>
+                            {% for column in row.keys %}
+                            <td>{{ row|lookup:column|default:"-" }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if deleted_data %}
+        <div>
+            <h3>Deleted Rows ({{ deleted_data|length|intcomma }} total)</h3>
+            <div>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            {% for column in deleted_data.0.keys %}
+                            <th>{{ column|title }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in deleted_data %}
+                        <tr>
+                            {% for column in row.keys %}
+                            <td>{{ row|lookup:column|default:"-" }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        {% endlanguage %}
+    {% endblock result %}
+{% endblock content %}
