@@ -97,6 +97,9 @@ def _run_observation_import_job(import_job, dry_run=True):
         "1/4", "Import started (Custom Observation import)", import_job, dry_run
     )
 
+    # Clear the import errors
+    import_job.errors = ""
+
     try:
         data = import_job.file.read()
         if isinstance(data, bytes):
@@ -112,13 +115,57 @@ def _run_observation_import_job(import_job, dry_run=True):
 
     from statistiek_hub.csv_import.observation import import_csv
 
-    import_csv(filepath_or_buffer=StringIO(data), dry_run=dry_run)
+    errors = []
+    try:
+        total_rows, inserted_rows, updated_rows, deleted_rows = import_csv(
+            filepath_or_buffer=StringIO(data), dry_run=dry_run
+        )
+    except Exception as e:
+        total_rows, inserted_rows, updated_rows, deleted_rows = [], [], [], []
+
+        if hasattr(e, "error_list"):  # Django ValidationError with multiple errors
+            logging.info(f"{e.error_list=}")
+            errors = []
+            for error in e.error_list:
+                if isinstance(error, Exception) and hasattr(error, "messages"):
+                    errors.extend(error.messages)
+                elif isinstance(error, Exception) and hasattr(error, "message"):
+                    errors.append(error.message)
+                else:
+                    errors.append(str(error))
+        elif hasattr(e, "messages"):  # Some exceptions have a messages attribute (list)
+            logging.info(f"{e.messages=}")
+            errors = e.messages if isinstance(e.messages, list) else [e.messages]
+        elif isinstance(e, list):  # e is already a list
+            logging.info(f"{e=}")
+            errors = e
+        else:  # Single error - wrap in list
+            logging.info(f"{e=}")
+            errors = [str(e)]
+
+        import_job.errors = "ERRORS zie change_summary"
 
     _update_status(
         "3/4",
-        "Skipped: Generating import summary (Custom Observation import)",
+        "Generating import summary (Custom Observation import)",
         import_job,
         dry_run,
+    )
+
+    context = {
+        "csv_name": import_job.file.name,
+        "dry_run": "enabled" if dry_run else "disabled",
+        "total_rows": total_rows,
+        "inserted_data": inserted_rows,
+        "updated_data": updated_rows,
+        "deleted_data": deleted_rows,
+        "errors": errors,
+    }
+    content = render_to_string("csv_import/observation.html", context)
+    import_job.change_summary.delete()
+    import_job.change_summary.save(
+        os.path.split(import_job.file.name)[1] + ".html",
+        ContentFile(content.encode("utf-8")),
     )
 
     if not dry_run and (import_job.errors == ""):

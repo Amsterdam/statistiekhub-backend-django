@@ -2,6 +2,7 @@ import logging
 import time
 import uuid
 from io import IOBase, StringIO
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import connection
@@ -204,7 +205,9 @@ def pre_import(df: DataFrame):
     df["value"] = to_numeric(df["value"], errors="coerce")
 
 
-def copy_and_sync(df: DataFrame, dry_run: bool = True) -> tuple[int, int, int]:
+def copy_and_sync(
+    df: DataFrame, dry_run: bool = True
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     df_len = len(df)
     if df_len == 0:
         logger.info("No Observations to update, insert and or delete")
@@ -240,10 +243,17 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> tuple[int, int, int]:
                 f"org.temporaldimension_id = tmp.temporaldimension_id AND "
                 f"org.spatialdimension_id = tmp.spatialdimension_id AND "
                 f"tmp.value IS NOT NULL AND "
-                f"org.value != tmp.value"
+                f"org.value != tmp.value "
+                f"RETURNING *"
             )
             cursor.execute(update_sql)
-            rows_updated = cursor.rowcount
+            updated_rows = cursor.fetchall()
+
+            column_names = [desc[0] for desc in cursor.description]
+
+            updated_data = []
+            for row in updated_rows:
+                updated_data.append(dict(zip(column_names, row)))
 
             insert_sub_query = (
                 f"SELECT org.* FROM {table_name} AS org "
@@ -257,10 +267,17 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> tuple[int, int, int]:
                 f"SELECT now() AS created_at, now() AS updated_at, tmp.value, tmp.measure_id, tmp.spatialdimension_id, tmp.temporaldimension_id "
                 f"FROM {tmp_table_name} AS tmp "
                 f"WHERE NOT EXISTS ({insert_sub_query}) "
-                f"AND tmp.value IS NOT NULL"
+                f"AND tmp.value IS NOT NULL "
+                f"RETURNING *"
             )
             cursor.execute(insert_sql)
-            rows_inserted = cursor.rowcount
+            inserted_rows = cursor.fetchall()
+
+            column_names = [desc[0] for desc in cursor.description]
+
+            inserted_data = []
+            for row in inserted_rows:
+                inserted_data.append(dict(zip(column_names, row)))
 
             delete_sql = (
                 f"DELETE FROM {table_name} AS org "
@@ -268,10 +285,17 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> tuple[int, int, int]:
                 f"WHERE org.measure_id = tmp.measure_id AND "
                 f"org.temporaldimension_id = tmp.temporaldimension_id AND "
                 f"org.spatialdimension_id = tmp.spatialdimension_id AND "
-                f"tmp.value IS NULL"
+                f"tmp.value IS NULL "
+                f"RETURNING *"
             )
             cursor.execute(delete_sql)
-            rows_deleted = cursor.rowcount
+            deleted_rows = cursor.fetchall()
+
+            column_names = [desc[0] for desc in cursor.description]
+
+            deleted_data = []
+            for row in deleted_rows:
+                deleted_data.append(dict(zip(column_names, row)))
 
             # Delete the tmp table
             cursor.execute(f"DROP TABLE IF EXISTS {tmp_table_name}")
@@ -283,14 +307,14 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> tuple[int, int, int]:
                 logger.info("Dry run disabled, commit the transaction")
                 connection.commit()
 
-        return rows_inserted, rows_updated, rows_deleted
+        return inserted_data, updated_data, deleted_data
     finally:
         connection.set_autocommit(True)
 
 
 def import_csv(
     filepath_or_buffer: str | IOBase, dry_run: bool = True
-) -> tuple[int, int, int]:
+) -> tuple[int, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     """
     Import Observation CSV file
     """
@@ -303,12 +327,12 @@ def import_csv(
     )
 
     pre_import(df=df)
-    inserted, updated, deleted = copy_and_sync(df=df, dry_run=dry_run)
+    inserted_rows, updated_rows, deleted_rows = copy_and_sync(df=df, dry_run=dry_run)
 
     logger.info(
-        f"Summary: Inserted {inserted}, updated {updated} and deleted {deleted} row(s)"
+        f"Summary: Inserted {len(inserted_rows)}, updated {len(updated_rows)} and deleted {deleted_rows} row(s)"
     )
 
     duration = time.time() - start_time
     logger.info(f"Import Observation CSV done in {duration:.2f} seconds")
-    return inserted, updated, deleted
+    return len(df), inserted_rows, updated_rows, deleted_rows
