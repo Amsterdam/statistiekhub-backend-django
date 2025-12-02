@@ -10,8 +10,9 @@ from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from import_export.results import Result
 from pandas import DataFrame
+
+from statistiek_hub.csv_import.observation.result import Result
 
 from . import models
 from .model_config import ModelConfig
@@ -122,7 +123,6 @@ def _run_observation_import_job(import_job, dry_run=True):
         result = import_csv(filepath_or_buffer=StringIO(data), dry_run=dry_run)
     except Exception as e:
         if hasattr(e, "error_list"):  # Django ValidationError with multiple errors
-            logging.info(f"{e.error_list=}")
             errors = []
             for error in e.error_list:
                 if isinstance(error, Exception) and hasattr(error, "messages"):
@@ -132,17 +132,15 @@ def _run_observation_import_job(import_job, dry_run=True):
                 else:
                     errors.append(str(error))
         elif hasattr(e, "messages"):  # Some exceptions have a messages attribute (list)
-            logging.info(f"{e.messages=}")
             errors = e.messages if isinstance(e.messages, list) else [e.messages]
         elif isinstance(e, list):  # e is already a list
-            logging.info(f"{e=}")
             errors = e
         else:  # Single error - wrap in list
-            logging.info(f"{e=}")
             errors = [str(e)]
 
         import_job.errors = "ERRORS zie change_summary"
         result = Result(DataFrame())
+        logger.info(dir(result))
 
     _update_status(
         "3/4",
@@ -158,18 +156,27 @@ def _run_observation_import_job(import_job, dry_run=True):
         "spatialdimension_id",
         "temporaldimension_id",
     ]
+    inserted_html = ""
+    if result.total_inserted:
+        inserted_html = result.inserted[columns_to_html].to_html(index=False, border=1)
+    updated_html = ""
+    if result.total_updated:
+        updated_html = result.updated[columns_to_html].to_html(index=False, border=1)
+    deleted_html = ""
+    if result.total_deleted:
+        deleted_html = result.deleted[columns_to_html].to_html(index=False, border=1)
+
     context = {
         "csv_name": import_job.file.name,
         "dry_run": "enabled" if dry_run else "disabled",
         "result": result,
-        "inserted_html": result.inserted[columns_to_html].to_html(
-            index=False, border=1
-        ),
-        "updated_html": result.updated[columns_to_html].to_html(index=False, border=1),
-        "deleted_html": result.deleted[columns_to_html].to_html(index=False, border=1),
+        "inserted_html": inserted_html,
+        "updated_html": updated_html,
+        "deleted_html": deleted_html,
         "errors": errors,
     }
     content = render_to_string("csv_import/observation.html", context)
+
     import_job.change_summary.delete()
     import_job.change_summary.save(
         os.path.split(import_job.file.name)[1] + ".html",

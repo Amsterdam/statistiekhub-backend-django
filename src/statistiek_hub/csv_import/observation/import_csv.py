@@ -61,6 +61,8 @@ def _transform_measure(df: DataFrame):
 
     Raises a MissingValues exception if non-existing measures are in dataframe
     """
+    logger.info("Transform the measure into the correct measure pk")
+
     df["measure"] = df["measure"].str.upper()
     distinct_uppercase_values = df["measure"].unique()
 
@@ -89,6 +91,10 @@ def _transform_spatialdim(df: DataFrame):
 
     Raises a MissingValues exception if non-existing spatial dimensions are in dataframe
     """
+    logger.info(
+        "Transform the spatial code/type/date into the correct SpatialDimension pk"
+    )
+
     df["spatial_code"] = df["spatial_code"].str.upper()
     df["spatial_type"] = df["spatial_type"].str.upper()
     df["spatial_date"] = df["spatial_date"].astype(str).apply(convert_to_date)
@@ -141,6 +147,10 @@ def _transform_temporaldim(df: DataFrame):
 
     Raises a MissingValues exception if non-existing temporal dimensions are in dataframe
     """
+    logger.info(
+        "Transform the temporal type/date into the correct TemporalDimension pk"
+    )
+
     df["temporal_type"] = df["temporal_type"].str.upper()
     df["temporal_date"] = df["temporal_date"].astype(str).apply(convert_to_date)
 
@@ -181,6 +191,16 @@ def _transform_temporaldim(df: DataFrame):
 
 
 def _check_measure_temporal_dimension_type_matches(df: DataFrame):
+    logger.info("Check if the measure type matched the temporal dimension type")
+
+    missing_columns = [
+        col for col in ["measure_id", "temporaldimension_id"] if col not in df.columns
+    ]
+    if missing_columns:
+        raise MisMatchTypes(
+            "Unable to check the measure temporal type with the temporal dimension type"
+        )
+
     measure_ids = df["measure_id"].unique().tolist()
     temporaldimension_ids = df["temporaldimension_id"].unique().tolist()
 
@@ -205,6 +225,8 @@ def _check_measure_temporal_dimension_type_matches(df: DataFrame):
         raise MisMatchTypes(
             f"Found {len(mismatched_rows)} rows with mismatched temporal types"
         )
+
+    df.drop(columns=["types_match"], inplace=True)
 
 
 def pre_import(df: DataFrame):
