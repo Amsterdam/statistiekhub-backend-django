@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
 
 import pandas as pd
 
@@ -7,17 +6,9 @@ import pandas as pd
 @dataclass
 class Result:
     original: pd.DataFrame
-    inserted: Optional[pd.DataFrame] = None
-    updated: Optional[pd.DataFrame] = None
-    deleted: Optional[pd.DataFrame] = None
-
-    def __post_init__(self):
-        if self.inserted is None:
-            self.inserted = pd.DataFrame()
-        if self.updated is None:
-            self.updated = pd.DataFrame()
-        if self.deleted is None:
-            self.deleted = pd.DataFrame()
+    inserted: pd.DataFrame = field(default_factory=pd.DataFrame)
+    updated: pd.DataFrame = field(default_factory=pd.DataFrame)
+    deleted: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     @property
     def total_original(self) -> int:
