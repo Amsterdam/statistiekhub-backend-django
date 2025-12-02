@@ -4,3 +4,7 @@ class MissingColumns(Exception):
 
 class MissingValues(Exception):
     pass
+
+
+class MisMatchTypes(Exception):
+    pass

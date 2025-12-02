@@ -11,6 +11,7 @@ from pandas.core.frame import DataFrame
 from pandas.io.parsers import read_csv
 
 from statistiek_hub.csv_import.observation.exceptions import (
+    MisMatchTypes,
     MissingColumns,
     MissingValues,
 )
@@ -179,6 +180,33 @@ def _transform_temporaldim(df: DataFrame):
     df.drop(columns=["temporal_type", "temporal_date"], inplace=True)
 
 
+def _check_measure_temporal_dimension_type_matches(df: DataFrame):
+    measure_ids = df["measure_id"].unique().tolist()
+    temporaldimension_ids = df["temporaldimension_id"].unique().tolist()
+
+    measure_types = dict(
+        Measure.objects.filter(id__in=measure_ids).values_list("id", "temporaltype")
+    )
+    temporal_types = dict(
+        TemporalDimension.objects.filter(id__in=temporaldimension_ids).values_list(
+            "id", "type__type"
+        )
+    )
+
+    df["types_match"] = df.apply(
+        lambda row: measure_types.get(row["measure_id"])
+        == temporal_types.get(row["temporaldimension_id"]),
+        axis=1,
+    )
+
+    mismatched_rows = df[~df["types_match"]]
+
+    if not mismatched_rows.empty:
+        raise MisMatchTypes(
+            f"Found {len(mismatched_rows)} rows with mismatched temporal types"
+        )
+
+
 def pre_import(df: DataFrame):
     """
     Makes sure that all pre import checks and transformations are done
@@ -203,6 +231,11 @@ def pre_import(df: DataFrame):
     try:
         _transform_temporaldim(df=df)
     except MissingValues as e:
+        errors.append(str(e))
+
+    try:
+        _check_measure_temporal_dimension_type_matches(df=df)
+    except MisMatchTypes as e:
         errors.append(str(e))
 
     if errors:
@@ -277,6 +310,12 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> Result:
     return result
 
 
+def data_to_dataframe(filepath_or_buffer: str | IOBase) -> DataFrame:
+    return read_csv(
+        filepath_or_buffer=filepath_or_buffer, header=0, sep=";", keep_default_na=False
+    )
+
+
 def import_csv(filepath_or_buffer: str | IOBase, dry_run: bool = True) -> Result:
     """
     Import Observation CSV file
@@ -285,9 +324,7 @@ def import_csv(filepath_or_buffer: str | IOBase, dry_run: bool = True) -> Result
     logger.info(f"Dry-run: {"enabled" if dry_run else "disabled"}")
     start_time = time.time()
 
-    df = read_csv(
-        filepath_or_buffer=filepath_or_buffer, header=0, sep=";", keep_default_na=False
-    )
+    df = data_to_dataframe(filepath_or_buffer=filepath_or_buffer)
 
     pre_import(df=df)
     result = copy_and_sync(df=df, dry_run=dry_run)
