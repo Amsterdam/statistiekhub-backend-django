@@ -10,6 +10,8 @@ from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from import_export.results import Result
+from pandas import DataFrame
 
 from . import models
 from .model_config import ModelConfig
@@ -117,12 +119,8 @@ def _run_observation_import_job(import_job, dry_run=True):
 
     errors = []
     try:
-        total_rows, inserted_rows, updated_rows, deleted_rows = import_csv(
-            filepath_or_buffer=StringIO(data), dry_run=dry_run
-        )
+        result = import_csv(filepath_or_buffer=StringIO(data), dry_run=dry_run)
     except Exception as e:
-        total_rows, inserted_rows, updated_rows, deleted_rows = [], [], [], []
-
         if hasattr(e, "error_list"):  # Django ValidationError with multiple errors
             logging.info(f"{e.error_list=}")
             errors = []
@@ -144,6 +142,7 @@ def _run_observation_import_job(import_job, dry_run=True):
             errors = [str(e)]
 
         import_job.errors = "ERRORS zie change_summary"
+        result = Result(DataFrame())
 
     _update_status(
         "3/4",
@@ -152,13 +151,22 @@ def _run_observation_import_job(import_job, dry_run=True):
         dry_run,
     )
 
+    columns_to_html = [
+        "id",
+        "value",
+        "measure_id",
+        "spatialdimension_id",
+        "temporaldimension_id",
+    ]
     context = {
         "csv_name": import_job.file.name,
         "dry_run": "enabled" if dry_run else "disabled",
-        "total_rows": total_rows,
-        "inserted_data": inserted_rows,
-        "updated_data": updated_rows,
-        "deleted_data": deleted_rows,
+        "result": result,
+        "inserted_html": result.inserted[columns_to_html].to_html(
+            index=False, border=1
+        ),
+        "updated_html": result.updated[columns_to_html].to_html(index=False, border=1),
+        "deleted_html": result.deleted[columns_to_html].to_html(index=False, border=1),
         "errors": errors,
     }
     content = render_to_string("csv_import/observation.html", context)
@@ -183,10 +191,11 @@ def run_import_job(pk: int, dry_run: bool = True):
     import_job = models.ImportJob.objects.get(pk=pk)
 
     try:
-        logger.info(f"{import_job.model.lower() == "observation"=}")
         if import_job.model.lower() == "observation":
+            logger.info(f"Run the custom observation import")
             _run_observation_import_job(import_job, dry_run)
         else:
+            logger.info(f"Run the import_export job")
             _run_import_job(import_job, dry_run)
     except Exception as e:
         logger.info(f"error op _run_import_job {pk}: {e}")

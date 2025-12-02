@@ -2,29 +2,36 @@ import logging
 import time
 import uuid
 from io import IOBase, StringIO
-from typing import Any
 
 from django.core.exceptions import ValidationError
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models.functions import Upper
 from pandas import to_numeric
 from pandas.core.frame import DataFrame
 from pandas.io.parsers import read_csv
 
+from statistiek_hub.csv_import.observation.exceptions import (
+    MissingColumns,
+    MissingValues,
+)
+from statistiek_hub.csv_import.observation.queries import (
+    copy_csv_query,
+    create_table_as_query,
+    delete_query,
+    drop_table_query,
+    insert_query,
+    update_query,
+)
+from statistiek_hub.csv_import.observation.result import Result
+from statistiek_hub.csv_import.observation.utils import (
+    execute_query_and_return_dataframe,
+)
 from statistiek_hub.models import Observation, SpatialDimension
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.temporal_dimension import TemporalDimension
 from statistiek_hub.utils.datetime import convert_to_date
 
 logger = logging.getLogger(__name__)
-
-
-class MissingColumns(Exception):
-    pass
-
-
-class MissingValues(Exception):
-    pass
 
 
 def _pre_import_check_mandatory_columns(df: DataFrame):
@@ -205,14 +212,7 @@ def pre_import(df: DataFrame):
     df["value"] = to_numeric(df["value"], errors="coerce")
 
 
-def copy_and_sync(
-    df: DataFrame, dry_run: bool = True
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
-    df_len = len(df)
-    if df_len == 0:
-        logger.info("No Observations to update, insert and or delete")
-        return 0, 0, 0
-
+def copy_and_sync(df: DataFrame, dry_run: bool = True) -> Result:
     csv_buffer = StringIO()
     df.to_csv(csv_buffer, index=False, header=False)
     csv_buffer.seek(0)
@@ -222,99 +222,62 @@ def copy_and_sync(
     table_name = Observation._meta.db_table
     tmp_table_name = f"{table_name}_tmp_{uuid.uuid4().hex[:8]}"
 
-    connection.set_autocommit(False)
+    connection.close()
 
-    try:
+    result = Result(original=df)
+
+    with transaction.atomic():
         with connection.cursor() as cursor:
+            # Create the TMP table
             cursor.execute(
-                f"CREATE TABLE IF NOT EXISTS {tmp_table_name} "
-                f"AS TABLE {table_name} WITH NO DATA"
+                create_table_as_query.format(
+                    table_name=table_name, tmp_table_name=tmp_table_name
+                )
             )
 
+            # Copy the CSV into the tmp table
             cursor.copy_expert(
-                f"COPY {tmp_table_name} ({columns}) FROM STDIN WITH CSV", csv_buffer
+                copy_csv_query.format(table_name=tmp_table_name, columns=columns),
+                csv_buffer,
             )
 
-            update_sql = (
-                f"UPDATE {table_name} AS org "
-                f"SET value = tmp.value, updated_at = now() "
-                f"FROM {tmp_table_name} AS tmp "
-                f"WHERE org.measure_id = tmp.measure_id AND "
-                f"org.temporaldimension_id = tmp.temporaldimension_id AND "
-                f"org.spatialdimension_id = tmp.spatialdimension_id AND "
-                f"tmp.value IS NOT NULL AND "
-                f"org.value != tmp.value "
-                f"RETURNING *"
-            )
-            cursor.execute(update_sql)
-            updated_rows = cursor.fetchall()
-
-            column_names = [desc[0] for desc in cursor.description]
-
-            updated_data = []
-            for row in updated_rows:
-                updated_data.append(dict(zip(column_names, row)))
-
-            insert_sub_query = (
-                f"SELECT org.* FROM {table_name} AS org "
-                f"WHERE org.measure_id = tmp.measure_id AND "
-                f"org.temporaldimension_id = tmp.temporaldimension_id AND "
-                f"org.spatialdimension_id = tmp.spatialdimension_id"
+            # Run the update query
+            result.updated = execute_query_and_return_dataframe(
+                update_query.format(
+                    table_name=table_name, tmp_table_name=tmp_table_name
+                ),
+                cursor,
             )
 
-            insert_sql = (
-                f"INSERT INTO {table_name} (created_at, updated_at, value, measure_id, spatialdimension_id, temporaldimension_id) "
-                f"SELECT now() AS created_at, now() AS updated_at, tmp.value, tmp.measure_id, tmp.spatialdimension_id, tmp.temporaldimension_id "
-                f"FROM {tmp_table_name} AS tmp "
-                f"WHERE NOT EXISTS ({insert_sub_query}) "
-                f"AND tmp.value IS NOT NULL "
-                f"RETURNING *"
+            # Run the insert query
+            result.inserted = execute_query_and_return_dataframe(
+                insert_query.format(
+                    table_name=table_name, tmp_table_name=tmp_table_name
+                ),
+                cursor,
             )
-            cursor.execute(insert_sql)
-            inserted_rows = cursor.fetchall()
 
-            column_names = [desc[0] for desc in cursor.description]
-
-            inserted_data = []
-            for row in inserted_rows:
-                inserted_data.append(dict(zip(column_names, row)))
-
-            delete_sql = (
-                f"DELETE FROM {table_name} AS org "
-                f"USING {tmp_table_name} AS tmp "
-                f"WHERE org.measure_id = tmp.measure_id AND "
-                f"org.temporaldimension_id = tmp.temporaldimension_id AND "
-                f"org.spatialdimension_id = tmp.spatialdimension_id AND "
-                f"tmp.value IS NULL "
-                f"RETURNING *"
+            # Run the delete query
+            result.deleted = execute_query_and_return_dataframe(
+                delete_query.format(
+                    table_name=table_name, tmp_table_name=tmp_table_name
+                ),
+                cursor,
             )
-            cursor.execute(delete_sql)
-            deleted_rows = cursor.fetchall()
 
-            column_names = [desc[0] for desc in cursor.description]
-
-            deleted_data = []
-            for row in deleted_rows:
-                deleted_data.append(dict(zip(column_names, row)))
-
-            # Delete the tmp table
-            cursor.execute(f"DROP TABLE IF EXISTS {tmp_table_name}")
+            # Drop the tmp table
+            cursor.execute(drop_table_query.format(table_name=tmp_table_name))
 
             if dry_run:
                 logger.info("Dry run enabled, rollback the transaction")
-                connection.rollback()
+                transaction.set_rollback(True)
             else:
                 logger.info("Dry run disabled, commit the transaction")
-                connection.commit()
 
-        return inserted_data, updated_data, deleted_data
-    finally:
-        connection.set_autocommit(True)
+    return result
 
 
-def import_csv(
-    filepath_or_buffer: str | IOBase, dry_run: bool = True
-) -> tuple[int, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+def import_csv(filepath_or_buffer: str | IOBase, dry_run: bool = True) -> Result:
     """
     Import Observation CSV file
     """
@@ -327,12 +290,12 @@ def import_csv(
     )
 
     pre_import(df=df)
-    inserted_rows, updated_rows, deleted_rows = copy_and_sync(df=df, dry_run=dry_run)
+    result = copy_and_sync(df=df, dry_run=dry_run)
 
     logger.info(
-        f"Summary: Inserted {len(inserted_rows)}, updated {len(updated_rows)} and deleted {deleted_rows} row(s)"
+        f"Summary: Inserted {result.total_inserted}, updated {result.total_updated} and deleted {result.total_deleted} row(s)"
     )
 
     duration = time.time() - start_time
     logger.info(f"Import Observation CSV done in {duration:.2f} seconds")
-    return len(df), inserted_rows, updated_rows, deleted_rows
+    return result

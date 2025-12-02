@@ -37,7 +37,7 @@
                         <strong>Total rows</strong>
                     </td>
                     <td>
-                        {{ total_rows|intcomma|default:"0" }}
+                        {{ result.total_original|intcomma|default:"0" }}
                     </td>
                 </tr>
                 <tr>
@@ -45,7 +45,7 @@
                         <strong>Inserted rows</strong>
                     </td>
                     <td>
-                        {{ inserted_data|length|intcomma|default:"0" }}
+                        {{ result.total_inserted|intcomma|default:"0" }}
                     </td>
                 </tr>
                 <tr>
@@ -53,7 +53,7 @@
                         <strong>Updated rows</strong>
                     </td>
                     <td>
-                        {{ updated_data|length|intcomma|default:"0" }}
+                        {{ result.total_updated|intcomma|default:"0" }}
                     </td>
                 </tr>
                 <tr>
@@ -61,7 +61,7 @@
                         <strong>Deleted rows</strong>
                     </td>
                     <td>
-                        {{ deleted_data|length|intcomma|default:"0" }}
+                        {{ result.total_deleted|intcomma|default:"0" }}
                     </td>
                 </tr>
             </table>
@@ -90,82 +90,17 @@
 
     {% block result %}
         {% language "nl-nl" %}
-        {% if inserted_data %}
-        <div>
-            <h3>Inserted Rows ({{ inserted_data|length|intcomma }} total)</h3>
-            <div>
-                <table border="1">
-                    <thead>
-                        <tr>
-                            {% for column in inserted_data.0.keys %}
-                            <th>{{ column|lower }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in inserted_data %}
-                        <tr>
-                            {% for column in row.keys %}
-                            <td>{{ row|lookup:column|default:"-" }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {% if result.total_inserted > 0 %}
+            <h2>Inserted Rows ({{ result.total_inserted|intcomma }})</h2>
+            {{ inserted_html|safe }}
         {% endif %}
-
-        {% if updated_data %}
-        <div>
-            <h3>Updated Rows ({{ updated_data|length|intcomma }} total)</h3>
-            <div>
-                <table border="1">
-                    <thead>
-                        <tr>
-                            {% for column in updated_data.0.keys %}
-                            <th>{{ column|title }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in updated_data %}
-                        <tr>
-                            {% for column in row.keys %}
-                            <td>{{ row|lookup:column|default:"-" }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {% if result.total_updated > 0 %}
+            <h2>Updated Rows ({{ result.total_updated|intcomma }})</h2>
+            {{ updated_html|safe }}
         {% endif %}
-
-        {% if deleted_data %}
-        <div>
-            <h3>Deleted Rows ({{ deleted_data|length|intcomma }} total)</h3>
-            <div>
-                <table border="1">
-                    <thead>
-                        <tr>
-                            {% for column in deleted_data.0.keys %}
-                            <th>{{ column|title }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in deleted_data %}
-                        <tr>
-                            {% for column in row.keys %}
-                            <td>{{ row|lookup:column|default:"-" }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {% if result.total_deleted > 0 %}
+            <h2>Deleted Rows ({{ result.total_deleted|intcomma }})</h2>
+            {{ deleted_html|safe }}
         {% endif %}
         {% endlanguage %}
     {% endblock result %}
