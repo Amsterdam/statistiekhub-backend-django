@@ -125,6 +125,7 @@ IMPORT_EXPORT_TMP_STORAGE_CLASS = "import_export.tmp_storages.MediaStorage"
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+
 # import_export_job
 def resource_observation():
     from statistiek_hub.resources.observation_resource import ObservationResource
