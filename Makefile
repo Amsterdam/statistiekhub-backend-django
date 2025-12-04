@@ -3,6 +3,9 @@
 #
 # VERSION = 2020.01.29
 
+UID := $(shell id -u)
+GID := $(shell id -g)
+
 PYTHON = python3
 
 dc = docker compose
