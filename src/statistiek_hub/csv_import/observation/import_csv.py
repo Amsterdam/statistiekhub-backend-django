@@ -10,6 +10,7 @@ from pandas import to_numeric
 from pandas.core.frame import DataFrame
 from pandas.io.parsers import read_csv
 
+from referentie_tabellen.referentie_choices import TemporaltypeChoices
 from statistiek_hub.csv_import.observation.exceptions import (
     MisMatchTypes,
     MissingColumns,
@@ -213,6 +214,8 @@ def _check_measure_temporal_dimension_type_matches(df: DataFrame):
         )
     )
 
+    dict(TemporaltypeChoices.choices)
+
     df["types_match"] = df.apply(
         lambda row: measure_types.get(row["measure_id"])
         == temporal_types.get(row["temporaldimension_id"]),
@@ -222,8 +225,13 @@ def _check_measure_temporal_dimension_type_matches(df: DataFrame):
     mismatched_rows = df[~df["types_match"]]
 
     if not mismatched_rows.empty:
+        unique_mismatched_measure_ids = mismatched_rows["measure_id"].unique()
+        measure_names = Measure.objects.filter(
+            id__in=unique_mismatched_measure_ids
+        ).values_list("name", flat=True)
+
         raise MisMatchTypes(
-            f"Found {len(mismatched_rows)} rows with mismatched temporal types"
+            f"TemporalDimensionType mismatch for observation measure: {", ".join(measure_names)}"
         )
 
     df.drop(columns=["types_match"], inplace=True)
@@ -334,7 +342,13 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> Result:
 
 def data_to_dataframe(filepath_or_buffer: str | IOBase) -> DataFrame:
     return read_csv(
-        filepath_or_buffer=filepath_or_buffer, header=0, sep=";", keep_default_na=False
+        filepath_or_buffer=filepath_or_buffer,
+        header=0,
+        sep=";",
+        keep_default_na=False,
+        dtype={
+            "spatial_code": "str",
+        },
     )
 
 

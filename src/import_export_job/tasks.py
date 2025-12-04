@@ -140,7 +140,6 @@ def _run_observation_import_job(import_job, dry_run=True):
 
         import_job.errors = "ERRORS zie change_summary"
         result = Result(DataFrame())
-        logger.info(dir(result))
 
     _update_status(
         "3/4",
