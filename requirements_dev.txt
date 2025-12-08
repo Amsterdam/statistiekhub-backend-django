@@ -12,7 +12,7 @@ click==8.3.1
     # via pip-tools
 coverage[toml]==7.12.0
     # via pytest-cov
-django==5.2.8
+django==5.2.9
     # via model-bakery
 iniconfig==2.3.0
     # via pytest
