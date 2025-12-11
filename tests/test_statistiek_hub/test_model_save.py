@@ -75,6 +75,6 @@ class TestModelSave:
                 measure=measure_var,
                 temporaldimension=temp,
                 spatialdimension=spatial,
-                value=205,
+                value=1001,
             )
-        assert "Percentage is more than 200" in str(excinfo.value)
+        assert "Percentage is more than 1000" in str(excinfo.value)

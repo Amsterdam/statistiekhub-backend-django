@@ -49,7 +49,7 @@ class TestValidations:
     @pytest.mark.parametrize(
         "test_code, test_value, expected",
         [
-            ("P", 300, "['Percentage is more than 200']"),
+            ("P", 1001, "['Percentage is more than 1000']"),
             ("P", 50, "None"),
             ("R", 11, "['Rapportcijfer is more than 10']"),
             ("R", 7, "None"),

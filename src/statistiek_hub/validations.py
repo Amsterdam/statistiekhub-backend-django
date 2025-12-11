@@ -64,8 +64,8 @@ def check_value_context(unit_code: str, value: float) -> ValidationError:
     """
 
     if unit_code == "P":
-        if value > 200:
-            return ValidationError(f"Percentage is more than 200")
+        if value > 1000:
+            return ValidationError(f"Percentage is more than 1000")
     elif unit_code == "R":
         if value > 10:
             return ValidationError(f"Rapportcijfer is more than 10")
