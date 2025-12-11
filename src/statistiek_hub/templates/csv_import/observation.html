@@ -1,0 +1,106 @@
+{% extends "csv_import/base.html" %}
+{% load humanize i18n tz %}
+
+{% block header%}
+    {% language "nl-nl" %}
+    <div>
+        <h2>{% trans "Observation import summary" %}</h2>
+        <div>
+            <table border="1">
+                <tr>
+                    <td>
+                        <strong>File name</strong>
+                    </td>
+                    <td>
+                        {{ csv_name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Date</strong>
+                    </td>
+                    <td>
+                        {% now "j F Y, g:i a" %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Dry-run</strong>
+                    </td>
+                    <td>
+                        {{ dry_run }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Total rows</strong>
+                    </td>
+                    <td>
+                        {{ result.total_original|intcomma|default:"0" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Inserted rows</strong>
+                    </td>
+                    <td>
+                        {{ result.total_inserted|intcomma|default:"0" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Updated rows</strong>
+                    </td>
+                    <td>
+                        {{ result.total_updated|intcomma|default:"0" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Deleted rows</strong>
+                    </td>
+                    <td>
+                        {{ result.total_deleted|intcomma|default:"0" }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {% endlanguage %}
+{% endblock header %}
+
+{% block content %}
+    {% block errors %}
+        {% language "nl-nl" %}
+        {%  if errors %}
+        <div class="errors">
+            <h2>{% trans "Errors" %}</h2>
+            <ul>
+                {% for error in errors  %}
+                <li>
+                    {{ error }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endlanguage %}
+    {% endblock errors %}
+
+    {% block result %}
+        {% language "nl-nl" %}
+        {% if result.total_inserted > 0 %}
+            <h2>Inserted Rows ({{ result.total_inserted|intcomma }})</h2>
+            {{ inserted_html|safe }}
+        {% endif %}
+        {% if result.total_updated > 0 %}
+            <h2>Updated Rows ({{ result.total_updated|intcomma }})</h2>
+            {{ updated_html|safe }}
+        {% endif %}
+        {% if result.total_deleted > 0 %}
+            <h2>Deleted Rows ({{ result.total_deleted|intcomma }})</h2>
+            {{ deleted_html|safe }}
+        {% endif %}
+        {% endlanguage %}
+    {% endblock result %}
+{% endblock content %}
