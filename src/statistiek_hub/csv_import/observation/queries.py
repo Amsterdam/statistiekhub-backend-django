@@ -29,7 +29,7 @@ update_query = (
     "org.spatialdimension_id = tmp.spatialdimension_id AND "
     "tmp.value IS NOT NULL AND "
     "org.value != tmp.value "
-    "RETURNING *"
+    "RETURNING org.id, org.value, org.measure_id, org.temporaldimension_id, org.spatialdimension_id"
 )
 
 delete_query = (
@@ -39,5 +39,5 @@ delete_query = (
     "org.temporaldimension_id = tmp.temporaldimension_id AND "
     "org.spatialdimension_id = tmp.spatialdimension_id AND "
     "tmp.value IS NULL "
-    "RETURNING *"
+    "RETURNING org.id, org.value as original_value, tmp.value, org.measure_id, org.temporaldimension_id, org.spatialdimension_id"
 )

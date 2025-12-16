@@ -163,7 +163,16 @@ def _run_observation_import_job(import_job, dry_run=True):
         updated_html = result.updated[columns_to_html].to_html(index=False, border=1)
     deleted_html = ""
     if result.total_deleted:
-        deleted_html = result.deleted[columns_to_html].to_html(index=False, border=1)
+        deleted_html = result.deleted[
+            [
+                "id",
+                "original_value",
+                "value",
+                "measure_id",
+                "spatialdimension_id",
+                "temporaldimension_id",
+            ]
+        ].to_html(index=False, border=1)
 
     context = {
         "csv_name": import_job.file.name,
