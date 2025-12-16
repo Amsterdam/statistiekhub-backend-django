@@ -344,7 +344,8 @@ def data_to_dataframe(filepath_or_buffer: str | IOBase) -> DataFrame:
     return read_csv(
         filepath_or_buffer=filepath_or_buffer,
         header=0,
-        sep=";",
+        sep=None,  # When set to None auto-detection is enabled
+        engine="python",  # Required to auto-detect the separator, this will use the builtin python csv.Sniffer tool
         keep_default_na=False,
         dtype={
             "spatial_code": "str",
