@@ -1,7 +1,7 @@
 # Define all requirements, only pin when necessary (and if so, add a comment explaining why).
 # See # https://git.datapunt.amsterdam.nl/Datapunt/python-best-practices/blob/master/dependency_management/
 
-Django<6  # Do not upgrade to Django 6 yet!
+Django
 django-import-export[xlsx, pandas]
 django-db-views
 django-leaflet
@@ -19,10 +19,10 @@ amsterdam-django-oidc
 # Azure
 azure-core
 azure-identity
-azure-storage-blob
+azure-storage-blob==12.27.1
 azure-keyvault
 azure-keyvault-secrets
-azure-storage-queue
+azure-storage-queue==12.14.1
 
 # OTEL
 opentelemetry-exporter-otlp-proto-grpc
