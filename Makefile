@@ -57,7 +57,7 @@ load_fixtures:  migrate                  ## Load initial data into database by d
 	import_temporaldimensiontype.json \
 	import_spatialdimensiontype.json
 
-test: lint							## Execute tests
+test: 								## Execute tests
 	$(run) test pytest -m 'not integration' $(ARGS)
 
 loadtest: migrate

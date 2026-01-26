@@ -51,9 +51,9 @@ class ObservationAdmin(
     )
 
     def get_readonly_fields(self, request, obj=None):
-            if obj:  
-                return [ "measure", "temporaldimension", "spatialdimension" ]
-            return []  
+        if obj:
+            return ["measure", "temporaldimension", "spatialdimension"]
+        return []
 
     resource_classes = [ObservationResource]
 
