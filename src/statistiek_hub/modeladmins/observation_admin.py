@@ -44,17 +44,16 @@ class ObservationAdmin(
     )
     show_facets = admin.ShowFacets.NEVER
 
-    readonly_fields = (
-        "measure",
-        "temporaldimension",
-        "spatialdimension",
-    )
-
     raw_id_fields = (
         "measure",
         "temporaldimension",
         "spatialdimension",
     )
+
+    def get_readonly_fields(self, request, obj=None):
+            if obj:  
+                return [ "measure", "temporaldimension", "spatialdimension" ]
+            return []  
 
     resource_classes = [ObservationResource]
 
