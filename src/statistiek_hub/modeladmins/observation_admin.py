@@ -3,7 +3,6 @@ from import_export.tmp_storages import MediaStorage
 
 from statistiek_hub.modeladmins.admin_mixins import (
     CheckPermissionUserMixin,
-    ImportExportFormatsMixin,
 )
 from statistiek_hub.modeladmins.filters import (
     MeasureThemeFilter,
@@ -15,9 +14,7 @@ from statistiek_hub.models.observation import ObservationCalculated
 from statistiek_hub.resources.observation_resource import ObservationResource
 
 
-class ObservationAdmin(
-    ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin
-):
+class ObservationAdmin(CheckPermissionUserMixin, admin.ModelAdmin):
     tmp_storage_class = MediaStorage
 
     search_help_text = "search on measure name"

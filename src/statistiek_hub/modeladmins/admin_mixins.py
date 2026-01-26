@@ -10,12 +10,12 @@ class ImportExportFormatsMixin(ImportMixin, ExportActionMixin):
 
     def get_import_formats(self):
         """Returns available import formats."""
-        formats = [SCSV, base_formats.XLSX, base_formats.CSV, GEOJSON]
+        formats = [SCSV, base_formats.CSV, GEOJSON]
         return formats
 
     def get_export_formats(self):
         """Returns available export formats."""
-        formats = [SCSV, base_formats.XLSX, base_formats.CSV, base_formats.JSON]
+        formats = [SCSV, base_formats.CSV, base_formats.JSON]
         return formats
 
 
