@@ -290,13 +290,13 @@ def test_select_df_wijk_ggw(fill_bev_won_obs):
     )
 
     assert (
-        dfobs["spatialdimensiontype"].unique().sort()
+        dfobs["spatialdimensiontype"].unique().tolist().sort()
         == ["Wijk", "GGW-gebied", "Gemeente"].sort()
     )
 
     dfwijkggw = _select_df_wijk_ggw(dfobs)
     assert (
-        dfwijkggw["spatialdimensiontype"].unique().sort()
+        dfwijkggw["spatialdimensiontype"].unique().tolist().sort()
         == ["Wijk", "GGW-gebied"].sort()
     )
 
