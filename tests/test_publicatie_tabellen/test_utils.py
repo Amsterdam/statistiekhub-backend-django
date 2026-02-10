@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pytest
 from django.contrib.auth.models import Group
@@ -68,9 +67,7 @@ def test_round_to_decimal(test_value, test_decimals, expected):
 @pytest.mark.django_db
 def test_convert_queryset_into_dataframe(qs=None, model=Measure):
     """converts a queryset into a dataframe"""
-    name_test = baker.make(
-        model, name="TEST", theme=baker.make(Theme, group=baker.make(Group))
-    )
+    name_test = baker.make(model, name="TEST", theme=baker.make(Theme, group=baker.make(Group)))
     qs = model.objects.all()
 
     df = convert_queryset_into_dataframe(qs)
@@ -106,9 +103,7 @@ def test_copy_queryset(model=Measure, copy_to_model=PublicationMeasure):
 
 
 @pytest.mark.django_db
-def test_copy_dataframe(
-    test_df=pd.DataFrame(sample_statistic), copy_to_model=PublicationObservation
-):
+def test_copy_dataframe(test_df=pd.DataFrame(sample_statistic), copy_to_model=PublicationObservation):
     """copy dataframe into the copy_to_model
     df.columns must be equal to copy_to_model._fields"""
 

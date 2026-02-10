@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 def oidc_login(request, **kwargs):
     oidc_authentication_init = reverse("oidc_authentication_init")
-    redirect = f'{oidc_authentication_init}?next={request.GET.get("next", "")}'
+    redirect = f"{oidc_authentication_init}?next={request.GET.get('next', '')}"
     return HttpResponseRedirect(redirect)
 
 

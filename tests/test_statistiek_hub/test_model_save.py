@@ -17,9 +17,7 @@ class TestModelSave:
     def test_save_temporaldimension_cbs_date(self):
         """cbs_date should result in year+1"""
         tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
-        cbs_date = baker.make(
-            TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
-        )
+        cbs_date = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
         assert TemporalDimension.objects.first().year == 2024
 
         cbs_date.delete()
@@ -30,9 +28,7 @@ class TestModelSave:
         """temporaltype doesnt exist"""
         tempdimtype = baker.make(TemporalDimensionType, name="bestaatniet")
 
-        temp_date = TemporalDimension(
-            startdate=datetime.date(2023, 12, 31), type=tempdimtype
-        )
+        temp_date = TemporalDimension(startdate=datetime.date(2023, 12, 31), type=tempdimtype)
 
         with pytest.raises(ValidationError) as e:
             temp_date.clean()
@@ -42,9 +38,7 @@ class TestModelSave:
     @pytest.mark.django_db
     def test_save_measure_name_upper(self):
         """name should be saved upper"""
-        name_upper = baker.make(
-            Measure, name="test2", theme=baker.make(Theme, group=baker.make(Group))
-        )
+        name_upper = baker.make(Measure, name="test2", theme=baker.make(Theme, group=baker.make(Group)))
         assert Measure.objects.first().name == "TEST2"
 
         name_upper.delete()
@@ -63,9 +57,7 @@ class TestModelSave:
         )
 
         tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
-        temp = baker.make(
-            TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
-        )
+        temp = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
         spatial = baker.make(SpatialDimension)
 
         # check the specific error message

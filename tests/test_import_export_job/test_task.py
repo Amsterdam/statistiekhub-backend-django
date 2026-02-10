@@ -1,15 +1,11 @@
-import os
-
 import pytest
-from azure.storage.blob import BlobServiceClient
-from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage, storages
+from django.core.files.storage import default_storage
 from model_bakery import baker
 
 from import_export_job.models import ImportJob
 from import_export_job.tasks import _run_import_job, get_format
-from tests.temp_storage import temporary_media_root
+from tests.temp_storage import temporary_media_root  # noqa: F401
 
 
 class MockFormat:
@@ -77,7 +73,7 @@ def test_delete_file_on_job_delete():
 
 
 @pytest.mark.django_db
-def test_run_import_job(temporary_media_root):
+def test_run_import_job(temporary_media_root):  # noqa: F811
     import_job = baker.make(
         ImportJob,
         format="semicolon text/csv",
@@ -89,9 +85,6 @@ def test_run_import_job(temporary_media_root):
     _run_import_job(import_job, dry_run=True)
 
     assert import_job.errors == "ERRORS zie change_summary"
-    assert (
-        import_job.change_summary.name
-        == "django-import-job-change-summaries/mock_file2.csv.html"
-    )
+    assert import_job.change_summary.name == "django-import-job-change-summaries/mock_file2.csv.html"
 
     import_job.delete()

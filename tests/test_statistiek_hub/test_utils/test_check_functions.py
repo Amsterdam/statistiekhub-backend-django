@@ -4,13 +4,11 @@ import pandas as pd
 import pytest
 from tablib import Dataset
 
-from referentie_tabellen.models import TemporalDimensionType
 from src.statistiek_hub.utils.check_functions import (
     check_exists_in_model,
     check_missing_fields,
     check_temporaldimensiontype_observation_vs_measure,
 )
-from statistiek_hub.utils.converter import set_stringfields_to_upper
 
 dataset = Dataset()
 dataset.append(
@@ -67,18 +65,14 @@ dataset.headers = [
 testinput = [
     {
         "dataset": dataset.df,
-        "dfmodel": pd.DataFrame(
-            [[1, "BEVTOTAAL"], [2, "BEVMAN"], [3, "BEVVROUW"]], columns=["id", "name"]
-        ),
+        "dfmodel": pd.DataFrame([[1, "BEVTOTAAL"], [2, "BEVMAN"], [3, "BEVVROUW"]], columns=["id", "name"]),
         "column": ["measure"],
         "field": ["name"],
         "expected": False,
     },
     {
         "dataset": dataset.df,
-        "dfmodel": pd.DataFrame(
-            [[1, "TEST"], [2, "BEVMAN"], [3, "BEVVROUW"]], columns=["id", "name"]
-        ),
+        "dfmodel": pd.DataFrame([[1, "TEST"], [2, "BEVMAN"], [3, "BEVVROUW"]], columns=["id", "name"]),
         "column": ["measure"],
         "field": ["name"],
         "expected": "Niet terug",
@@ -98,7 +92,7 @@ class TestCheck_functions:
             test_input["field"],
         )
 
-        if type(error) != bool:
+        if not isinstance(error, bool):
             error = error[0:10]
 
         assert error == test_input["expected"]
@@ -181,5 +175,5 @@ class TestCheck_functions:
             check_temporaldimensiontype_observation_vs_measure(
                 df_main=df_main, dftemporaldim=dftemporaldim, dfmeasure=dfmeasure
             )
-            == False  # no error
+            is False  # no error
         )

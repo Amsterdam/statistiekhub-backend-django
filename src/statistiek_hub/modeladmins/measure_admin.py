@@ -31,9 +31,7 @@ class FilterInline(admin.TabularInline):
     extra = 0  # <=== For remove empty fields from admin view
 
 
-class MeasureAdmin(
-    ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin
-):
+class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
     tmp_storage_class = MediaStorage
     list_display = (
         "id",

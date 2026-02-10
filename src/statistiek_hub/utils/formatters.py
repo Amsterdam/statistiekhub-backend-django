@@ -20,9 +20,7 @@ class SCSV(base_formats.CSV):
 
         delimiter = csv.Sniffer().sniff(in_stream, delimiters=";,").delimiter
         if delimiter != self.DEFAULT_DELIMITER:
-            raise ValidationError(
-                f"SCSV semicolon_csv format is with '{self.DEFAULT_DELIMITER}' delimiter"
-            )
+            raise ValidationError(f"SCSV semicolon_csv format is with '{self.DEFAULT_DELIMITER}' delimiter")
         kwargs["delimiter"] = self.DEFAULT_DELIMITER
         kwargs["format"] = "csv"
         return tablib.import_set(in_stream, **kwargs)
@@ -57,7 +55,7 @@ class GEOJSON(base_formats.TablibFormat):
 
         try:
             crs = data["crs"]
-        except:  # if not in Geojson -> default crs RD
+        except Exception:  # if not in Geojson -> default crs RD
             crs = {
                 "type": "name",
                 "properties": {"name": "urn:ogc:def:crs:EPSG::28992"},

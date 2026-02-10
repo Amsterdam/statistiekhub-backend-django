@@ -46,9 +46,7 @@ class PgDumpToStorage:
         for file in os.listdir(self.TMP_DIRECTORY):
             filepath = os.path.join(self.TMP_DIRECTORY, file)
             with open(filepath, "rb") as f:
-                storage.save_without_postfix(
-                    name=os.path.join("pgdump", file), content=f
-                )
+                storage.save_without_postfix(name=os.path.join("pgdump", file), content=f)
             logger.info(f"Successfully uploaded {filepath} to blob")
 
     def remove_dump(self):

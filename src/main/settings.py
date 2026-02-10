@@ -44,9 +44,7 @@ DEBUG = os.getenv("DEBUG", False)
 ALLOWED_HOSTS = ["*"]
 X_FRAME_OPTIONS = "ALLOW-FROM *"
 INTERNAL_IPS = ("127.0.0.1", "0.0.0.0")
-DATA_UPLOAD_MAX_MEMORY_SIZE = (
-    1024 * 1024 * 20
-)  # max upload size; 20MB (instead of the default 2.5MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 20  # max upload size; 20MB (instead of the default 2.5MB)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
 
 # Application definition
@@ -340,9 +338,7 @@ FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 
 
 # Configure OpenTelemetry to use Azure Monitor with the specified connection string
-APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"
-)
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
 
 # Django Logging settings
 LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
@@ -396,9 +392,7 @@ LEAFLET_CONFIG = {
         (
             "Amsterdam",
             "https://t1.data.amsterdam.nl/topo_wm_light/{z}/{x}/{y}.png",
-            {
-                "attribution": 'Kaartgegevens &copy; <a href="https://data.amsterdam.nl/">Gemeente Amsterdam </a>'
-            },
+            {"attribution": 'Kaartgegevens &copy; <a href="https://data.amsterdam.nl/">Gemeente Amsterdam </a>'},
         ),
     ],
     "DEFAULT_CENTER": (4.9020727, 52.3717204),
@@ -464,9 +458,7 @@ if AZURITE_CONNECTION_STRING and not os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
         queue_endpoint = parts.get("QueueEndpoint")
 
         if not all([account_name, account_key, queue_endpoint]):
-            raise ValueError(
-                "Connection string must contain AccountName, AccountKey, and QueueEndpoint"
-            )
+            raise ValueError("Connection string must contain AccountName, AccountKey, and QueueEndpoint")
 
         # Parse the QueueEndpoint to get host and port
         parsed = urlparse(queue_endpoint)
@@ -475,9 +467,7 @@ if AZURITE_CONNECTION_STRING and not os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
 
         return f"azurestoragequeue://{account_name}:{quote_plus(account_key)}@{host}:{port}"
 
-    CELERY_BROKER_URL = _azure_connection_string_to_broker_url(
-        AZURITE_CONNECTION_STRING
-    )
+    CELERY_BROKER_URL = _azure_connection_string_to_broker_url(AZURITE_CONNECTION_STRING)
 elif os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     CELERY_BROKER_URL = "azurestoragequeue://workloadidentitycredential@"
 
@@ -485,9 +475,7 @@ CELERY_TIMEZONE = "UTC"
 CELERY_ACCEPT_CONTENT = ["json"]
 
 CELERY_TASK_SERIALIZER = "json"
-CELERY_TASK_DEFAULT_QUEUE = (
-    "celery-job-queue"  # was JOB_QUEUE_NAME in the previous situation
-)
+CELERY_TASK_DEFAULT_QUEUE = "celery-job-queue"  # was JOB_QUEUE_NAME in the previous situation
 CELERY_TASK_RESULT_EXPIRES = 5 * 60
 CELERY_TASK_ALWAYS_EAGER = _env_to_bool(os.getenv("CELERY_TASK_ALWAYS_EAGER", "False"))
 CELERY_TASK_DEFAULT_PRIORITY = 5

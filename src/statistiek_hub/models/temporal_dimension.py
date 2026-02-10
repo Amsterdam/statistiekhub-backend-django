@@ -41,7 +41,8 @@ class TemporalDimension(models.Model):
         if not self.enddate:
             logger.info("add_timedelta bestaat niet")
             raise ValidationError(
-                "Type bestaat niet in add_timedelta function, neem contact op als de Type opgenomen dient te worden in de add_timedelta function"
+                "Type bestaat niet in add_timedelta function, "
+                "neem contact op als de Type opgenomen dient te worden in de add_timedelta function"
             )
 
     def save(self, *args, **kwargs):

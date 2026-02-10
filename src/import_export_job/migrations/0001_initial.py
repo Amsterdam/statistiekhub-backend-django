@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -55,9 +54,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "format",
-                    models.CharField(
-                        max_length=255, verbose_name="Format of file to be imported"
-                    ),
+                    models.CharField(max_length=255, verbose_name="Format of file to be imported"),
                 ),
                 (
                     "change_summary",
@@ -74,15 +71,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "model",
-                    models.CharField(
-                        max_length=160, verbose_name="Name of model to import to"
-                    ),
+                    models.CharField(max_length=160, verbose_name="Name of model to import to"),
                 ),
                 (
                     "job_status",
-                    models.CharField(
-                        blank=True, max_length=160, verbose_name="Status of the job"
-                    ),
+                    models.CharField(blank=True, max_length=160, verbose_name="Status of the job"),
                 ),
                 (
                     "owner",

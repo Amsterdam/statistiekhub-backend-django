@@ -1,12 +1,10 @@
 import pytest
-from django.conf import settings
 from django.test.utils import override_settings
 
 from health.views import health
 
 
 class TestHealth:
-
     @pytest.mark.django_db
     def test_health_db(self, client):
         """# check database"""

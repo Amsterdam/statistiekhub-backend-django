@@ -1,20 +1,21 @@
 # standard library
 import json
-import pkg_resources
 import urllib.request
 from collections import namedtuple
 from contextlib import suppress
 from distutils.version import StrictVersion
-from subprocess import check_output
-from typing import Iterable, NamedTuple, List
 from pathlib import Path
+from subprocess import check_output
+from typing import Iterable, List, NamedTuple
+
+import pkg_resources
 
 
 def git_diff(cwd) -> Iterable[str]:
     """
     Run git diff in the specified directory.
     """
-    return check_output(['git', 'diff', 'requirements.txt'], cwd=cwd).decode().splitlines()
+    return check_output(["git", "diff", "requirements.txt"], cwd=cwd).decode().splitlines()
 
 
 class PackageChange(NamedTuple):
@@ -30,7 +31,7 @@ def normalise_package_name(package_name):
     think depending on pip version).
     """
     data = json.load(urllib.request.urlopen(f"https://pypi.org/pypi/{package_name}/json"))
-    return data['info']['name']
+    return data["info"]["name"]
 
 
 def parse_diff(diff: Iterable[str]) -> List[PackageChange]:
@@ -41,8 +42,9 @@ def parse_diff(diff: Iterable[str]) -> List[PackageChange]:
 
     :return: Iterable of package changes.
     """
+
     def get_change_type(line):
-        for char in '-+':
+        for char in "-+":
             # filter single line changes
             if line.startswith(char) and not line.startswith(char * 3):
                 return char
@@ -51,7 +53,7 @@ def parse_diff(diff: Iterable[str]) -> List[PackageChange]:
     # should always be of the form ==version, so we strip the first two
     # characters
     # TODO: assert this assumption
-    LineChange = namedtuple('LineChange', 'change_type package version')
+    LineChange = namedtuple("LineChange", "change_type package version")
     changes = {
         LineChange(change_type, normalise_package_name(requirement.key), str(requirement.specifier)[2:])
         for line in diff
@@ -61,17 +63,14 @@ def parse_diff(diff: Iterable[str]) -> List[PackageChange]:
 
     def version(package, change_type):
         changes_for_this_package_of_type = (
-            c.version
-            for c in changes
-            if c.package == package
-            if c.change_type == change_type
+            c.version for c in changes if c.package == package if c.change_type == change_type
         )
         return next(changes_for_this_package_of_type, None)
 
     return [
         PackageChange(package, from_version, to_version)
         for package in {c.package for c in changes}
-        if (from_version := version(package, '-')) != (to_version := version(package, '+'))
+        if (from_version := version(package, "-")) != (to_version := version(package, "+"))
     ]
 
 
@@ -83,7 +82,6 @@ def post_package_updates_to_slack(project_package_changes: List):
     messages = []
 
     for package_change in project_package_changes:
-
         if package_change.to_version is not None and package_change.from_version is not None:
             # if one of the versions is not strict, so we can't say anything about if this is a patch
             # release or not so we just show the message to be sure
@@ -93,19 +91,17 @@ def post_package_updates_to_slack(project_package_changes: List):
                 show_message = strict_from_version.version[0] != strict_to_version.version[0]
 
             if package_change.from_version < package_change.to_version:
-                icon_emoji = ':arrow_up:'
-                message = f'{package_change.from_version} ➩ {package_change.to_version}'
+                message = f"{package_change.from_version} ➩ {package_change.to_version}"
             else:
-                icon_emoji = ':arrow_down:'
-                message = f'{package_change.from_version} ➩ {package_change.to_version}'
+                message = f"{package_change.from_version} ➩ {package_change.to_version}"
 
             if show_message:
                 messages.append(f"{package_change.package} | {message}")
 
-    print('\n'.join(messages))
+    print("\n".join(messages))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     path = Path(__file__).parent.parent
     diff = parse_diff(git_diff(path))
     post_package_updates_to_slack(diff)

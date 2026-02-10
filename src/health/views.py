@@ -24,8 +24,6 @@ def health(request):
             assert cursor.fetchone()
     except Exception as e:
         log.exception(f"Database connectivity failed: {str(e)}")
-        return HttpResponse(
-            "Database connectivity failed", content_type="text/plain", status=500
-        )
+        return HttpResponse("Database connectivity failed", content_type="text/plain", status=500)
 
     return HttpResponse("Connectivity OK", content_type="text/plain", status=200)

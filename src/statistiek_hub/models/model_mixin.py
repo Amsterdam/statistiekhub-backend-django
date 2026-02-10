@@ -11,11 +11,10 @@ class TimeStampMixin(models.Model):
 
 
 class AddErrorFuncion(models.Model):
-
     @classmethod
     def add_error(cls, errors, new_errors):
         for err_code, err_value in new_errors.items():
-            if err_value == None:
+            if err_value is None:
                 continue
 
             if err_code in errors.keys():

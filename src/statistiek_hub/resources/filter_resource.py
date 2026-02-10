@@ -41,9 +41,7 @@ class FilterResource(ModelResource):
             df_main = dataset.df
             df_main = set_stringfields_to_upper(df_main)
 
-            error = check_exists_in_model(
-                dataset=df_main, dfmodel=dfmeasure, column=["measure"], field=["name"]
-            )
+            error = check_exists_in_model(dataset=df_main, dfmodel=dfmeasure, column=["measure"], field=["name"])
 
             if error:
                 errors["measure_names"] = error

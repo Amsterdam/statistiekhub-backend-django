@@ -1,12 +1,15 @@
 """Utilities set for data processing"""
 
+from datetime import date as original_date
 from datetime import datetime
 
-from dateutil.relativedelta import *
+from dateutil.relativedelta import relativedelta
 
 
-def convert_to_datetime(date: str = None) -> datetime:
-    """Convert string format %Y%m%d (/,-) to datetime with time as 0 or %d/%m/%y %H:%M of %Y-%m-%d %H:%M:%S.%f to datetime"""
+def convert_to_datetime(date: str = None) -> datetime | str:
+    """
+    Convert string format %Y%m%d (/,-) to datetime with time as 0 or %d/%m/%y %H:%M of %Y-%m-%d %H:%M:%S.%f to datetime
+    """
 
     if date in [None, " ", ""]:
         return ""
@@ -23,14 +26,14 @@ def convert_to_datetime(date: str = None) -> datetime:
 
     _date = None
 
-    for format in formats_allowed:
+    for _format in formats_allowed:
         try:
-            _date = datetime.strptime(date, format)
+            _date = datetime.strptime(date, _format)
             break
         except ValueError:
             pass
 
-    if _date == None:
+    if _date is None:
         # probeer O&S aanlever-format
 
         # remove date notation
@@ -47,10 +50,8 @@ def convert_to_datetime(date: str = None) -> datetime:
                 month if month != 0 else month + 1,
                 day if day != 0 else day + 1,
             )
-        except:
-            raise ValueError(
-                f"verkeerd datumformat voor {date}, toegestane formats zijn {formats_allowed}"
-            )
+        except Exception:
+            raise ValueError(f"verkeerd datumformat voor {date}, toegestane formats zijn {formats_allowed}")
 
     return _date
 
@@ -76,12 +77,12 @@ def add_timedelta(date: datetime, delta: str = None):
     return delta_date
 
 
-def convert_to_date(date: str = None) -> datetime.date:
+def convert_to_date(date: str = None) -> original_date:
     """Convert string format to date"""
 
     _date = convert_to_datetime(date)
 
-    if type(_date) != str:
+    if not isinstance(_date, str):
         _date = _date.date()
     else:
         _date = _date
@@ -89,7 +90,7 @@ def convert_to_date(date: str = None) -> datetime.date:
     return _date
 
 
-def set_year(date: datetime.date) -> int:
+def set_year(date: original_date) -> int:
     """return year from date with custom mapping for 31-12 dates"""
 
     if date.day == 31 and date.month == 12:

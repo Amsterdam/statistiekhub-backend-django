@@ -18,7 +18,7 @@ class Command(BaseCommand):
     help = "Dump publication-tables to storagecontainer pgdump"
 
     def handle(self, *args, **options) -> None:
-        with tracer.start_as_current_span("pgdump") as span:
+        with tracer.start_as_current_span("pgdump") as span:  # noqa: F841
             self._handle(*args, **options)
 
     def _handle(self, *args, **options):
@@ -28,9 +28,7 @@ class Command(BaseCommand):
                 # calculate all publication-tables
                 updated = PublicationUpdatedAt.objects.order_by("-updated_at").first()
                 if not updated:
-                    updated = PublicationUpdatedAt(
-                        updated_at=datetime.datetime(1900, 10, 1)
-                    )
+                    updated = PublicationUpdatedAt(updated_at=datetime.datetime(1900, 10, 1))
 
                 # only run if something changed
                 latest_change = ChangesLog.objects.order_by("-changed_at").first()

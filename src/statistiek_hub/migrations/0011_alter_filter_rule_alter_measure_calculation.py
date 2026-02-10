@@ -6,7 +6,6 @@ import statistiek_hub.validations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("statistiek_hub", "0010_remove_measure_owner"),
     ]
@@ -15,9 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="filter",
             name="rule",
-            field=models.TextField(
-                validators=[statistiek_hub.validations.validate_filter_rule]
-            ),
+            field=models.TextField(validators=[statistiek_hub.validations.validate_filter_rule]),
         ),
         migrations.AlterField(
             model_name="measure",

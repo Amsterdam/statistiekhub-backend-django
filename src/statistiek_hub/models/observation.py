@@ -15,19 +15,13 @@ class ObservationBase(TimeStampMixin, AddErrorFuncion):
 
     measure = models.ForeignKey(Measure, related_name="+", on_delete=models.CASCADE)
     value = models.FloatField()
-    temporaldimension = models.ForeignKey(
-        TemporalDimension, related_name="+", on_delete=models.RESTRICT
-    )
-    spatialdimension = models.ForeignKey(
-        SpatialDimension, related_name="+", on_delete=models.RESTRICT
-    )
+    temporaldimension = models.ForeignKey(TemporalDimension, related_name="+", on_delete=models.RESTRICT)
+    spatialdimension = models.ForeignKey(SpatialDimension, related_name="+", on_delete=models.RESTRICT)
 
     def clean(self):
         errors = {}
 
-        self.add_error(
-            errors, {"value": check_value_context(self.measure.unit.code, self.value)}
-        )
+        self.add_error(errors, {"value": check_value_context(self.measure.unit.code, self.value)})
 
         if errors:
             raise ValidationError(errors)
@@ -54,9 +48,7 @@ class Observation(ObservationBase):
             )
         ]
 
-    measure = models.ForeignKey(
-        Measure, related_name="obs_measure", on_delete=models.CASCADE
-    )
+    measure = models.ForeignKey(Measure, related_name="obs_measure", on_delete=models.CASCADE)
     temporaldimension = models.ForeignKey(
         TemporalDimension,
         related_name="obs_temporaldimension",
@@ -85,9 +77,7 @@ class ObservationCalculated(ObservationBase):
         ]
         verbose_name_plural = "observations calculated"
 
-    measure = models.ForeignKey(
-        Measure, related_name="calc_obs_measure", on_delete=models.CASCADE
-    )
+    measure = models.ForeignKey(Measure, related_name="calc_obs_measure", on_delete=models.CASCADE)
     temporaldimension = models.ForeignKey(
         TemporalDimension,
         related_name="calc_obs_temporaldimension",

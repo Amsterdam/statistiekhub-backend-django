@@ -23,8 +23,5 @@ def init_azurite_storage_containers() -> None:
         return
 
     for storage in settings.STORAGES:
-        if (
-            hasattr(storages[storage], "client")
-            and not storages[storage].client.exists()
-        ):
+        if hasattr(storages[storage], "client") and not storages[storage].client.exists():
             storages[storage].client.create_container()

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("publicatie_tabellen", "0005_log_table_model_changes"),
     ]

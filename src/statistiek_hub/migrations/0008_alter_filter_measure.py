@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("statistiek_hub", "0007_alter_measure_calculation_and_more"),
     ]
@@ -14,8 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="filter",
             name="measure",
-            field=models.OneToOneField(
-                on_delete=django.db.models.deletion.CASCADE, to="statistiek_hub.measure"
-            ),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to="statistiek_hub.measure"),
         ),
     ]
