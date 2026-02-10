@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("statistiek_hub", "0008_alter_filter_measure"),
     ]

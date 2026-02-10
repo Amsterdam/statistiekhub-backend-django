@@ -46,14 +46,9 @@ class Theme(models.Model):
         super().clean()
 
         if self.group_id:
-            if any(
-                self.group.name.startswith(prefix)
-                for prefix in self.excluded_group_prefixes
-            ):
+            if any(self.group.name.startswith(prefix) for prefix in self.excluded_group_prefixes):
                 prefix_list = '", "'.join(self.excluded_group_prefixes)
-                raise ValidationError(
-                    {"group": f'Group name cannot start with: "{prefix_list}"'}
-                )
+                raise ValidationError({"group": f'Group name cannot start with: "{prefix_list}"'})
 
     def save(self, *args, **kwargs):
         self.full_clean()

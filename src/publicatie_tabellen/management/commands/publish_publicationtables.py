@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = "Populates publication tables"
 
     def handle(self, *args, **options) -> None:
-        with tracer.start_as_current_span("publish") as span:
+        with tracer.start_as_current_span("publish") as span:  # noqa: F841
             self._handle(*args, **options)
 
     def _handle(self, *args, **options):
@@ -25,6 +25,4 @@ class Command(BaseCommand):
                 publ.run_all_publish_tables()
 
         except Exception as e:
-            logger.exception(
-                f"An exception in command publish_publicationtables observations: {e}"
-            )
+            logger.exception(f"An exception in command publish_publicationtables observations: {e}")

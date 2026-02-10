@@ -29,7 +29,4 @@ def test_async_unsafe_decorator():
         try:
             await sync_to_async(connection.cursor)()
         except RuntimeError as e:
-            assert (
-                str(e)
-                == "You cannot call this from an async context - use a thread or sync_to_async."
-            )
+            assert str(e) == "You cannot call this from an async context - use a thread or sync_to_async."

@@ -52,9 +52,7 @@ class Migration(migrations.Migration):
                 ("source", models.CharField(max_length=100)),
                 (
                     "extra_attr",
-                    models.JSONField(
-                        blank=True, help_text="jsonfield voor productvelden", null=True
-                    ),
+                    models.JSONField(blank=True, help_text="jsonfield voor productvelden", null=True),
                 ),
                 (
                     "deprecated",
@@ -175,9 +173,7 @@ class Migration(migrations.Migration):
                 ("source_date", models.DateField()),
                 (
                     "geom",
-                    django.contrib.gis.db.models.fields.GeometryField(
-                        blank=True, null=True, srid=28992
-                    ),
+                    django.contrib.gis.db.models.fields.GeometryField(blank=True, null=True, srid=28992),
                 ),
                 (
                     "parent",

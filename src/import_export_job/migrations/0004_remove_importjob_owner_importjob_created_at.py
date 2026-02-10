@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "import_export_job",
@@ -22,9 +21,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="importjob",
             name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True, default=datetime.datetime(2024, 11, 12, 0, 0)
-            ),
+            field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2024, 11, 12, 0, 0)),
             preserve_default=False,
         ),
     ]

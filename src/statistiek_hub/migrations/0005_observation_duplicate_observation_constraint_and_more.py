@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("statistiek_hub", "0004_temporaldimension_duplicate_tempdim_constraint"),
     ]

@@ -6,7 +6,6 @@ import statistiek_hub.validations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("statistiek_hub", "0013_filter_created_at_filter_updated_at"),
     ]
@@ -15,9 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="measure",
             name="temporaltype",
-            field=models.IntegerField(
-                choices=[(1, "Peildatum"), (2, "Periode")], default=1
-            ),
+            field=models.IntegerField(choices=[(1, "Peildatum"), (2, "Periode")], default=1),
         ),
         migrations.AlterField(
             model_name="measure",

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("referentie_tabellen", "0003_source"),
     ]
@@ -13,8 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="temporaldimensiontype",
             name="type",
-            field=models.IntegerField(
-                choices=[(1, "Peildatum"), (2, "Periode")], default=2
-            ),
+            field=models.IntegerField(choices=[(1, "Peildatum"), (2, "Periode")], default=2),
         ),
     ]

@@ -25,17 +25,12 @@ class Channel(virtual.Channel):
         if userid.lower() == "workloadidentitycredential":
             # Use Workload Identity (federated token)
             self._init_workload_identity()
-        elif (
-            hostname.lower() in ("127.0.0.1", "localhost", "azurite")
-            or userid.lower() == "devstoreaccount1"
-        ):
+        elif hostname.lower() in ("127.0.0.1", "localhost", "azurite") or userid.lower() == "devstoreaccount1":
             # Azurite connection
             self._init_azurite(hostname, port, userid, password)
         else:
             # Connection not (yet) implemented
-            raise NotImplementedError(
-                f"Authentication method not implemented for {userid}"
-            )
+            raise NotImplementedError(f"Authentication method not implemented for {userid}")
 
         self._queue_cache = {}
 
@@ -43,9 +38,7 @@ class Channel(virtual.Channel):
         from azure.identity import WorkloadIdentityCredential
 
         storage_account = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
-        logger.info(
-            f"Initializing Azure Queue with Workload Identity for account: {storage_account}"
-        )
+        logger.info(f"Initializing Azure Queue with Workload Identity for account: {storage_account}")
 
         credentials = WorkloadIdentityCredential()
         account_url = f"https://{storage_account}.queue.core.windows.net"
@@ -94,9 +87,7 @@ class Channel(virtual.Channel):
         queue_client = self._get_queue(queue)
 
         visibility_timeout = timeout if timeout else 30
-        messages = queue_client.receive_messages(
-            messages_per_page=1, visibility_timeout=visibility_timeout
-        )
+        messages = queue_client.receive_messages(messages_per_page=1, visibility_timeout=visibility_timeout)
 
         try:
             message = next(messages)
@@ -117,9 +108,7 @@ class Channel(virtual.Channel):
 
     def _size(self, queue):
         try:
-            return (
-                self._get_queue(queue).get_queue_properties().approximate_message_count
-            )
+            return self._get_queue(queue).get_queue_properties().approximate_message_count
         except Exception:
             return 0
 

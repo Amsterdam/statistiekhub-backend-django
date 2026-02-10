@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("statistiek_hub", "0009_remove_filter_id_alter_filter_measure"),
     ]

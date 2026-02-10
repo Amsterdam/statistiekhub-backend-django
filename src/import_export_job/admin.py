@@ -49,7 +49,7 @@ class ImportJobForm(forms.ModelForm):
     def _get_model_choices(self) -> list:
         _import_job_models = self.import_job_models.copy()
         if not self.modifier:
-            logger.info(f"user not in modifier-group")
+            logger.info("user not in modifier-group")
             _import_job_models.pop("SpatialDimension")
             _import_job_models.pop("TemporalDimension")
 
@@ -109,14 +109,10 @@ class ImportJobAdmin(JobWithStatusMixin, admin.ModelAdmin):
     def change_summary_link(self, obj):
         if obj.change_summary:
             url = reverse("get_blob", args=[obj.change_summary.name])
-            return mark_safe(
-                f'<a href="{url}" target="_blank" >{obj.change_summary.name}</a>'
-            )
+            return mark_safe(f'<a href="{url}" target="_blank" >{obj.change_summary.name}</a>')
         return "-"
 
-    change_summary_link.short_description = models.ImportJob._meta.get_field(
-        "change_summary"
-    ).verbose_name
+    change_summary_link.short_description = models.ImportJob._meta.get_field("change_summary").verbose_name
 
     actions = (
         admin_actions.run_import_job_action_dry,

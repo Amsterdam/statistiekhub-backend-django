@@ -58,7 +58,7 @@ def _get_qs_publishobservation(obsmodel, measure) -> QuerySet:
 def _apply_sensitive_rules(value, unit):
     """change value by rule depending on unit"""
 
-    if pd.isna(value) or value == None:
+    if pd.isna(value) or value is None:
         return None
 
     match unit:
@@ -81,9 +81,7 @@ def _get_df_with_filterrule(measure: Measure) -> pd.DataFrame:
     """apply sql db_function public.apply_filter on measure
     return: dataframe with value corrected by filterrule"""
 
-    value_new = (
-        "Null" if pd.isna(measure.filter.value_new) else measure.filter.value_new
-    )
+    value_new = "Null" if pd.isna(measure.filter.value_new) else measure.filter.value_new
     raw_query = f"select (public.apply_filter ({measure.id}, '{measure.filter.rule}', {value_new} )).*"
 
     with connection.cursor() as cursor:
@@ -166,14 +164,10 @@ def publishobservation() -> tuple:
             logger.info(f"filterrule {measure.filter.rule} applied")
 
         if measure.sensitive:
-            mdf["value"] = mdf.apply(
-                lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1
-            )
+            mdf["value"] = mdf.apply(lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1)
             logger.info("sensitiverules applied")
             # apply rule 1: Over gebieden met minder dan 50 inwoners rapporteren we geen privacygevoelige indicatoren
-            mdf = set_small_regions_to_nan_if_minimum(
-                dfmin, "BEVTOTAAL", mdf, minimum_value=50
-            )
+            mdf = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", mdf, minimum_value=50)
             logger.info("sensitive less 50 inwoners applied")
 
         # remove the by filter and sensitive introduced np.nan values
@@ -184,9 +178,7 @@ def publishobservation() -> tuple:
             continue
 
         # round value to decimals
-        mdf["value"] = mdf.apply(
-            lambda x: round_to_decimal(x.value, x.decimals), axis=1
-        )
+        mdf["value"] = mdf.apply(lambda x: round_to_decimal(x.value, x.decimals), axis=1)
         logger.info("decimals are set")
 
         mdf.rename(columns={"measure_name": "measure"}, inplace=True)

@@ -99,20 +99,14 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
         try:
             instance.file.delete()
         except Exception as e:
-            logger.error(
-                "Some error occurred while deleting ImportJob file: {0}".format(e)
-            )
+            logger.error("Some error occurred while deleting ImportJob file: {0}".format(e))
 
         # remove summary file if exists
         if instance.change_summary:
             try:
                 instance.change_summary.delete()
             except Exception as e:
-                logger.error(
-                    "Some error occurred while deleting ImportJob change_summary file: {0}".format(
-                        e
-                    )
-                )
+                logger.error("Some error occurred while deleting ImportJob change_summary file: {0}".format(e))
 
         # TODO remove job from queue if exists
 

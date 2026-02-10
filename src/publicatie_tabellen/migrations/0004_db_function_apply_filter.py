@@ -11,7 +11,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(
-            function_apply_filter, ("DROP FUNCTION public.apply_filter;")
-        ),
+        migrations.RunSQL(function_apply_filter, ("DROP FUNCTION public.apply_filter;")),
     ]

@@ -247,4 +247,4 @@ function_calculate_observation = r"""
                 $$
                 language plpgsql
                 ;
-            """
+            """  # noqa: E101, E501

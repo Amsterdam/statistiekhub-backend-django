@@ -15,9 +15,7 @@ class SourceDateFilter(DynamicListFilter):
     filter_field = "source_date"
 
 
-class SpatialDimensionAdmin(
-    ImportExportFormatsMixin, LeafletGeoAdminMixin, admin.ModelAdmin
-):
+class SpatialDimensionAdmin(ImportExportFormatsMixin, LeafletGeoAdminMixin, admin.ModelAdmin):
     map_template = "leaflet/admin/custom_widget.html"
 
     tmp_storage_class = MediaStorage
