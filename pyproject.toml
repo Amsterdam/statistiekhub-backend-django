@@ -1,9 +1,3 @@
-[tool.isort]
-profile = "black"
-
-[tool.autoflake]
-ignore_init_module_imports = true
-
 [tool.pytest.ini_options]
 addopts = "-s --cov --cov-config /app/pyproject.toml --disable-pytest-warnings "
 
@@ -31,3 +25,15 @@ fail_under = 79 # temporary lowered
 skip_covered = true
 show_missing = true
 sort = "Cover"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (autoflake uses this)
+    "I",   # isort
+]
+ignore-init-module-imports = true
