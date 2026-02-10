@@ -112,7 +112,7 @@ def test_get_df_with_filterrule(
         value=var_value,
     )
 
-    dftest = _get_df_with_filterrule(measure_var)
+    dftest = _get_df_with_filterrule(measure_var, calculated_years=None)
 
     assert dftest["value"].tolist() == expected
 
@@ -191,7 +191,7 @@ def test_get_df_filterrule_with_difftempdate(
         value=100,
     )
 
-    dftest = _get_df_with_filterrule(measure_var)
+    dftest = _get_df_with_filterrule(measure_var, calculated_years=None)
 
     assert dftest["value"].tolist() == [None]
     temp_id = dftest["temporaldimension_id"].item()

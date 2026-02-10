@@ -77,7 +77,7 @@ def _apply_sensitive_rules(value, unit):
     return value
 
 
-def _get_df_with_filterrule(measure: Measure) -> pd.DataFrame:
+def _get_df_with_filterrule(measure: Measure, calculated_years: list) -> pd.DataFrame:
     """apply sql db_function public.apply_filter on measure
     return: dataframe with value corrected by filterrule"""
 
@@ -140,11 +140,34 @@ def publishobservation() -> tuple:
     measure_no_data = []
 
     for measure in qsmeasure:
+        calculated = bool(measure.calculation)
+        calculated_years = None
+
         # select observations
         qsobservation = _get_qs_publishobservation(Observation, measure)
-        if len(qsobservation) == 0:
-            qsobservation = _get_qs_publishobservation(ObservationCalculated, measure)
         mdf = convert_queryset_into_dataframe(qsobservation)
+
+        if calculated:
+            # select complementary calculated years from calcobs (same basemodel as obs)
+            years_obs = qsobservation.values_list(
+                "temporaldimensionyear", flat=True
+            ).distinct()
+
+            qscalc_observation = _get_qs_publishobservation(
+                ObservationCalculated, measure
+            )
+            years_calcobs = qscalc_observation.values_list(
+                "temporaldimensionyear", flat=True
+            ).distinct()
+            diff = list(set(years_calcobs) - set(years_obs))
+
+            filtered_qs = qscalc_observation.filter(temporaldimensionyear__in=diff)
+
+            calculated_years = diff
+            # add to dataframe
+            mdf = pd.concat(
+                [mdf, convert_queryset_into_dataframe(filtered_qs)], ignore_index=True
+            )
 
         if len(mdf) == 0:
             measure_no_data.append(measure.name)
@@ -152,7 +175,7 @@ def publishobservation() -> tuple:
 
         logger.info(f"selected observations for {measure}: {len(mdf)}")
         if hasattr(measure, "filter"):
-            dfobs = _get_df_with_filterrule(measure)
+            dfobs = _get_df_with_filterrule(measure, calculated_years)
 
             # update mdf with new values from dfobs
             mdf = mdf.merge(
