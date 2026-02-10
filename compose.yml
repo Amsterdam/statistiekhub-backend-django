@@ -204,6 +204,5 @@ services:
       context: .
       target: linting
     volumes:
-      - ./src:/app/src
-      - ./tests:/app/tests
+      - .:/app/
     user: 1000:1000
