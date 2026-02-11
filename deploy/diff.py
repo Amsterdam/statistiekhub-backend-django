@@ -3,12 +3,12 @@ import json
 import urllib.request
 from collections import namedtuple
 from contextlib import suppress
-from distutils.version import StrictVersion
 from pathlib import Path
 from subprocess import check_output
 from typing import Iterable, List, NamedTuple
 
 import pkg_resources
+from distutils.version import StrictVersion
 
 
 def git_diff(cwd) -> Iterable[str]:
