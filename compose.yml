@@ -165,6 +165,7 @@ services:
       OTEL_EXPORTER: "none"
       OTEL_SDK_DISABLED: true
       CELERY_TASK_ALWAYS_EAGER: true
+      COVERAGE_FILE: /tmp/.coverage
     depends_on:
       database:
         condition: service_healthy
