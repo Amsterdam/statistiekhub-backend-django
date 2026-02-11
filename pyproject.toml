@@ -1,3 +1,9 @@
+[project]
+name = "statistiekhub-backend-django"
+readme = "README.md"
+requires-python = ">=3.13, <3.14"
+dynamic = ["version"]
+
 [tool.pytest.ini_options]
 addopts = "-s --cov --cov-config /app/pyproject.toml --disable-pytest-warnings "
 
