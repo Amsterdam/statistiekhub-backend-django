@@ -87,7 +87,7 @@ def _get_df_with_filterrule(measure: Measure, calculated_years: list) -> pd.Data
         measure.filter.value_new,
         calculated_years,
     )
-    raw_query = f"select (public.apply_filter (%s, %s, %s, %s::int[])).*"
+    raw_query = "select (public.apply_filter (%s, %s, %s, %s::int[])).*"
 
     with connection.cursor() as cursor:
         cursor.execute(raw_query, params)
@@ -152,16 +152,10 @@ def publishobservation() -> tuple:
 
         if calculated:
             # select complementary calculated years from calcobs (same basemodel as obs)
-            years_obs = qsobservation.values_list(
-                "temporaldimensionyear", flat=True
-            ).distinct()
+            years_obs = qsobservation.values_list("temporaldimensionyear", flat=True).distinct()
 
-            qscalc_observation = _get_qs_publishobservation(
-                ObservationCalculated, measure
-            )
-            years_calcobs = qscalc_observation.values_list(
-                "temporaldimensionyear", flat=True
-            ).distinct()
+            qscalc_observation = _get_qs_publishobservation(ObservationCalculated, measure)
+            years_calcobs = qscalc_observation.values_list("temporaldimensionyear", flat=True).distinct()
 
             if diff := list(set(years_calcobs) - set(years_obs)):  # als niet leeg
                 filtered_qs = qscalc_observation.filter(temporaldimensionyear__in=diff)

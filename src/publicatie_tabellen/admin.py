@@ -86,9 +86,7 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         search_term = request.GET.get("q")
         if search_term:
             escaped_search_term = search_term.replace("_", r"\_")
-            return self.model.objects.filter(
-                measure__icontains=escaped_search_term.upper()
-            )
+            return self.model.objects.filter(measure__icontains=escaped_search_term.upper())
 
         # include an object if being accessed so detailview works
         if request.resolver_match.kwargs.get("object_id"):

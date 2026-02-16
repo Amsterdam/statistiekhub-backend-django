@@ -133,9 +133,7 @@ def test_get_df_with_filterrule(fill_ref_tabellen, filter, value_new, var_value,
     ],
 )
 @pytest.mark.django_db
-def test_get_df_with_filterrule_on_calcobs(
-    fill_ref_tabellen, filter, value_new, var_value, base_value, expected
-):
+def test_get_df_with_filterrule_on_calcobs(fill_ref_tabellen, filter, value_new, var_value, base_value, expected):
     """apply sql db_function public.apply_filter on measure
     return: dataframe with value corrected by filterrule"""
     fixture = fill_ref_tabellen
@@ -153,9 +151,7 @@ def test_get_df_with_filterrule_on_calcobs(
         theme=baker.make(Theme, group=baker.make(Group)),
     )
 
-    filter_var = baker.make(
-        Filter, measure=measure_var, rule=filter, value_new=value_new
-    )
+    filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=value_new)
 
     obs_base = baker.make(
         Observation,
