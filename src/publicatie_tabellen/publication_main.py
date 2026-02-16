@@ -46,7 +46,7 @@ class PublishFunction:
     def fill_observationcalculated(self):
         """fill model ObservationCalculated with observations calculated by the calculation-query of the measure"""
         # get calculation measures -> select from observations otherwise they can not exist
-        qsmeasurecalc = Measure.objects.exclude(calculation="")
+        qsmeasurecalc = Measure.objects.exclude(calculation="").filter(deprecated=False)
         logger.info(f"Number measures calculated : {len(qsmeasurecalc)}")
 
         truncate(ObservationCalculated)

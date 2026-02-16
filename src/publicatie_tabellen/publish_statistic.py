@@ -57,12 +57,11 @@ def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_str) -> QuerySet:
     return queryset
 
 
-def _get_qs_publishstatistic_measure(measuremodel) -> QuerySet:
+def _get_qs_publishstatistic_measure() -> QuerySet:
     """measures exclude kleurenpalet, annotate var from extra_attr json field"""
     queryset = (
-        measuremodel.objects.filter(
-            extra_attr__has_key=KLEURENPALET
-        )  # only objects where the key exists
+        Measure.objects.filter(deprecated=False)
+        .filter(extra_attr__has_key=KLEURENPALET)  # only objects where the key exists
         .exclude(**{f"extra_attr__{KLEURENPALET}__in": EXCLUDE_KLEURENPALET_SD})
         .annotate(
             sd_minimum_bevtotaal=Coalesce(
@@ -181,7 +180,7 @@ def publishstatistic() -> tuple:
     """
 
     logger.info("get data necessary for calculation of statistic standarddeviation")
-    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
