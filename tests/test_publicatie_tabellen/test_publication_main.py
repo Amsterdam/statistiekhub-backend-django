@@ -17,9 +17,7 @@ def fill_ref_tabellen() -> dict:
     unit = baker.make(Unit, name="aantal")
 
     tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
-    temp = baker.make(
-        TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
-    )
+    temp = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
     temp2_startdate = datetime.date(2024, 1, 1)
     temp2 = baker.make(TemporalDimension, startdate=temp2_startdate, type=tempdimtype)
 
@@ -43,9 +41,7 @@ def fill_ref_tabellen() -> dict:
     ],
 )
 @pytest.mark.django_db
-def test_fill_observationcalculated(
-    fill_ref_tabellen, calculation, var1_value, base_value, expected
-):
+def test_fill_observationcalculated(fill_ref_tabellen, calculation, var1_value, base_value, expected):
     """fill model ObservationCalculated with observations calculated by the calculation-query of the measure"""
     ficture = fill_ref_tabellen
 
@@ -90,9 +86,7 @@ def test_fill_observationcalculated(
     qs_result = ObservationCalculated.objects.all()
 
     assert qs_result.first().value == expected
-    assert (
-        qs_result.first().temporaldimension.startdate == ficture["temp2_startdate"]
-    )  # calc has startdate of var1
+    assert qs_result.first().temporaldimension.startdate == ficture["temp2_startdate"]  # calc has startdate of var1
 
     measure_calc.delete()
     measure_base.delete()
@@ -109,9 +103,7 @@ def test_fill_observationcalculated(
     ],
 )
 @pytest.mark.django_db
-def test_fill_observationcalculated_divide_by_zero(
-    fill_ref_tabellen, calculation, var1_value, base_value, expected
-):
+def test_fill_observationcalculated_divide_by_zero(fill_ref_tabellen, calculation, var1_value, base_value, expected):
     """fill model ObservationCalculated with observations calculated by the calculation-query of the measure"""
     ficture = fill_ref_tabellen
 

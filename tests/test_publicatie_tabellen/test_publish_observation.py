@@ -1,7 +1,6 @@
 import datetime
 
 import numpy as np
-import pandas as pd
 import pytest
 from django.contrib.auth.models import Group
 from model_bakery import baker
@@ -24,9 +23,7 @@ from statistiek_hub.models.temporal_dimension import TemporalDimension
 def fill_ref_tabellen() -> dict:
     unit = baker.make(Unit, name="aantal")
     tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
-    temp = baker.make(
-        TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
-    )
+    temp = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
     spatial = baker.make(SpatialDimension)
     return {"unit": unit, "temp": temp, "spatial": spatial, "tempdimtype": tempdimtype}
 
@@ -73,9 +70,7 @@ def test_apply_sensitive_rules(test_value, test_unit, expected):
     ],
 )
 @pytest.mark.django_db
-def test_get_df_with_filterrule(
-    fill_ref_tabellen, filter, value_new, var_value, base_value, expected
-):
+def test_get_df_with_filterrule(fill_ref_tabellen, filter, value_new, var_value, base_value, expected):
     """apply sql db_function public.apply_filter on measure
     return: dataframe with value corrected by filterrule"""
     fixture = fill_ref_tabellen
@@ -93,9 +88,7 @@ def test_get_df_with_filterrule(
         theme=baker.make(Theme, group=baker.make(Group)),
     )
 
-    filter_var = baker.make(
-        Filter, measure=measure_var, rule=filter, value_new=value_new
-    )
+    filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=value_new)
 
     obs_base = baker.make(
         Observation,
@@ -225,12 +218,8 @@ def test_get_df_filterrule_with_difftempdate(
     return: dataframe with timestamp from VAR measure"""
     fixture = fill_ref_tabellen
 
-    temp1 = baker.make(
-        TemporalDimension, startdate=basis_start_date, type=fixture["tempdimtype"]
-    )
-    temp2 = baker.make(
-        TemporalDimension, startdate=var_start_date, type=fixture["tempdimtype"]
-    )
+    temp1 = baker.make(TemporalDimension, startdate=basis_start_date, type=fixture["tempdimtype"])
+    temp2 = baker.make(TemporalDimension, startdate=var_start_date, type=fixture["tempdimtype"])
 
     measure_base = baker.make(
         Measure,

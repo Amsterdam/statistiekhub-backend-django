@@ -12,8 +12,10 @@ def round_to_base(x, base=5):
 
 
 def round_to_decimal(x, decimal):
-    """banker's rounding: when a number is exactly halfway between two possible rounding amounts, it is rounded to the nearest even number.
-    Use of package decimal because python round() doesnt give secure rounding half to even due to uncertainty with floats
+    """
+    banker's rounding: when a number is exactly halfway between two possible rounding amounts,
+    it is rounded to the nearest even number. Use of package decimal because python round() doesn't
+    give secure rounding half to even due to uncertainty with floats
     """
 
     number = Decimal(str(x))
@@ -66,9 +68,7 @@ def get_qs_for_bevmin_wonmin(
     and temporaldimensiontype 'Peildatum' (default)
     """
     queryset = (
-        obsmodel.objects.select_related(
-            "measure", "spatialdimension", "temporaldimension"
-        )
+        obsmodel.objects.select_related("measure", "spatialdimension", "temporaldimension")
         .filter(
             measure__name__in=measures,
             spatialdimension__type__name__in=spatialdimensiontypes,

@@ -69,7 +69,6 @@ def csv_file_semicolon():
 
 
 class TestFormatters:
-
     def test_GEOJSON(self):
         gj = GEOJSON()
         ds = gj.create_dataset(testgeojson)

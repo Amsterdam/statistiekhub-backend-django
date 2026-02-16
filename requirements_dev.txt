@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe --output-file=requirements_dev.txt requirements_dev.in
 #
-asgiref==3.11.0
+asgiref==3.11.1
     # via django
 build==1.4.0
     # via pip-tools
@@ -16,31 +16,33 @@ django==6.0.2
     # via model-bakery
 iniconfig==2.3.0
     # via pytest
-model-bakery==1.23.2
+model-bakery==1.23.3
     # via -r requirements_dev.in
 packaging==26.0
     # via
     #   build
     #   pytest
     #   wheel
-pip-tools==7.5.2
+pip-tools==7.5.3
     # via -r requirements_dev.in
 pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
+pygments==2.19.2
+    # via pytest
 pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
-pytest==7.4.4
+pytest==9.0.2
     # via
     #   -r requirements_dev.in
     #   pytest-cov
     #   pytest-django
 pytest-cov==7.0.0
     # via -r requirements_dev.in
-pytest-django==4.11.1
+pytest-django==4.12.0
     # via -r requirements_dev.in
 sqlparse==0.5.5
     # via django
@@ -48,7 +50,7 @@ wheel==0.46.3
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==26.0
+pip==26.0.1
     # via pip-tools
-setuptools==80.10.2
+setuptools==82.0.0
     # via pip-tools

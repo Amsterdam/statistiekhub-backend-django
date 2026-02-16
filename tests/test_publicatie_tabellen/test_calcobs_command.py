@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 import pytest
-from django.conf import settings
 from django.core.management import call_command
 
 

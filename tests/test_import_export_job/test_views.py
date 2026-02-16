@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
@@ -8,11 +6,11 @@ from django.urls import reverse
 from model_bakery import baker
 
 from import_export_job.models.importjob import ImportJob
-from tests.temp_storage import temporary_media_root
+from tests.temp_storage import temporary_media_root  # noqa: F401
 
 
 @pytest.mark.django_db
-def test_blob_link(client, temporary_media_root):
+def test_blob_link(client, temporary_media_root):  # noqa: F811
     """test the get_blob url"""
     creator = baker.make(User)
     job = ImportJob(file="test.json", created_by=creator)

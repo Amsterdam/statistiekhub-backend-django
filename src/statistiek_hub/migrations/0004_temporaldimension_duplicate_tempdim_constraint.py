@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "statistiek_hub",
@@ -15,8 +14,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name="temporaldimension",
-            constraint=models.UniqueConstraint(
-                fields=("type", "startdate"), name="duplicate_tempdim_constraint"
-            ),
+            constraint=models.UniqueConstraint(fields=("type", "startdate"), name="duplicate_tempdim_constraint"),
         ),
     ]

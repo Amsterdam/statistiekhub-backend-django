@@ -64,12 +64,8 @@ def _get_qs_publishstatistic_measure() -> QuerySet:
         .filter(extra_attr__has_key=KLEURENPALET)  # only objects where the key exists
         .exclude(**{f"extra_attr__{KLEURENPALET}__in": EXCLUDE_KLEURENPALET_SD})
         .annotate(
-            sd_minimum_bevtotaal=Coalesce(
-                F(f"extra_attr__{SD_MIN_BEVTOTAAL}"), Value(None)
-            ),
-            sd_minimum_wvoorrbag=Coalesce(
-                F(f"extra_attr__{SD_MIN_WVOORRBAG}"), Value(None)
-            ),
+            sd_minimum_bevtotaal=Coalesce(F(f"extra_attr__{SD_MIN_BEVTOTAAL}"), Value(None)),
+            sd_minimum_wvoorrbag=Coalesce(F(f"extra_attr__{SD_MIN_WVOORRBAG}"), Value(None)),
             measure_id=F("id"),
         )
         .values("measure_id", "name", "sd_minimum_bevtotaal", "sd_minimum_wvoorrbag")
@@ -128,7 +124,8 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
     'source':= wijk-source if wijksource exists else ggwsource
     """
     _df = dataframe.dropna(subset=["value"]).copy()
-    # door het format per variabele kan de standaarddeviatie niet berekend worden -> daarom eerst value omzetten naar float
+    # door het format per variabele kan de standaarddeviatie niet berekend worden,
+    # daarom eerst value omzetten naar float
     _df["value"] = _df["value"].astype(float)
 
     # split df in wijk en gebied22 - standarddeviation
@@ -158,17 +155,11 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
     )
 
     # coalesce of std wijk and geb22
-    df_wijk_geb["standarddeviation"] = df_wijk_geb["sd_wijk"].combine_first(
-        df_wijk_geb["sd_geb"]
-    )
+    df_wijk_geb["standarddeviation"] = df_wijk_geb["sd_wijk"].combine_first(df_wijk_geb["sd_geb"])
     # noteren waar de sd vandaan komt als source
-    df_wijk_geb["source"] = df_wijk_geb["bron_wijk"].combine_first(
-        df_wijk_geb["bron_geb"]
-    )
+    df_wijk_geb["source"] = df_wijk_geb["bron_wijk"].combine_first(df_wijk_geb["bron_geb"])
 
-    return df_wijk_geb[
-        ["temporaldimensionyear", "measure_id", "standarddeviation", "source"]
-    ]
+    return df_wijk_geb[["temporaldimensionyear", "measure_id", "standarddeviation", "source"]]
 
 
 def publishstatistic() -> tuple:
@@ -190,13 +181,9 @@ def publishstatistic() -> tuple:
 
     for measure in qsmeasure:
         # select observations
-        qsobservation = _get_qs_publishstatistic_obs(
-            PublicationObservation, measure["name"]
-        )
+        qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
         df_obs = convert_queryset_into_dataframe(qsobservation)
-        df = df_obs.merge(
-            df_measure, how="left", left_on="measure_name", right_on="name"
-        )
+        df = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
         if len(df) == 0:
             measure_no_sd.append(measure["name"])
@@ -229,11 +216,7 @@ def publishstatistic() -> tuple:
         # gemiddelde en std afronden op 3 decimalen -> set on the model field
         copy_dataframe(dfstatistic, PublicationStatistic)
 
-    extra = (
-        f", WARNING Not included: no standarddeviation for {measure_no_sd}"
-        if len(measure_no_sd) > 0
-        else ""
-    )
+    extra = f", WARNING Not included: no standarddeviation for {measure_no_sd}" if len(measure_no_sd) > 0 else ""
 
     return (
         f"All records for publication-statistic are imported{extra}",

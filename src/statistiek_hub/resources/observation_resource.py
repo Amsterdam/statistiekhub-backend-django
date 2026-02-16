@@ -135,15 +135,11 @@ class ObservationResource(ModelResource):
         merged_df = merged_df.rename(columns={"id": "temporaldimension"})
 
         # merge id measure
-        merged_df = merged_df.merge(
-            dfmeasure, left_on=["measure"], right_on=["name"], how="left"
-        )
+        merged_df = merged_df.merge(dfmeasure, left_on=["measure"], right_on=["name"], how="left")
         merged_df = merged_df.rename(columns={"id": "measure", "measure": "name"})
 
         # clean df
-        df_main = merged_df[
-            ["measure", "spatialdimension", "temporaldimension", "value"]
-        ]
+        df_main = merged_df[["measure", "spatialdimension", "temporaldimension", "value"]]
         df_main.loc[:, "value"] = df_main["value"].apply(convert_str)
 
         # Converteer de DataFrame terug naar een Tablib dataset

@@ -54,9 +54,7 @@ class ObservationAdmin(CheckPermissionUserMixin, admin.ModelAdmin):
 
     resource_classes = [ObservationResource]
 
-    def get_paginator(
-        self, request, queryset, per_page, orphans=0, allow_empty_first_page=True
-    ):
+    def get_paginator(self, request, queryset, per_page, orphans=0, allow_empty_first_page=True):
         return self.paginator(
             queryset,
             per_page,
@@ -92,9 +90,7 @@ class ObservationAdmin(CheckPermissionUserMixin, admin.ModelAdmin):
         from statistiek_hub.models.measure import Measure
 
         # Gets run as a subquery
-        matching_measure_id_qs = Measure.objects.filter(
-            name__icontains=search_term
-        ).values_list("id", flat=True)
+        matching_measure_id_qs = Measure.objects.filter(name__icontains=search_term).values_list("id", flat=True)
 
         # Filter observations by these measure IDs
         queryset = queryset.filter(measure_id__in=matching_measure_id_qs)

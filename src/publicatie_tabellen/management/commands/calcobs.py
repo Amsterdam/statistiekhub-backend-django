@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = "Dump publication-tables to storagecontainer pgdump"
 
     def handle(self, *args, **options) -> None:
-        with tracer.start_as_current_span("calcobs") as span:
+        with tracer.start_as_current_span("calcobs") as span:  # noqa: F841
             self._handle(*args, **options)
 
     def _handle(self, *args, **options):

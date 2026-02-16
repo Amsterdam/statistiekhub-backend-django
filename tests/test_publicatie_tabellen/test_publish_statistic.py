@@ -40,13 +40,9 @@ def fill_ref_tabellen() -> dict:
     unit = baker.make(Unit, name="aantal")
 
     tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
-    temppeildatum = baker.make(
-        TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype
-    )
+    temppeildatum = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
     tempdimtypejaar = baker.make(TemporalDimensionType, name="Jaar")
-    tempjaar = baker.make(
-        TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtypejaar
-    )
+    tempjaar = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtypejaar)
 
     spatialdimtypewijk = baker.make(SpatialDimensionType, name="Wijk")
     spatialdimtypeggw = baker.make(SpatialDimensionType, name="GGW-gebied")
@@ -200,9 +196,7 @@ def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected
     ],
 )
 @pytest.mark.django_db
-def test_get_df_data_publishstatistic(
-    fill_ref_tabellen, extra_attr, tempdim, spatialdim, expected
-):
+def test_get_df_data_publishstatistic(fill_ref_tabellen, extra_attr, tempdim, spatialdim, expected):
     """check correct filter for select_get_qs_publishstatistic_obs query selection"""
     fixture = fill_ref_tabellen
 
@@ -228,13 +222,9 @@ def test_get_df_data_publishstatistic(
     df_measure = convert_queryset_into_dataframe(qsmeasure)
 
     for measure in qsmeasure:
-        qsobservation = _get_qs_publishstatistic_obs(
-            PublicationObservation, measure["name"]
-        )
+        qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
         df_obs = convert_queryset_into_dataframe(qsobservation)
-        df = df_obs.merge(
-            df_measure, how="left", left_on="measure_name", right_on="name"
-        )
+        df = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
         assert len(df) == expected
         if len(df) > 0:
@@ -281,24 +271,14 @@ def test_select_df_wijk_ggw(fill_bev_won_obs):
     qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
     measure_first = qsmeasure.first()
-    qsobservation = _get_qs_publishstatistic_obs(
-        PublicationObservation, measure_first["name"]
-    )
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure_first["name"])
     df_obs = convert_queryset_into_dataframe(qsobservation)
-    dfobs = df_obs.merge(
-        df_measure, how="left", left_on="measure_name", right_on="name"
-    )
+    dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
-    assert (
-        dfobs["spatialdimensiontype"].unique().tolist().sort()
-        == ["Wijk", "GGW-gebied", "Gemeente"].sort()
-    )
+    assert dfobs["spatialdimensiontype"].unique().tolist().sort() == ["Wijk", "GGW-gebied", "Gemeente"].sort()
 
     dfwijkggw = _select_df_wijk_ggw(dfobs)
-    assert (
-        dfwijkggw["spatialdimensiontype"].unique().tolist().sort()
-        == ["Wijk", "GGW-gebied"].sort()
-    )
+    assert dfwijkggw["spatialdimensiontype"].unique().tolist().sort() == ["Wijk", "GGW-gebied"].sort()
 
 
 @pytest.mark.django_db
@@ -318,9 +298,7 @@ def test_get_qs_for_bevmin_wonmin(fill_bev_won_obs):
         "Wijk",
         "GGW-gebied",
     }
-    assert set(qsmin.values_list("temporaldimension__type__name", flat=True)) == {
-        "Peildatum"
-    }
+    assert set(qsmin.values_list("temporaldimension__type__name", flat=True)) == {"Peildatum"}
 
 
 @pytest.mark.parametrize(
@@ -427,25 +405,16 @@ def test_set_small_regions_to_nan_if_minimum(
     qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
     measure = qsmeasure.get(name=measurevar.name)
-    qsobservation = _get_qs_publishstatistic_obs(
-        PublicationObservation, measure["name"]
-    )
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
     df_obs = convert_queryset_into_dataframe(qsobservation)
-    dfobs = df_obs.merge(
-        df_measure, how="left", left_on="measure_name", right_on="name"
-    )
+    dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
     dfwijkggw = _select_df_wijk_ggw(dfobs)
 
     df_result = set_small_regions_to_nan_if_minimum(dfmin, var_min, dfwijkggw)
-    assert (
-        np.testing.assert_equal(
-            df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected
-        )
-        is None
-    )
+    assert np.testing.assert_equal(df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected) is None
 
     measurevar.delete()
     obsvar.delete()
@@ -465,9 +434,7 @@ def test_set_small_regions_to_nan_if_minimum(
     ],
 )
 @pytest.mark.django_db
-def test_set_small_regions_to_nan_if_minimum_observations(
-    fill_ref_tabellen, bev_value, min_value, expected
-):
+def test_set_small_regions_to_nan_if_minimum_observations(fill_ref_tabellen, bev_value, min_value, expected):
     """set region value to np.nan if var_min is less than minimum_value"""
     f_ref_tabellen = fill_ref_tabellen
 
@@ -511,36 +478,19 @@ def test_set_small_regions_to_nan_if_minimum_observations(
     dfmin = convert_queryset_into_dataframe(qsmin)
 
     measure = qsmeasure.get(name=measurevar.name)
-    qsobservation = _get_qs_publishstatistic_obs(
-        PublicationObservation, measure["name"]
-    )
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
     df_obs = convert_queryset_into_dataframe(qsobservation)
-    dfobs = df_obs.merge(
-        df_measure, how="left", left_on="measure_name", right_on="name"
-    )
+    dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
-    df_result = set_small_regions_to_nan_if_minimum(
-        dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value
-    )
-    assert (
-        np.testing.assert_equal(
-            df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected
-        )
-        is None
-    )
+    df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
+    assert np.testing.assert_equal(df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected) is None
 
     measure = qsmeasure.get(name=measurebev.name)
-    qsobservation = _get_qs_publishstatistic_obs(
-        PublicationObservation, measure["name"]
-    )
+    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
     df_obs = convert_queryset_into_dataframe(qsobservation)
-    dfobs = df_obs.merge(
-        df_measure, how="left", left_on="measure_name", right_on="name"
-    )
+    dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
-    df_result = set_small_regions_to_nan_if_minimum(
-        dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value
-    )
+    df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
     # dfobs is based on publicationobservation (cleaned-obs) so no nan in df
     if bev_value is not np.nan:
         assert (

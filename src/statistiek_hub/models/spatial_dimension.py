@@ -7,9 +7,7 @@ from referentie_tabellen.models import SpatialDimensionType
 class SpatialDimension(models.Model):
     class Meta:
         indexes = [
-            models.Index(
-                "code", "type", "source_date", name="unique_spatialdimension_idx"
-            ),
+            models.Index("code", "type", "source_date", name="unique_spatialdimension_idx"),
         ]
         constraints = [
             models.UniqueConstraint(

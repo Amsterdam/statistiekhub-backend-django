@@ -209,7 +209,7 @@ create or replace function public.apply_filter
 
                         p_stmt_order :=	'order by 2, 4, 3'
                                         ;
-                                           
+
 
                         -------------------------------------------------------------------------
                         -- combine all separate sql-statements to construct full sql-statement --
@@ -232,4 +232,4 @@ create or replace function public.apply_filter
                 $$
                 language plpgsql
                 ;
-            """
+            """  # noqa: E101, E501

@@ -6,7 +6,6 @@ import statistiek_hub.validations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("statistiek_hub", "0011_alter_filter_rule_alter_measure_calculation"),
     ]

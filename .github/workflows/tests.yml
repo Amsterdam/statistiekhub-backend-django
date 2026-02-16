@@ -1,0 +1,26 @@
+name: Tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - ".github/**"
+    branches:
+      - main
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run tests
+        run: docker compose run --rm test
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v

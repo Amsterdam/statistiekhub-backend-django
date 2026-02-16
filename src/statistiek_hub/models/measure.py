@@ -28,7 +28,7 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     )
     sensitive = models.BooleanField(
         default=False,
-        help_text="gevoeligedata - afronden op veelvouden van 5 of 90% en gebieden met minder dan 50 inwoners worden leeg gemaakt",
+        help_text="gevoeligedata - afronden op veelvouden van 5 of 90% en gebieden met minder dan 50 inwoners worden leeg gemaakt",  # noqa: E501
     )
     unit = models.ForeignKey(Unit, models.RESTRICT)
     decimals = models.IntegerField(default=0)
@@ -36,14 +36,10 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
     theme = models.ForeignKey(Theme, models.RESTRICT)
     dimension = models.ForeignKey(Dimension, models.SET_NULL, blank=True, null=True)
-    extra_attr = models.JSONField(
-        blank=True, null=True, help_text="jsonfield voor productvelden"
-    )
+    extra_attr = models.JSONField(blank=True, null=True, help_text="jsonfield voor productvelden")
     deprecated = models.BooleanField(default=False, help_text="vervallen")
     deprecated_date = models.DateField(blank=True, null=True)
-    deprecated_reason = models.TextField(
-        blank=True, default="", help_text="toelichting"
-    )
+    deprecated_reason = models.TextField(blank=True, default="", help_text="toelichting")
     temporaltype = models.IntegerField(
         choices=TemporaltypeChoices.choices,
         default=TemporaltypeChoices.PEILDATUM,
@@ -67,13 +63,11 @@ class Measure(TimeStampMixin, AddErrorFuncion):
 
         if self.dimension:
             if self.dimension.code:
-                self.add_error(
-                    errors, {"name": check_code_in_name(self.dimension.code, self.name)}
-                )
+                self.add_error(errors, {"name": check_code_in_name(self.dimension.code, self.name)})
             else:
                 pass
 
-        if self.deprecated == True and not self.deprecated_date:
+        if self.deprecated and not self.deprecated_date:
             self.deprecated_date = datetime.datetime.now().date()
 
         if errors:

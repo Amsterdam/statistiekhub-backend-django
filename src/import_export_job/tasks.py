@@ -96,9 +96,7 @@ def _run_observation_import_job(import_job, dry_run=True):
     """
     Run the custom Observation import job
     """
-    _update_status(
-        "1/4", "Import started (Custom Observation import)", import_job, dry_run
-    )
+    _update_status("1/4", "Import started (Custom Observation import)", import_job, dry_run)
 
     # Clear the import errors
     import_job.errors = ""
@@ -112,9 +110,7 @@ def _run_observation_import_job(import_job, dry_run=True):
     except Exception as e:
         raise Exception("Error reading file" + str(e)) from e
 
-    _update_status(
-        "2/4", "Processing import data (Custom Observation import)", import_job, dry_run
-    )
+    _update_status("2/4", "Processing import data (Custom Observation import)", import_job, dry_run)
 
     from statistiek_hub.csv_import.observation import import_csv
 
@@ -194,9 +190,7 @@ def _run_observation_import_job(import_job, dry_run=True):
     if not dry_run and (import_job.errors == ""):
         import_job.imported = timezone.now()
 
-    _update_status(
-        "4/4", "Import job finished (Custom Observation import)", import_job, dry_run
-    )
+    _update_status("4/4", "Import job finished (Custom Observation import)", import_job, dry_run)
     import_job.save()
 
 
@@ -207,10 +201,10 @@ def run_import_job(pk: int, dry_run: bool = True):
 
     try:
         if import_job.model.lower() == "observation":
-            logger.info(f"Run the custom observation import")
+            logger.info("Run the custom observation import")
             _run_observation_import_job(import_job, dry_run)
         else:
-            logger.info(f"Run the import_export job")
+            logger.info("Run the import_export job")
             _run_import_job(import_job, dry_run)
     except Exception as e:
         logger.info(f"error op _run_import_job {pk}: {e}")

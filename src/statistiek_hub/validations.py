@@ -9,9 +9,7 @@ def _check_open_closing_brackets(string: str):
     close_brackets = re.findall(r"\)", string)
 
     if not len(open_brackets) == len(close_brackets):
-        raise ValidationError(
-            f"Invalid format. The string {string} should have equal open and closing brackets"
-        )
+        raise ValidationError(f"Invalid format. The string {string} should have equal open and closing brackets")
 
 
 def validate_filter_rule(string: str) -> ValidationError:
@@ -28,7 +26,7 @@ def validate_filter_rule(string: str) -> ValidationError:
 
     if not re.fullmatch(pattern, strip_and_or):
         raise ValidationError(
-            f"Invalid format. The string should be of the form like: ( $VAR1 [!=<>] getal ) AND | OR etc"
+            "Invalid format. The string should be of the form like: ( $VAR1 [!=<>] getal ) AND | OR etc"
         )
 
 
@@ -47,7 +45,7 @@ def validate_calculation_string(string: str) -> ValidationError:
 
     if not re.fullmatch(pattern, strip_brackets):
         raise ValidationError(
-            f"Invalid format. The string should be of the form like: ( $VAR1 [+-*/] $VAR2 ) [+-*/] 1000"
+            "Invalid format. The string should be of the form like: ( $VAR1 [+-*/] $VAR2 ) [+-*/] 1000"
         )
 
 
@@ -65,12 +63,12 @@ def check_value_context(unit_code: str, value: float) -> ValidationError:
 
     if unit_code == "P":
         if value > 1000:
-            return ValidationError(f"Percentage is more than 1000")
+            return ValidationError("Percentage is more than 1000")
     elif unit_code == "R":
         if value > 10:
-            return ValidationError(f"Rapportcijfer is more than 10")
+            return ValidationError("Rapportcijfer is more than 10")
         elif value < 0:
-            return ValidationError(f"Rapportcijfer is negative")
+            return ValidationError("Rapportcijfer is negative")
 
 
 # model validation

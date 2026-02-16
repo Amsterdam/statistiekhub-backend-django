@@ -74,7 +74,5 @@ class PublishFunction:
                     )
                 return new_item_list
 
-            ObservationCalculated.objects.bulk_create(
-                _transform_results(measure_calcobs)
-            )
+            ObservationCalculated.objects.bulk_create(_transform_results(measure_calcobs))
         logger.info("records for calculated observations are calculated")

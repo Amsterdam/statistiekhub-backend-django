@@ -17,9 +17,7 @@ from referentie_tabellen.models import Theme
 
 
 class TestPgDumpToStorage:
-    @patch(
-        "publicatie_tabellen.pgdump_to_storage.PgDumpToStorage._dump_model_to_csv_zip"
-    )
+    @patch("publicatie_tabellen.pgdump_to_storage.PgDumpToStorage._dump_model_to_csv_zip")
     def test_start_dump(self, mock_dump):
         PgDumpToStorage().start_dump(
             [

@@ -67,20 +67,14 @@ def _transform_measure(df: DataFrame):
     df["measure"] = df["measure"].str.upper()
     distinct_uppercase_values = df["measure"].unique()
 
-    measure_qs = Measure.objects.annotate(upper_name=Upper("name")).filter(
-        upper_name__in=distinct_uppercase_values
-    )
+    measure_qs = Measure.objects.annotate(upper_name=Upper("name")).filter(upper_name__in=distinct_uppercase_values)
 
     existing_values = measure_qs.values_list("upper_name", flat=True)
 
     if missing_values := list(set(distinct_uppercase_values) - set(existing_values)):
         raise MissingValues(f"Missing measures: {', '.join(list(missing_values))}")
 
-    measure_id_map = dict(
-        Measure.objects.annotate(upper_name=Upper("name")).values_list(
-            "upper_name", "id"
-        )
-    )
+    measure_id_map = dict(Measure.objects.annotate(upper_name=Upper("name")).values_list("upper_name", "id"))
     df["measure_id"] = df["measure"].map(measure_id_map)
 
     df.drop(columns=["measure"], inplace=True)
@@ -92,9 +86,7 @@ def _transform_spatialdim(df: DataFrame):
 
     Raises a MissingValues exception if non-existing spatial dimensions are in dataframe
     """
-    logger.info(
-        "Transform the spatial code/type/date into the correct SpatialDimension pk"
-    )
+    logger.info("Transform the spatial code/type/date into the correct SpatialDimension pk")
 
     df["spatial_code"] = df["spatial_code"].str.upper()
     df["spatial_type"] = df["spatial_type"].str.upper()
@@ -107,35 +99,25 @@ def _transform_spatialdim(df: DataFrame):
     )
 
     valid_combinations = {
-        (row["upper_code"], row["upper_type_name"], row["source_date"])
-        for row in spatialdimension_qs
+        (row["upper_code"], row["upper_type_name"], row["source_date"]) for row in spatialdimension_qs
     }
 
-    df_combinations = set(
-        zip(df["spatial_code"], df["spatial_type"], df["spatial_date"])
-    )
+    df_combinations = set(zip(df["spatial_code"], df["spatial_type"], df["spatial_date"]))
 
     missing_combinations = df_combinations - valid_combinations
 
     if missing_combinations:
         missing_list = [
-            f"(code='{code}', type='{type_}', date='{date}')"
-            for code, type_, date in sorted(missing_combinations)
+            f"(code='{code}', type='{type_}', date='{date}')" for code, type_, date in sorted(missing_combinations)
         ]
         raise MissingValues(
-            f"The following spatial dimension combinations do not exist in the database: "
-            f"{', '.join(missing_list)}"
+            f"The following spatial dimension combinations do not exist in the database: {', '.join(missing_list)}"
         )
 
-    lookup = {
-        (row["upper_code"], row["upper_type_name"], row["source_date"]): row["id"]
-        for row in spatialdimension_qs
-    }
+    lookup = {(row["upper_code"], row["upper_type_name"], row["source_date"]): row["id"] for row in spatialdimension_qs}
 
     df["spatialdimension_id"] = df.apply(
-        lambda row: lookup[
-            (row["spatial_code"], row["spatial_type"], row["spatial_date"])
-        ],
+        lambda row: lookup[(row["spatial_code"], row["spatial_type"], row["spatial_date"])],
         axis=1,
     )
 
@@ -148,9 +130,7 @@ def _transform_temporaldim(df: DataFrame):
 
     Raises a MissingValues exception if non-existing temporal dimensions are in dataframe
     """
-    logger.info(
-        "Transform the temporal type/date into the correct TemporalDimension pk"
-    )
+    logger.info("Transform the temporal type/date into the correct TemporalDimension pk")
 
     df["temporal_type"] = df["temporal_type"].str.upper()
     df["temporal_date"] = df["temporal_date"].astype(str).apply(convert_to_date)
@@ -161,32 +141,21 @@ def _transform_temporaldim(df: DataFrame):
         .values("id", "startdate", "upper_type_name")
     )
 
-    valid_combinations = {
-        (row["upper_type_name"], row["startdate"]) for row in temporaldimension_qs
-    }
+    valid_combinations = {(row["upper_type_name"], row["startdate"]) for row in temporaldimension_qs}
 
     df_combinations = set(zip(df["temporal_type"], df["temporal_date"]))
 
     missing_combinations = df_combinations - valid_combinations
 
     if missing_combinations:
-        missing_list = [
-            f"(type='{type_}', date='{date}')"
-            for type_, date in sorted(missing_combinations)
-        ]
+        missing_list = [f"(type='{type_}', date='{date}')" for type_, date in sorted(missing_combinations)]
         raise MissingValues(
-            f"The following temporal dimension combinations do not exist in the database: "
-            f"{', '.join(missing_list)}"
+            f"The following temporal dimension combinations do not exist in the database: {', '.join(missing_list)}"
         )
 
-    lookup = {
-        (row["upper_type_name"], row["startdate"]): row["id"]
-        for row in temporaldimension_qs
-    }
+    lookup = {(row["upper_type_name"], row["startdate"]): row["id"] for row in temporaldimension_qs}
 
-    df["temporaldimension_id"] = df.apply(
-        lambda row: lookup[(row["temporal_type"], row["temporal_date"])], axis=1
-    )
+    df["temporaldimension_id"] = df.apply(lambda row: lookup[(row["temporal_type"], row["temporal_date"])], axis=1)
 
     df.drop(columns=["temporal_type", "temporal_date"], inplace=True)
 
@@ -194,31 +163,22 @@ def _transform_temporaldim(df: DataFrame):
 def _check_measure_temporal_dimension_type_matches(df: DataFrame):
     logger.info("Check if the measure type matched the temporal dimension type")
 
-    missing_columns = [
-        col for col in ["measure_id", "temporaldimension_id"] if col not in df.columns
-    ]
+    missing_columns = [col for col in ["measure_id", "temporaldimension_id"] if col not in df.columns]
     if missing_columns:
-        raise MisMatchTypes(
-            "Unable to check the measure temporal type with the temporal dimension type"
-        )
+        raise MisMatchTypes("Unable to check the measure temporal type with the temporal dimension type")
 
     measure_ids = df["measure_id"].unique().tolist()
     temporaldimension_ids = df["temporaldimension_id"].unique().tolist()
 
-    measure_types = dict(
-        Measure.objects.filter(id__in=measure_ids).values_list("id", "temporaltype")
-    )
+    measure_types = dict(Measure.objects.filter(id__in=measure_ids).values_list("id", "temporaltype"))
     temporal_types = dict(
-        TemporalDimension.objects.filter(id__in=temporaldimension_ids).values_list(
-            "id", "type__type"
-        )
+        TemporalDimension.objects.filter(id__in=temporaldimension_ids).values_list("id", "type__type")
     )
 
     dict(TemporaltypeChoices.choices)
 
     df["types_match"] = df.apply(
-        lambda row: measure_types.get(row["measure_id"])
-        == temporal_types.get(row["temporaldimension_id"]),
+        lambda row: measure_types.get(row["measure_id"]) == temporal_types.get(row["temporaldimension_id"]),
         axis=1,
     )
 
@@ -226,13 +186,9 @@ def _check_measure_temporal_dimension_type_matches(df: DataFrame):
 
     if not mismatched_rows.empty:
         unique_mismatched_measure_ids = mismatched_rows["measure_id"].unique()
-        measure_names = Measure.objects.filter(
-            id__in=unique_mismatched_measure_ids
-        ).values_list("name", flat=True)
+        measure_names = Measure.objects.filter(id__in=unique_mismatched_measure_ids).values_list("name", flat=True)
 
-        raise MisMatchTypes(
-            f"TemporalDimensionType mismatch for observation measure: {", ".join(measure_names)}"
-        )
+        raise MisMatchTypes(f"TemporalDimensionType mismatch for observation measure: {', '.join(measure_names)}")
 
     df.drop(columns=["types_match"], inplace=True)
 
@@ -292,11 +248,7 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> Result:
     with transaction.atomic():
         with connection.cursor() as cursor:
             # Create the TMP table
-            cursor.execute(
-                create_table_as_query.format(
-                    table_name=table_name, tmp_table_name=tmp_table_name
-                )
-            )
+            cursor.execute(create_table_as_query.format(table_name=table_name, tmp_table_name=tmp_table_name))
 
             # Copy the CSV into the tmp table
             cursor.copy_expert(
@@ -306,25 +258,19 @@ def copy_and_sync(df: DataFrame, dry_run: bool = True) -> Result:
 
             # Run the update query
             result.updated = execute_query_and_return_dataframe(
-                update_query.format(
-                    table_name=table_name, tmp_table_name=tmp_table_name
-                ),
+                update_query.format(table_name=table_name, tmp_table_name=tmp_table_name),
                 cursor,
             )
 
             # Run the insert query
             result.inserted = execute_query_and_return_dataframe(
-                insert_query.format(
-                    table_name=table_name, tmp_table_name=tmp_table_name
-                ),
+                insert_query.format(table_name=table_name, tmp_table_name=tmp_table_name),
                 cursor,
             )
 
             # Run the delete query
             result.deleted = execute_query_and_return_dataframe(
-                delete_query.format(
-                    table_name=table_name, tmp_table_name=tmp_table_name
-                ),
+                delete_query.format(table_name=table_name, tmp_table_name=tmp_table_name),
                 cursor,
             )
 
@@ -358,7 +304,7 @@ def import_csv(filepath_or_buffer: str | IOBase, dry_run: bool = True) -> Result
     Import Observation CSV file
     """
     logger.info("Import Observation CSV started")
-    logger.info(f"Dry-run: {"enabled" if dry_run else "disabled"}")
+    logger.info(f"Dry-run: {'enabled' if dry_run else 'disabled'}")
     start_time = time.time()
 
     df = data_to_dataframe(filepath_or_buffer=filepath_or_buffer)
@@ -367,7 +313,8 @@ def import_csv(filepath_or_buffer: str | IOBase, dry_run: bool = True) -> Result
     result = copy_and_sync(df=df, dry_run=dry_run)
 
     logger.info(
-        f"Summary: Inserted {result.total_inserted}, updated {result.total_updated} and deleted {result.total_deleted} row(s)"
+        f"Summary: Inserted {result.total_inserted}, "
+        f"updated {result.total_updated} and deleted {result.total_deleted} row(s)"
     )
 
     duration = time.time() - start_time

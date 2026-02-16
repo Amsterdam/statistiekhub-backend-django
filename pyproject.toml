@@ -1,8 +1,8 @@
-[tool.isort]
-profile = "black"
-
-[tool.autoflake]
-ignore_init_module_imports = true
+[project]
+name = "statistiekhub-backend-django"
+readme = "README.md"
+requires-python = ">=3.13, <3.14"
+dynamic = ["version"]
 
 [tool.pytest.ini_options]
 addopts = "-s --cov --cov-config /app/pyproject.toml --disable-pytest-warnings "
@@ -31,3 +31,21 @@ fail_under = 79 # temporary lowered
 skip_covered = true
 show_missing = true
 sort = "Cover"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+ignore = ["W293", ]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (autoflake uses this)
+    "I",   # isort
+]
+ignore-init-module-imports = true
+
+[tool.ruff.lint.per-file-ignores]
+"src/main/settings.py" = ["E402"]
+"tests/**.py" = ["F841"]
+"src/*/migrations/**.py" = ["E501"]

@@ -6,11 +6,11 @@
 #
 amqp==5.3.1
     # via kombu
-amsterdam-django-oidc==0.2.3
+amsterdam-django-oidc==0.2.4
     # via -r requirements.in
-asgiref==3.11.0
+asgiref==3.11.1
     # via django
-azure-core==1.38.0
+azure-core==1.38.1
     # via
     #   -r requirements.in
     #   azure-identity
@@ -20,7 +20,7 @@ azure-core==1.38.0
     #   azure-storage-blob
     #   azure-storage-queue
     #   django-storages
-azure-identity==1.25.1
+azure-identity==1.25.2
     # via -r requirements.in
 azure-keyvault==4.2.0
     # via -r requirements.in
@@ -36,7 +36,7 @@ azure-storage-blob==12.27.1
     # via
     #   -r requirements.in
     #   django-storages
-azure-storage-queue==12.14.1
+azure-storage-queue==12.15.0
     # via -r requirements.in
 billiard==4.2.4
     # via celery
@@ -62,7 +62,7 @@ click-plugins==1.1.1.2
     # via celery
 click-repl==0.3.0
     # via celery
-cryptography==46.0.4
+cryptography==46.0.5
     # via
     #   azure-identity
     #   azure-keyvault-keys
@@ -99,7 +99,7 @@ et-xmlfile==2.0.0
     # via openpyxl
 googleapis-common-protos==1.72.0
     # via opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.76.0
+grpcio==1.78.0
     # via opentelemetry-exporter-otlp-proto-grpc
 idna==3.11
     # via requests
@@ -256,7 +256,7 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
-wcwidth==0.5.3
+wcwidth==0.6.0
     # via prompt-toolkit
 wrapt==1.17.3
     # via
