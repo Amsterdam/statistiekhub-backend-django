@@ -19,5 +19,4 @@ class Migration(migrations.Migration):
             function_calculate_observation,
             ("DROP FUNCTION public.calculate_observation;"),
         ),
-        migrations.RunSQL(function_apply_filter, ("DROP FUNCTION public.apply_filter;")),
     ]
