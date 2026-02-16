@@ -85,19 +85,15 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
     def get_queryset(self, request):
         search_term = request.GET.get("q")
         if search_term:
-            table_name = self.model._meta.db_table
-            raw_query = f"""
-                SELECT id
-                FROM {table_name}
-                WHERE measure LIKE %s
-            """
             escaped_search_term = search_term.replace("_", r"\_")
-            raw_queryset = self.model.objects.raw(
-                raw_query, [escaped_search_term.upper()]
+            return self.model.objects.filter(
+                measure__icontains=escaped_search_term.upper()
             )
-            ids = [obj.id for obj in raw_queryset]
-            return self.model.objects.filter(id__in=ids)
 
+        # include an object if being accessed so detailview works
+        if request.resolver_match.kwargs.get("object_id"):
+            object_id = request.resolver_match.kwargs["object_id"]
+            return self.model.objects.filter(pk=object_id)
         return self.model.objects.none()
 
     list_display = (
