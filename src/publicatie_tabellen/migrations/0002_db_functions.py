@@ -2,7 +2,6 @@
 
 from django.db import migrations
 
-from publicatie_tabellen.db_functions.function_apply_filter import function_apply_filter
 from publicatie_tabellen.db_functions.function_calculate_observations import (
     function_calculate_observation,
 )

@@ -92,12 +92,10 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
                 WHERE measure LIKE %s
             """
             escaped_search_term = search_term.replace("_", r"\_")
-            raw_queryset = self.model.objects.raw(
-                raw_query, [escaped_search_term.upper()]
-            )
+            raw_queryset = self.model.objects.raw(raw_query, [escaped_search_term.upper()])
             ids = [obj.id for obj in raw_queryset]
             return self.model.objects.filter(id__in=ids)
-            
+
         # include an object if being accessed so detailview works
         if request.resolver_match.kwargs.get("object_id"):
             object_id = request.resolver_match.kwargs["object_id"]
