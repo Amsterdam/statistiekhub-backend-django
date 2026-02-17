@@ -6,7 +6,8 @@ create or replace function public.apply_filter
                 (
                     p_measure_id			bigint,
                     p_filter_rule			varchar,
-                    p_replacement_value		float
+                    p_replacement_value		float,
+                    p_years                 int[] default null
                 )
                     returns setof statistiek_hub_observation -- returns query result
                     -- returns text -- returns query statement
@@ -27,22 +28,6 @@ create or replace function public.apply_filter
                     p_stmt				text;
                     p_stmt_select		text default '';
                     p_stmt_with			text default '';
-                    p_stmt_with_base    text default ' as	(
-                                                        select	o.spatialdimension_id
-                                                        , 		o.temporaldimension_id
-                                                        ,       t.year
-                                                        , 		o.value
-                                                        from	(
-																select measure_id, spatialdimension_id, temporaldimension_id, value from statistiek_hub_observation
-																union all
-																select measure_id, spatialdimension_id, temporaldimension_id, value from statistiek_hub_observationcalculated
-																) o
-                                                        join	statistiek_hub_measure m on o.measure_id = m.id
-                                                        join	statistiek_hub_spatialdimension s on o.spatialdimension_id = s.id
-                                                        join	statistiek_hub_temporaldimension t on o.temporaldimension_id = t.id
-                                                        where	1=1
-														and		m.name =
-                                                ';
                     p_stmt_join			text default '';
                     p_stmt_value		text default '';
                     p_stmt_order		text default '';
@@ -80,14 +65,47 @@ create or replace function public.apply_filter
                     if p_total > 0 then
 
                     
-                        --------------------------------------------------
-                        -- start 'with' statement with supplied measure --
-                        --------------------------------------------------
+                        ------------------------------------------------
+                        -- start 'with' statement with supplied years --
+                        ------------------------------------------------
 
-                        p_number := 0;
-                        p_stmt_with := 'with var' || p_number || p_stmt_with_base || '''' || p_measure || ''')';
+                        p_stmt_with :=
+                        '
+                        with base as (
+                            select  o.measure_id,
+                                    o.spatialdimension_id,
+                                    o.temporaldimension_id,
+                                    t.year,
+                                    o.value
+                            from (
+                                    select a.measure_id, a.spatialdimension_id, a.temporaldimension_id, a.value
+                                    from statistiek_hub_observation a
+                                    union all
+                                    select b.measure_id, b.spatialdimension_id, b.temporaldimension_id, b.value
+                                    from statistiek_hub_observationcalculated b
+                                    join statistiek_hub_temporaldimension c on b.temporaldimension_id = c.id
+                                    where ($1 is null OR c.year = any($1))
+                            ) o
+                            join statistiek_hub_measure m on o.measure_id = m.id
+                            join statistiek_hub_spatialdimension s on o.spatialdimension_id = s.id
+                            join statistiek_hub_temporaldimension t on o.temporaldimension_id = t.id
+                        )
+                        ';
 
-                        
+                        -----------------------------------------------------
+                        -- continue 'with' statement with supplied measure --
+                        -----------------------------------------------------
+
+                        p_stmt_with := p_stmt_with || ',
+                            var0 as (
+                                select b.*
+                                from base b
+                                join statistiek_hub_measure m on b.measure_id = m.id
+                                where m.name = $2
+                            )
+                            ';
+
+                                                                            
                         -------------------------------------------------------------------
                         -- loop through rule elements; only if rule contains any measure --
                         -------------------------------------------------------------------
@@ -103,10 +121,14 @@ create or replace function public.apply_filter
                                 -- construct 'with' sql-statements for each individual measure --
                                 -----------------------------------------------------------------
 
-                                p_stmt_with := p_stmt_with || ', ';
-                                p_stmt_with := p_stmt_with || 'var' || p_number || p_stmt_with_base;
-								p_stmt_with := p_stmt_with || '''' || right(i, length(i) - 1) || ''''; -- measure
-                                p_stmt_with := p_stmt_with || ') '; -- close with-statement
+                                p_stmt_with := p_stmt_with || ',
+                                var' || p_number || ' as (
+                                    select b.*
+                                    from base b
+                                    join statistiek_hub_measure m on b.measure_id = m.id
+                                    where m.name = ''' || right(i, length(i) - 1) || '''
+                                )
+                                ';
 
 
                                 -----------------------------------------------------------------
@@ -173,7 +195,7 @@ create or replace function public.apply_filter
                                             ,       now() as update_at
                                             ,       cast(row_number() over () as bigint) as local_id
                                             ,       ' || p_stmt_value || ' as value
-                                            ,		cast(' || p_measure_id || ' as bigint) as measure_id
+                                            ,		$3::bigint as measure_id
                                             ,		var0.spatialdimension_id
                                             ,		var0.temporaldimension_id
                                             from	var0
@@ -202,8 +224,8 @@ create or replace function public.apply_filter
                     -------------------------
 
                     if length(p_stmt) > 0 then
-                       return query execute p_stmt; -- returns query result
-                       -- return p_stmt; -- returns query statement
+                    return query execute p_stmt
+                        using p_years, p_measure, p_measure_id;
                     end if;
 
                 end;

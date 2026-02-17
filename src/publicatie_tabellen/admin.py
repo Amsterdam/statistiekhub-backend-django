@@ -96,6 +96,11 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
             ids = [obj.id for obj in raw_queryset]
             return self.model.objects.filter(id__in=ids)
 
+        # include an object if being accessed so detailview works
+        if request.resolver_match.kwargs.get("object_id"):
+            object_id = request.resolver_match.kwargs["object_id"]
+            return self.model.objects.filter(pk=object_id)
+
         return self.model.objects.none()
 
     list_display = (

@@ -14,7 +14,7 @@ from publicatie_tabellen.publish_observation import (
 from referentie_tabellen.models import TemporalDimensionType, Theme, Unit
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
-from statistiek_hub.models.observation import Observation
+from statistiek_hub.models.observation import Observation, ObservationCalculated
 from statistiek_hub.models.spatial_dimension import SpatialDimension
 from statistiek_hub.models.temporal_dimension import TemporalDimension
 
@@ -105,9 +105,76 @@ def test_get_df_with_filterrule(fill_ref_tabellen, filter, value_new, var_value,
         value=var_value,
     )
 
-    dftest = _get_df_with_filterrule(measure_var)
+    dftest = _get_df_with_filterrule(measure_var, calculated_years=None)
 
     assert dftest["value"].tolist() == expected
+
+    measure_base.delete()
+    measure_var.delete()
+    filter_var.delete()
+    obs_base.delete()
+    obs_var.delete()
+
+
+@pytest.mark.parametrize(
+    "filter, value_new, base_value, var_value, expected",
+    [
+        ("( $BASE < 10 )", 1, 11, 50, [50.0]),
+        ("( $BASE < 10 )", 1, 9, 50, [1.0]),
+        ("( $BASE < 10 )", None, 9, 50, [None]),
+        ("( $BASE < 5 )", 10, 3, 50, [10]),
+        ("( $GEENBASE < 8 )", 1, 3, 50, []),
+        ("( $BASE < 10 AND $BASE > 5 )", 1, 9, 50, [1.0]),
+        ("( $BASE < 10 AND $BASE > 5 )", 1, 3, 50, [50.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 3, 50, [1.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 6, 3, [1.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 6, 50, [50.0]),
+        ("( ( ( $BASE != 0 ) AND ( $BASE < 5 ) ) OR ( $VAR < 5 ) )", 1, 0, 50, [50.0]),
+    ],
+)
+@pytest.mark.django_db
+def test_get_df_with_filterrule_on_calcobs(fill_ref_tabellen, filter, value_new, var_value, base_value, expected):
+    """apply sql db_function public.apply_filter on measure
+    return: dataframe with value corrected by filterrule"""
+    fixture = fill_ref_tabellen
+
+    measure_base = baker.make(
+        Measure,
+        name="BASE",
+        unit=fixture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
+    measure_var = baker.make(
+        Measure,
+        name="VAR",
+        unit=fixture["unit"],
+        theme=baker.make(Theme, group=baker.make(Group)),
+    )
+
+    filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=value_new)
+
+    obs_base = baker.make(
+        Observation,
+        measure=measure_base,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=base_value,
+    )
+
+    obs_var = baker.make(
+        ObservationCalculated,
+        measure=measure_var,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=var_value,
+    )
+
+    dftest = _get_df_with_filterrule(measure_var, calculated_years=[2024])
+    assert dftest["value"].tolist() == expected
+
+    # als calculated_years = [] dan geen observations vanuit ObservationCalculated
+    dftest = _get_df_with_filterrule(measure_var, calculated_years=[])
+    assert dftest["value"].tolist() == []
 
     measure_base.delete()
     measure_var.delete()
@@ -180,7 +247,7 @@ def test_get_df_filterrule_with_difftempdate(
         value=100,
     )
 
-    dftest = _get_df_with_filterrule(measure_var)
+    dftest = _get_df_with_filterrule(measure_var, calculated_years=None)
 
     assert dftest["value"].tolist() == [None]
     temp_id = dftest["temporaldimension_id"].item()

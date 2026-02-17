@@ -54,10 +54,11 @@ dev: migrate
 	$(run) --service-ports dev
 
 load_fixtures:  migrate                  ## Load initial data into database by django fixtures
-	$(manage) loaddata import_theme.json \
+	$(manage) loaddata auth.group.json \
+	import_theme.json \
 	import_unit.json \
 	import_temporaldimensiontype.json \
-	import_spatialdimensiontype.json
+	import_spatialdimensiontype.json 
 
 test: 								## Execute tests
 	$(run) test pytest -m 'not integration' $(ARGS)

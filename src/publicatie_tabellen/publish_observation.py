@@ -77,15 +77,20 @@ def _apply_sensitive_rules(value, unit):
     return value
 
 
-def _get_df_with_filterrule(measure: Measure) -> pd.DataFrame:
+def _get_df_with_filterrule(measure: Measure, calculated_years: list) -> pd.DataFrame:
     """apply sql db_function public.apply_filter on measure
     return: dataframe with value corrected by filterrule"""
 
-    value_new = "Null" if pd.isna(measure.filter.value_new) else measure.filter.value_new
-    raw_query = f"select (public.apply_filter ({measure.id}, '{measure.filter.rule}', {value_new} )).*"
+    params = (
+        measure.id,
+        measure.filter.rule,
+        measure.filter.value_new,
+        calculated_years,
+    )
+    raw_query = "select (public.apply_filter (%s, %s, %s, %s::int[])).*"
 
     with connection.cursor() as cursor:
-        cursor.execute(raw_query)
+        cursor.execute(raw_query, params)
         measure_obs = cursor.fetchall()
 
     def _transform_results_to_df(results: list) -> pd.DataFrame:
@@ -134,15 +139,33 @@ def publishobservation() -> tuple:
     dfmin = convert_queryset_into_dataframe(qsmin)
 
     truncate(PublicationObservation)
-    qsmeasure = Measure.objects.all()
+    qsmeasure = Measure.objects.filter(deprecated=False)
     measure_no_data = []
 
     for measure in qsmeasure:
+        calculated = bool(measure.calculation)
+        calculated_years = None
+
         # select observations
         qsobservation = _get_qs_publishobservation(Observation, measure)
-        if len(qsobservation) == 0:
-            qsobservation = _get_qs_publishobservation(ObservationCalculated, measure)
         mdf = convert_queryset_into_dataframe(qsobservation)
+
+        if calculated:
+            # select complementary calculated years from calcobs (same basemodel as obs)
+            years_obs = qsobservation.values_list("temporaldimensionyear", flat=True).distinct()
+
+            qscalc_observation = _get_qs_publishobservation(ObservationCalculated, measure)
+            years_calcobs = qscalc_observation.values_list("temporaldimensionyear", flat=True).distinct()
+
+            if diff := list(set(years_calcobs) - set(years_obs)):  # als niet leeg
+                filtered_qs = qscalc_observation.filter(temporaldimensionyear__in=diff)
+
+                calculated_years = diff
+                # add to dataframe
+                mdf = pd.concat(
+                    [mdf, convert_queryset_into_dataframe(filtered_qs)],
+                    ignore_index=True,
+                )
 
         if len(mdf) == 0:
             measure_no_data.append(measure.name)
@@ -150,7 +173,7 @@ def publishobservation() -> tuple:
 
         logger.info(f"selected observations for {measure}: {len(mdf)}")
         if hasattr(measure, "filter"):
-            dfobs = _get_df_with_filterrule(measure)
+            dfobs = _get_df_with_filterrule(measure, calculated_years)
 
             # update mdf with new values from dfobs
             mdf = mdf.merge(

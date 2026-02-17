@@ -165,7 +165,7 @@ def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected
         theme=baker.make(Theme, group=baker.make(Group)),
     )
 
-    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    qsmeasure = _get_qs_publishstatistic_measure()
     measure_list = qsmeasure.values_list("name", flat=True)
 
     if measure_list[::1] == []:
@@ -218,7 +218,7 @@ def test_get_df_data_publishstatistic(fill_ref_tabellen, extra_attr, tempdim, sp
     # fill publishobservation model
     _, _ = publishobservation()
 
-    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
 
     for measure in qsmeasure:
@@ -268,7 +268,7 @@ def test_select_df_wijk_ggw(fill_bev_won_obs):
     # fill publishobservation model
     _, _ = publishobservation()
 
-    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
     measure_first = qsmeasure.first()
     qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure_first["name"])
@@ -402,7 +402,7 @@ def test_set_small_regions_to_nan_if_minimum(
     # fill publishobservation model
     _, _ = publishobservation()
 
-    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
     measure = qsmeasure.get(name=measurevar.name)
     qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
@@ -471,7 +471,7 @@ def test_set_small_regions_to_nan_if_minimum_observations(fill_ref_tabellen, bev
     # fill publishobservation model
     _, _ = publishobservation()
 
-    qsmeasure = _get_qs_publishstatistic_measure(Measure)
+    qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
