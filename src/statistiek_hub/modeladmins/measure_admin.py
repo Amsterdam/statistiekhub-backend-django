@@ -1,10 +1,27 @@
+from django import forms
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from import_export.tmp_storages import MediaStorage
 
 from statistiek_hub.models.filter import Filter
+from statistiek_hub.models.measure import Measure
 from statistiek_hub.resources.measure_resource import MeasureResource
 
 from .admin_mixins import CheckPermissionUserMixin, ImportExportFormatsMixin
+
+
+class MeasureForm(forms.ModelForm):
+    class Meta:
+        model = Measure
+        fields = "__all__"
+
+    def clean_team(self):
+        team = self.cleaned_data.get("team")
+        if team and self.request:
+            user_groups = self.request.user.groups.all()
+            if team not in user_groups:
+                raise ValidationError("You can only assign measures to groups of which you are a member.")
+        return team
 
 
 class CalculationFilter(admin.SimpleListFilter):
@@ -33,15 +50,29 @@ class FilterInline(admin.TabularInline):
 
 class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
     tmp_storage_class = MediaStorage
+    resource_classes = [MeasureResource]
+    form = MeasureForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        # Pass the request object to form for validation
+        form = super().get_form(request, obj, **kwargs)
+        form.request = request
+        return form
+
+    search_help_text = "search on measure name"
+    search_fields = ["name", "id"]
+
     list_display = (
         "id",
         "name",
         "label",
+        "team",
         "theme",
         "sensitive",
         "deprecated",
     )
     list_filter = (
+        "team",
         "theme",
         "temporaltype",
         CalculationFilter,
@@ -52,16 +83,15 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
         "updated_at",
         "source",
     )
-    resource_classes = [MeasureResource]
-
-    search_help_text = "search on measure name"
-    search_fields = ["name", "id"]
 
     fieldsets = (
         (
             None,
             {
-                "fields": ("theme",),
+                "fields": (
+                    "team",
+                    "theme",
+                ),
             },
         ),
         (

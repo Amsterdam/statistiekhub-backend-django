@@ -30,14 +30,14 @@ class CheckPermissionUserMixin:
 
     def has_change_permission(self, request, obj=None):
         if obj is not None:
-            theme_group = obj.measure.theme.group if hasattr(obj, "measure") else obj.theme.group
-            return theme_group in self._get_user_groups(request)
+            team = obj.measure.team if hasattr(obj, "measure") else obj.team
+            return team in self._get_user_groups(request)
         return super().has_change_permission(request)
 
     def has_delete_permission(self, request, obj=None):
         if obj is not None:
-            theme_group = obj.measure.theme.group if hasattr(obj, "measure") else obj.theme.group
-            return theme_group in self._get_user_groups(request)
+            team = obj.measure.team if hasattr(obj, "measure") else obj.team
+            return team in self._get_user_groups(request)
         return super().has_delete_permission(request)
 
 
