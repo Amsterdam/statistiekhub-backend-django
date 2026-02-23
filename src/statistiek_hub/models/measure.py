@@ -1,7 +1,11 @@
 import datetime
+import operator
+from functools import reduce
 
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 
 from referentie_tabellen.models import Theme, Unit
 from referentie_tabellen.referentie_choices import TemporaltypeChoices
@@ -13,6 +17,20 @@ from .model_mixin import AddErrorFuncion, TimeStampMixin
 
 class Measure(TimeStampMixin, AddErrorFuncion):
     id = models.BigAutoField(primary_key=True)
+
+    excluded_group_prefixes = [
+        "modifier_",
+        "maintainer",
+    ]
+    team = models.ForeignKey(
+        Group,
+        on_delete=models.SET_NULL,
+        limit_choices_to=~reduce(
+            operator.or_,
+            [Q(name__startswith=prefix) for prefix in excluded_group_prefixes],
+        ),
+        null=True,
+    )
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)
     label_uk = models.CharField(max_length=75, blank=True, default="")
