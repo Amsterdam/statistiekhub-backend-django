@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from import_export.fields import Field
 from import_export.instance_loaders import CachedInstanceLoader
 from import_export.resources import ModelResource
@@ -8,6 +9,15 @@ from statistiek_hub.models.dimension import Dimension
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.utils.datetime import convert_to_date
 from statistiek_hub.validations import get_instance
+
+
+class GroupForeignKeyWidget(ForeignKeyWidget):
+    def clean(self, value, row, **kwargs):
+        team, error = get_instance(model=Group, field="name", row=row, column="team")
+        if error:
+            raise ValueError(error)
+
+        return team
 
 
 class UnitForeignKeyWidget(ForeignKeyWidget):
@@ -53,6 +63,12 @@ class MeasureResource(ModelResource):
         column_name="unit",
         attribute="unit",
         widget=UnitForeignKeyWidget(Unit, field="name"),
+    )
+
+    team = Field(
+        column_name="team",
+        attribute="team",
+        widget=GroupForeignKeyWidget(Group, field="name"),
     )
 
     theme = Field(

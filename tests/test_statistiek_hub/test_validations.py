@@ -3,7 +3,6 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from model_bakery import baker
 
-from referentie_tabellen.models import Theme
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.validations import (
     check_code_in_name,
@@ -23,7 +22,7 @@ class TestValidations:
     @pytest.mark.django_db
     def test_get_instance_exists(self):
         var = "BEVTOT"
-        testmeasure = baker.make(Measure, name=var, theme=baker.make(Theme, group=baker.make(Group)))
+        testmeasure = baker.make(Measure, name=var, team=baker.make(Group))
         result = get_instance(Measure, field="name", row={"measure": var}, column="measure")
         assert result[0].name == testmeasure.name
 
