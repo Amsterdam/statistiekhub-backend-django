@@ -67,6 +67,7 @@ class Measure(TimeStampMixin, AddErrorFuncion):
         return f"{self.name}"
 
     def clean(self):
+        super().clean()
         errors = {}
 
         self.name = self.name.upper()
@@ -87,6 +88,11 @@ class Measure(TimeStampMixin, AddErrorFuncion):
 
         if self.deprecated and not self.deprecated_date:
             self.deprecated_date = datetime.datetime.now().date()
+
+        if self.team_id:
+            if any(self.team.name.startswith(prefix) for prefix in self.excluded_group_prefixes):
+                prefix_list = '", "'.join(self.excluded_group_prefixes)
+                self.add_error(errors, {"group": f'Group name cannot start with: "{prefix_list}"'})
 
         if errors:
             raise ValidationError(errors)
