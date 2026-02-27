@@ -24,7 +24,7 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     ]
     team = models.ForeignKey(
         Group,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         limit_choices_to=~reduce(
             operator.or_,
             [Q(name__startswith=prefix) for prefix in excluded_group_prefixes],
