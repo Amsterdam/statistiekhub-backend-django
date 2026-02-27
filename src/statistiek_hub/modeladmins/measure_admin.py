@@ -17,7 +17,7 @@ class MeasureForm(forms.ModelForm):
 
     def clean_team(self):
         team = self.cleaned_data.get("team")
-        if team and self.request:
+        if team and not self.request.user.is_superuser:
             user_groups = self.request.user.groups.all()
             if team not in user_groups:
                 raise ValidationError("You can only assign measures to groups of which you are a member.")
