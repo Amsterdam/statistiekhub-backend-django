@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from model_bakery import baker
 
-from referentie_tabellen.models import TemporalDimensionType, Theme, Unit
+from referentie_tabellen.models import TemporalDimensionType, Unit
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation
 from statistiek_hub.models.spatial_dimension import SpatialDimension
@@ -38,7 +38,7 @@ class TestModelSave:
     @pytest.mark.django_db
     def test_save_measure_name_upper(self):
         """name should be saved upper"""
-        name_upper = baker.make(Measure, name="test2", theme=baker.make(Theme, group=baker.make(Group)))
+        name_upper = baker.make(Measure, name="test2", team=baker.make(Group))
         assert Measure.objects.first().name == "TEST2"
 
         name_upper.delete()
@@ -53,7 +53,7 @@ class TestModelSave:
             Measure,
             name="VAR",
             unit=unit_var,
-            theme=baker.make(Theme, group=baker.make(Group)),
+            team=baker.make(Group),
         )
 
         tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")

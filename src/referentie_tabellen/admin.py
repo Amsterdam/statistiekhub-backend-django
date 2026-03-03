@@ -44,8 +44,8 @@ class UnitAdmin(admin.ModelAdmin):
 
 @admin.register(Theme)
 class ThemeAdmin(admin.ModelAdmin):
-    list_display = ("name", "id", "parent", "group")
-    ordering = ("group__name", "name")
+    list_display = ("name", "id", "parent")
+    ordering = ("name",)
 
 
 @admin.register(SpatialDimensionType)

@@ -26,7 +26,6 @@ from publicatie_tabellen.utils import (
 from referentie_tabellen.models import (
     SpatialDimensionType,
     TemporalDimensionType,
-    Theme,
     Unit,
 )
 from statistiek_hub.models.measure import Measure
@@ -68,11 +67,7 @@ def fill_bev_won_obs(fill_ref_tabellen):
     fixture = fill_ref_tabellen
 
     measurebev = baker.make(
-        Measure,
-        name="BEVTOTAAL",
-        unit=fixture["unit"],
-        extra_attr={KLEURENPALET: 3},
-        theme=baker.make(Theme, group=baker.make(Group)),
+        Measure, name="BEVTOTAAL", unit=fixture["unit"], extra_attr={KLEURENPALET: 3}, team=baker.make(Group)
     )
     obsbev = baker.make(
         Observation,
@@ -107,7 +102,7 @@ def fill_bev_won_obs(fill_ref_tabellen):
         name="WVOORRBAG",
         unit=fixture["unit"],
         extra_attr={KLEURENPALET: 3},
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     obswon = baker.make(
         Observation,
@@ -162,7 +157,7 @@ def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected
         name="TEST",
         unit=fixture["unit"],
         extra_attr=extra_attr,
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
 
     qsmeasure = _get_qs_publishstatistic_measure()
@@ -205,7 +200,7 @@ def test_get_df_data_publishstatistic(fill_ref_tabellen, extra_attr, tempdim, sp
         name="TEST",
         unit=fixture["unit"],
         extra_attr=extra_attr,
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     obs = baker.make(
         Observation,
@@ -389,7 +384,7 @@ def test_set_small_regions_to_nan_if_minimum(
         name="VAR",
         unit=f_ref_tabellen["unit"],
         extra_attr=extra_attr,
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     obsvar = baker.make(
         Observation,
@@ -443,7 +438,7 @@ def test_set_small_regions_to_nan_if_minimum_observations(fill_ref_tabellen, bev
         name="BEVTOTAAL",
         unit=f_ref_tabellen["unit"],
         extra_attr={KLEURENPALET: 3},
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     obsbev = baker.make(
         Observation,
@@ -458,7 +453,7 @@ def test_set_small_regions_to_nan_if_minimum_observations(fill_ref_tabellen, bev
         name="VAR",
         unit=f_ref_tabellen["unit"],
         extra_attr={KLEURENPALET: 3},
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     obsvar = baker.make(
         Observation,

@@ -3,11 +3,11 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from model_bakery import baker
 
-from referentie_tabellen.models import Theme
+from statistiek_hub.models.measure import Measure
 
 
 @pytest.mark.django_db
-class TestThemeGroupRequired:
+class TestMeasureGroupRequired:
     @pytest.fixture
     def groups(self):
         return [
@@ -29,12 +29,12 @@ class TestThemeGroupRequired:
     )
     def test_group_valid_group(self, group_name, groups):
         group = Group.objects.get(name=group_name)
-        theme = baker.make(Theme, group=group)
+        measure = baker.make(Measure, team=group)
 
-        theme.full_clean()
-        theme.save()
+        measure.full_clean()
+        measure.save()
 
-        assert theme.group.id == group.id
+        assert measure.team.id == group.id
 
     @pytest.mark.parametrize(
         "group_name",
@@ -48,16 +48,16 @@ class TestThemeGroupRequired:
         group = Group.objects.get(name=group_name)
 
         with pytest.raises(ValidationError) as exc_info:
-            baker.make(Theme, group=group)
+            baker.make(Measure, team=group)
 
         assert "group" in exc_info.value.message_dict
 
     def test_group_cannot_none(self):
         with pytest.raises(ValidationError) as exc_info:
-            baker.make(Theme, group=None)
+            baker.make(Measure, team=None)
 
-        assert "group" in exc_info.value.message_dict
-        assert exc_info.value.message_dict["group"][0] == "This field cannot be null."
+        assert "team" in exc_info.value.message_dict
+        assert exc_info.value.message_dict["team"][0] == "This field cannot be blank."
 
     @pytest.mark.parametrize(
         "valid_name,invalid_name",
@@ -71,13 +71,13 @@ class TestThemeGroupRequired:
         valid_group = Group.objects.get(name=valid_name)
         invalid_group = Group.objects.get(name=invalid_name)
 
-        theme = baker.make(Theme, group=valid_group)
+        measure = baker.make(Measure, team=valid_group)
 
-        theme.full_clean()
-        theme.save()
+        measure.full_clean()
+        measure.save()
 
-        theme.group = invalid_group
+        measure.team = invalid_group
         with pytest.raises(ValidationError) as exc_info:
-            theme.full_clean()
+            measure.full_clean()
 
-        assert "group" in exc_info.value.message_dict
+        assert "team" in exc_info.value.message_dict

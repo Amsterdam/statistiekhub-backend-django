@@ -6,7 +6,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 from django.conf import settings
-from django.contrib.auth.models import Group
 from django.core.files.storage import storages
 from django.core.management import call_command
 from model_bakery import baker
@@ -34,7 +33,7 @@ class TestPgDumpToStorage:
     def test_dump_model_csv_zip(self):
         os.makedirs(PgDumpToStorage.TMP_DIRECTORY, exist_ok=True)
 
-        baker.make(Theme, group=baker.make(Group))
+        baker.make(Theme)
         filepath = PgDumpToStorage()._dump_model_to_csv_zip(Theme)
         count = Theme.objects.all().count()
 
@@ -67,7 +66,7 @@ class TestPgdumpCommand:
         current_time = datetime.datetime.now()
 
         # change something in the db to be sure for the database trigger on statistiek_hub models
-        baker.make(Theme, name="TEST", group=baker.make(Group))
+        baker.make(Theme, name="TEST")
 
         call_command("pgdump")
 

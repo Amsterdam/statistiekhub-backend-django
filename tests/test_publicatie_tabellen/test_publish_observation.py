@@ -11,7 +11,7 @@ from publicatie_tabellen.publish_observation import (
     _get_df_with_filterrule,
     publishobservation,
 )
-from referentie_tabellen.models import TemporalDimensionType, Theme, Unit
+from referentie_tabellen.models import TemporalDimensionType, Unit
 from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.models.observation import Observation, ObservationCalculated
@@ -79,13 +79,13 @@ def test_get_df_with_filterrule(fill_ref_tabellen, filter, value_new, var_value,
         Measure,
         name="BASE",
         unit=fixture["unit"],
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     measure_var = baker.make(
         Measure,
         name="VAR",
         unit=fixture["unit"],
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
 
     filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=value_new)
@@ -142,13 +142,13 @@ def test_get_df_with_filterrule_on_calcobs(fill_ref_tabellen, filter, value_new,
         Measure,
         name="BASE",
         unit=fixture["unit"],
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     measure_var = baker.make(
         Measure,
         name="VAR",
         unit=fixture["unit"],
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
 
     filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=value_new)
@@ -221,13 +221,13 @@ def test_get_df_filterrule_with_difftempdate(
         Measure,
         name="BASE",
         unit=fixture["unit"],
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
     measure_var = baker.make(
         Measure,
         name="VAR",
         unit=fixture["unit"],
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
 
     filter_var = baker.make(Filter, measure=measure_var, rule=filter, value_new=None)
@@ -290,7 +290,7 @@ def test_set_decimals(fill_ref_tabellen, decimals, base_value, expected):
         name="BASE",
         unit=unit,
         decimals=decimals,
-        theme=baker.make(Theme, group=baker.make(Group)),
+        team=baker.make(Group),
     )
 
     obs = baker.make(
