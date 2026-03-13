@@ -61,19 +61,21 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
 
     search_help_text = "search on measure name"
     search_fields = ["name", "id"]
+    autocomplete_fields = [
+        "themes",
+    ]
 
     list_display = (
         "id",
         "name",
         "label",
         "team",
-        "theme",
         "sensitive",
         "deprecated",
     )
     list_filter = (
         "team",
-        "theme",
+        "themes",
         "temporaltype",
         CalculationFilter,
         "sensitive",
@@ -90,7 +92,7 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
             {
                 "fields": (
                     "team",
-                    "theme",
+                    "themes",
                 ),
             },
         ),
