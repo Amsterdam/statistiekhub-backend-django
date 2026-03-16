@@ -4,16 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('referentie_tabellen', '0006_remove_theme_group'),
-        ('statistiek_hub', '0018_alter_measure_team'),
+        ("referentie_tabellen", "0006_remove_theme_group"),
+        ("statistiek_hub", "0018_alter_measure_team"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='measure',
-            name='themes',
-            field=models.ManyToManyField(related_name='measures_themes', to='referentie_tabellen.theme'),
+            model_name="measure",
+            name="themes",
+            field=models.ManyToManyField(related_name="measures_themes", to="referentie_tabellen.theme"),
         ),
     ]

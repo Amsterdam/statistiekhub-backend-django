@@ -52,7 +52,7 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     decimals = models.IntegerField(default=0)
     source = models.CharField(max_length=100)
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
-    themes = models.ManyToManyField(Theme, related_name="measures_themes")    
+    themes = models.ManyToManyField(Theme, related_name="measures_themes")
     dimension = models.ForeignKey(Dimension, models.SET_NULL, blank=True, null=True)
     extra_attr = models.JSONField(blank=True, null=True, help_text="jsonfield voor productvelden")
     deprecated = models.BooleanField(default=False, help_text="vervallen")

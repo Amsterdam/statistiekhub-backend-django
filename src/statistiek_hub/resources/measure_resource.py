@@ -12,6 +12,7 @@ from statistiek_hub.validations import get_instance
 
 MANYTOMANY_SEPARATOR = "|"
 
+
 class GroupForeignKeyWidget(ForeignKeyWidget):
     def clean(self, value, row, **kwargs):
         team, error = get_instance(model=Group, field="name", row=row, column="team")
@@ -29,12 +30,12 @@ class UnitForeignKeyWidget(ForeignKeyWidget):
 
         return unit
 
-   
+
 class ThemeManyToManyWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if value is None or str(value).strip() == "":
             raise ValueError("Kolom 'theme' is verplicht en mag niet leeg zijn.")
-        
+
         values = [v.strip() for v in value.split(MANYTOMANY_SEPARATOR) if v.strip()]
         qs = self.model.objects.filter(**{f"{self.field}__in": values})
         found_values = set(qs.values_list(self.field, flat=True))

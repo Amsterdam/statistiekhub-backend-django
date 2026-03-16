@@ -24,9 +24,9 @@ class MeasureForm(forms.ModelForm):
         return team
 
     def clean_themes_items(self):
-        themes = self.cleaned_data.get('themes')
+        themes = self.cleaned_data.get("themes")
         if not themes:
-            raise ValidationError('Selecteer minimaal één thema.')
+            raise ValidationError("Selecteer minimaal één thema.")
         return themes
 
 

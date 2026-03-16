@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('statistiek_hub', '0020_auto_20260310_1544'),
+        ("statistiek_hub", "0020_auto_20260310_1544"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='measure',
-            name='theme',
+            model_name="measure",
+            name="theme",
         ),
     ]

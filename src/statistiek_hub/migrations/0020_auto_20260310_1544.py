@@ -2,16 +2,17 @@
 
 from django.db import migrations
 
+
 def migrate_foreignkey_to_manytomany(apps, schema_editor):
-    Measure = apps.get_model('statistiek_hub', 'Measure')
+    Measure = apps.get_model("statistiek_hub", "Measure")
     for measure in Measure.objects.all():
         if measure.theme:  # Check if the ForeignKey field has a value
             measure.themes.add(measure.theme)  # Add the ForeignKey value to the ManyToManyField
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('statistiek_hub', '0019_measure_themes'),
+        ("statistiek_hub", "0019_measure_themes"),
     ]
 
     operations = [
