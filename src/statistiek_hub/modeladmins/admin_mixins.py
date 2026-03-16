@@ -52,7 +52,7 @@ class DynamicListFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         # Get the current queryset
         queryset = model_admin.get_queryset(request)
-        values = set(queryset.values_list(self.filter_field, flat=True).distinct())
+        values = set(queryset.values_list(self.filter_field, flat=True).order_by(self.filter_field).distinct())
 
         # Return a list of tuples (value, display_name)
         return [(str(value), str(value)) for value in values]
