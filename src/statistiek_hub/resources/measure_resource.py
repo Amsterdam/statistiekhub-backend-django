@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 from import_export.fields import Field
 from import_export.instance_loaders import CachedInstanceLoader
 from import_export.resources import ModelResource
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 
 from referentie_tabellen.models import Theme, Unit
 from statistiek_hub.models.dimension import Dimension
@@ -10,6 +10,7 @@ from statistiek_hub.models.measure import Measure
 from statistiek_hub.utils.datetime import convert_to_date
 from statistiek_hub.validations import get_instance
 
+MANYTOMANY_SEPARATOR = "|"
 
 class GroupForeignKeyWidget(ForeignKeyWidget):
     def clean(self, value, row, **kwargs):
@@ -28,14 +29,21 @@ class UnitForeignKeyWidget(ForeignKeyWidget):
 
         return unit
 
+   
+class ThemeManyToManyWidget(ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if value is None or str(value).strip() == "":
+            raise ValueError("Kolom 'theme' is verplicht en mag niet leeg zijn.")
+        
+        values = [v.strip() for v in value.split(MANYTOMANY_SEPARATOR) if v.strip()]
+        qs = self.model.objects.filter(**{f"{self.field}__in": values})
+        found_values = set(qs.values_list(self.field, flat=True))
+        missing_values = [v for v in values if v not in found_values]
+        if missing_values:
+            missing = ", ".join(missing_values)
+            raise ValueError(f"De volgende thema's bestaan niet: {missing}.")
 
-class ThemeForeignKeyWidget(ForeignKeyWidget):
-    def clean(self, value, row, **kwargs):
-        theme, error = get_instance(model=Theme, field="name", row=row, column="theme")
-        if error:
-            raise ValueError(error)
-
-        return theme
+        return qs
 
 
 class DimensionForeignKeyWidget(ForeignKeyWidget):
@@ -71,10 +79,10 @@ class MeasureResource(ModelResource):
         widget=GroupForeignKeyWidget(Group, field="name"),
     )
 
-    theme = Field(
+    themes = Field(
         column_name="theme",
-        attribute="theme",
-        widget=ThemeForeignKeyWidget(Theme, field="name"),
+        attribute="themes",
+        widget=ThemeManyToManyWidget(Theme, field="name"),
     )
 
     dimension = Field(
@@ -90,12 +98,27 @@ class MeasureResource(ModelResource):
     )
 
     def before_import(self, dataset, **kwargs):
-        # omzetten naar datum veld
-        dataset.append_col(
-            tuple([convert_to_date(x) for x in dataset["deprecated_date"]]),
-            header="deprecated_date",
-        )
+        # keep track of headers so we only touch columns included in the file
+        self._imported_headers = set(dataset.headers or [])
+
+        if "name" not in self._imported_headers:
+            raise ValueError("Importbestand mist de kolom 'name' om bestaande metingen te vinden.")
+
+        if "deprecated_date" in self._imported_headers:
+            # omzetten naar datum veld
+            dataset.append_col(
+                tuple(convert_to_date(x) for x in dataset["deprecated_date"]),
+                header="deprecated_date",
+            )
+
         return super().before_import(dataset, **kwargs)
+
+    def import_field(self, field, instance, row, is_m2m=False, **kwargs):
+        column_name = getattr(field, "column_name", None)
+        if self._imported_headers and column_name and column_name not in self._imported_headers:
+            return
+
+        return super().import_field(field, instance, row, is_m2m=is_m2m, **kwargs)
 
     class Meta:
         model = Measure
@@ -104,5 +127,4 @@ class MeasureResource(ModelResource):
         report_skipped = True
         exclude = ("id", "created_at", "updated_at")
         import_id_fields = ("name",)
-        use_bulk = True
         instance_loader_class = CachedInstanceLoader  # only works when there is one import_id_fields field
