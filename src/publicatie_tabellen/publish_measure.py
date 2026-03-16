@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import F
 from django.db.models.query import QuerySet
 
@@ -12,17 +13,19 @@ from statistiek_hub.utils.truncate_model import truncate
 logger = logging.getLogger(__name__)
 
 
-def _get_qs_publishmeasure(obsmodel=Measure) -> QuerySet:
-    """get queryset from obsmodel specificly for publishmeasures"""
+def _get_qs_publishmeasure() -> QuerySet:
+    """get queryset from Measure model specificly for publishmeasures"""
 
     queryset = (
-        obsmodel.objects.select_related("theme", "unit")
+        Measure.objects.select_related("unit")
+        .prefetch_related("themes")
         .all()
         .defer("created_at", "updated_at", "id")
         .annotate(
-            theme_uk=F("theme__name_uk"),
             unit_code=F("unit__code"),
             unit_symbol=F("unit__symbol"),
+            theme=ArrayAgg("themes__name", distinct=True),
+            theme_uk=ArrayAgg("themes__name_uk", distinct=True),
         )
     )
     return queryset
@@ -32,7 +35,7 @@ def publishmeasure() -> tuple:
     """return: tuple(string, django.contrib.messages)"""
 
     # select measures
-    qsmeasure = _get_qs_publishmeasure(Measure)
+    qsmeasure = _get_qs_publishmeasure()
 
     try:
         truncate(PublicationMeasure)
