@@ -250,19 +250,6 @@ AZURITE_CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
 if AZURITE_CONNECTION_STRING and not os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     # Using connection string (Azurite or development)
     azure_auth = {"connection_string": AZURITE_CONNECTION_STRING}
-    # configure Azurite containers (if using Azurite)
-    try:
-        from azure.storage.blob import BlobServiceClient
-
-        blob_service = BlobServiceClient.from_connection_string(AZURITE_CONNECTION_STRING)
-        for container in ["django", "pgdump"]:
-            try:
-                blob_service.create_container(container)
-            except Exception:
-                pass
-    except ImportError:
-        pass
-
 elif os.getenv("AZURE_FEDERATED_TOKEN_FILE"):
     # Using workload identity (production)
     azure_auth = {
