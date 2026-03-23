@@ -6,6 +6,7 @@ from publicatie_tabellen.models import (
     PublicationStatistic,
     PublicationUpdatedAt,
 )
+from referentie_tabellen.models import Theme
 from statistiek_hub.modeladmins.admin_mixins import DynamicListFilter
 
 
@@ -30,6 +31,20 @@ class NoAddDeleteChangePermission(admin.ModelAdmin):
         return False
 
 
+class ThemeFilter(admin.SimpleListFilter):
+    title = "theme"
+    parameter_name = "theme"
+
+    def lookups(self, request, model_admin):
+        themes = Theme.objects.order_by("name").values_list("name", flat=True).distinct()
+        return [(theme, theme) for theme in themes]
+
+    def queryset(self, request, queryset):
+        if theme_name := self.value():
+            return queryset.filter(theme__contains=[theme_name]).order_by("name")
+        return queryset
+
+
 @admin.register(PublicationMeasure)
 class PublicationMeasureTypeAdmin(NoAddDeleteChangePermission):
     list_display = (
@@ -40,7 +55,7 @@ class PublicationMeasureTypeAdmin(NoAddDeleteChangePermission):
         "deprecated",
     )
     list_filter = (
-        "theme",
+        ThemeFilter,
         "unit",
         "sensitive",
         "deprecated",

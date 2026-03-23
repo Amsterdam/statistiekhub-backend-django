@@ -1,10 +1,8 @@
 x-common-depends-on: &common-depends-on
   migrate:
     condition: service_completed_successfully
-  database:
-    condition: service_healthy
-  azurite:
-    condition: service_healthy
+  azurite-init:
+    condition: service_completed_successfully
 
 x-common-env: &common-env
   SECRET_KEY: "insecure"
@@ -56,17 +54,30 @@ services:
       --blobHost 0.0.0.0 
       --queueHost 0.0.0.0
       --loose
+      --skipApiVersionCheck
     healthcheck:
       test: nc 127.0.0.1 10000 -z
       interval: 1s
       retries: 30
 
+  azurite-init:
+    image: mcr.microsoft.com/azure-cli
+    depends_on:
+      azurite:
+        condition: service_healthy
+    volumes:
+      - ./docker/azurite/init.sh:/init.sh:ro
+    environment:
+      AZURITE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;"
+      AZURITE_CONTAINER_NAMES: "django,pgdump"
+    command: bash /init.sh
+
   otel-collector:
     build:
-      context: otel-collector
+      context: docker/otel-collector
     image: ${REGISTRY:-localhost:5000}/${REPOSITORY:-opdrachten/statistiekhub-otel-collector}:${VERSION:-latest}
     volumes:
-      - ./otel-collector/config.local.yaml:/etc/otelcol-contrib/config.yaml
+      - ./docker/otel-collector/config.local.yaml:/etc/otelcol-contrib/config.yaml
     depends_on:
       - jaeger
     ports:

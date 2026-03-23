@@ -23,6 +23,12 @@ class MeasureForm(forms.ModelForm):
                 raise ValidationError("You can only assign measures to groups of which you are a member.")
         return team
 
+    def clean_themes_items(self):
+        themes = self.cleaned_data.get("themes")
+        if not themes:
+            raise ValidationError("Selecteer minimaal één thema.")
+        return themes
+
 
 class CalculationFilter(admin.SimpleListFilter):
     title = "calculation"
@@ -61,19 +67,21 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
 
     search_help_text = "search on measure name"
     search_fields = ["name", "id"]
+    autocomplete_fields = [
+        "themes",
+    ]
 
     list_display = (
         "id",
         "name",
         "label",
         "team",
-        "theme",
         "sensitive",
         "deprecated",
     )
     list_filter = (
         "team",
-        "theme",
+        "themes",
         "temporaltype",
         CalculationFilter,
         "sensitive",
@@ -90,7 +98,7 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
             {
                 "fields": (
                     "team",
-                    "theme",
+                    "themes",
                 ),
             },
         ),

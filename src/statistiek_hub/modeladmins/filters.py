@@ -16,7 +16,7 @@ class MeasureThemeFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(measure__theme_id=self.value())
+            return queryset.filter(measure__themes_id=self.value())
         return queryset
 
 

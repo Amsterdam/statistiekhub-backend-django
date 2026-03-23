@@ -87,7 +87,7 @@ def test_copy_queryset(model=Measure, copy_to_model=PublicationMeasure):
         label="aangemaakt",
         team=baker.make(Group),
     )
-    qs_tosave = _get_qs_publishmeasure(model)
+    qs_tosave = _get_qs_publishmeasure()
 
     copy_queryset(qs_tosave, copy_to_model)
 

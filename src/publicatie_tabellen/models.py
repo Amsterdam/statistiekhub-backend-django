@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 
@@ -13,8 +14,14 @@ class PublicationMeasure(models.Model):
     definition_uk = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     source = models.CharField(max_length=100)
-    theme = models.CharField(max_length=50)
-    theme_uk = models.CharField(max_length=50)
+    theme = ArrayField(
+        base_field=models.CharField(max_length=50),
+        default=list,
+    )
+    theme_uk = ArrayField(
+        base_field=models.CharField(max_length=50),
+        default=list,
+    )
     unit = models.CharField(max_length=30)
     unit_code = models.CharField(max_length=5, blank=True, null=True)
     unit_symbol = models.CharField(max_length=15, blank=True, null=True)
