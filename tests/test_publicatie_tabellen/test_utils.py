@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 from django.contrib.auth.models import Group
@@ -11,6 +12,7 @@ from publicatie_tabellen.utils import (
     copy_queryset,
     round_to_base,
     round_to_decimal,
+    set_small_regions_to_nan_if_minimum,
 )
 from statistiek_hub.models.measure import Measure
 
@@ -113,3 +115,96 @@ def test_copy_dataframe(test_df=pd.DataFrame(sample_statistic), copy_to_model=Pu
 
     qs.delete()
     assert not copy_to_model.objects.exists()
+
+
+def test_set_small_regions_to_nan_if_minimum_with_explicit_minimum_value():
+    dfmin = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 49,
+            }
+        ]
+    )
+
+    dfobs = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "VAR",
+                "value": 100.0,
+            },
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 49.0,
+            },
+        ]
+    )
+
+    result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=50)
+
+    assert np.isnan(result.loc[result["measure_name"] == "VAR", "value"].iloc[0])
+    assert result.loc[result["measure_name"] == "BEVTOTAAL", "value"].iloc[0] == 49.0
+
+
+@pytest.mark.parametrize(
+    "threshold, expected_var_value",
+    [
+        (800, 10.0),
+        (900, 10.0),
+        (901, np.nan),
+        (2000, np.nan),
+    ],
+)
+def test_set_small_regions_to_nan_if_minimum_uses_threshold_column_when_minimum_value_is_none(
+    threshold, expected_var_value
+):
+    dfmin = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 900,
+            }
+        ]
+    )
+
+    dfobs = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "VAR",
+                "value": 10.0,
+                "sd_minimum_bevtotaal": threshold,
+            },
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 900.0,
+                "sd_minimum_bevtotaal": threshold,
+            },
+        ]
+    )
+
+    result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs)
+
+    var_value = result.loc[result["measure_name"] == "VAR", "value"].iloc[0]
+    if np.isnan(expected_var_value):
+        assert np.isnan(var_value)
+    else:
+        assert var_value == expected_var_value
+    assert result.loc[result["measure_name"] == "BEVTOTAAL", "value"].iloc[0] == 900.0

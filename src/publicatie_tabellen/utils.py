@@ -99,37 +99,31 @@ def set_small_regions_to_nan_if_minimum(
     or if minimum_value is set as param: if value observation is smaller than minimum_value
     """
 
-    # get the values of bevtotaal or wvoorrbag
-    _df_var_min = dfmin[(dfmin["measure_name"] == var_min)][
-        [
-            "temporaldimensionyear",
-            "spatialdimensiondate",
-            "spatialdimensioncode",
-            "value",
-        ]
+    join_keys = [
+        "temporaldimensionyear",
+        "spatialdimensiondate",
+        "spatialdimensioncode",
     ]
+
+    # get the values of bevtotaal or wvoorrbag
+    _df_var_min = dfmin.loc[dfmin["measure_name"] == var_min, join_keys + ["value"]]
 
     if len(_df_var_min) == 0 or len(dataframe) == 0:
         return dataframe
 
     hulp = dataframe.join(
-        _df_var_min.rename(columns={"value": "varc"}).set_index(
-            ["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"]
-        ),
-        on=["temporaldimensionyear", "spatialdimensiondate", "spatialdimensioncode"],
+        _df_var_min.rename(columns={"value": "varc"}).set_index(join_keys),
+        on=join_keys,
         how="left",
     ).replace({None: np.nan})
 
-    #'value' vervangen door onbekend als te klein
-    if minimum_value:
-        hulp.loc[
-            ((hulp["varc"] < minimum_value) & (hulp["measure_name"] != var_min)),
-            "value",
-        ] = np.nan
+    # 'value' vervangen door onbekend als te klein
+    if minimum_value is not None:
+        threshold = minimum_value
     else:
-        minimum_value = f"sd_minimum_{var_min.lower()}"
-        hulp.loc[
-            ((hulp["varc"] < hulp[minimum_value]) & (hulp["measure_name"] != var_min)),
-            "value",
-        ] = np.nan
+        minimum_value_column = f"sd_minimum_{var_min.lower()}"
+        threshold = hulp[minimum_value_column]
+
+    mask_too_small = (hulp["measure_name"] != var_min) & (hulp["varc"] < threshold)
+    hulp.loc[mask_too_small, "value"] = np.nan
     return hulp.drop("varc", axis=1)
