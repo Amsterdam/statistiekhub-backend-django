@@ -16,6 +16,7 @@ omit = [
     "/app/src/manage.py",
     "/app/src/main/asgi.py",
     "/app/src/main/auth.py",
+    "/app/src/main/azure_settings.py",
     "*/urls.py",
     "*/apps.py",
     "*/models.py",
