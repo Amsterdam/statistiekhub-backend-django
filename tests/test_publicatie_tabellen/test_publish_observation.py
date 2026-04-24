@@ -1,14 +1,23 @@
 import datetime
+from types import SimpleNamespace
 
 import numpy as np
+import pandas as pd
 import pytest
+from django.contrib import messages
 from django.contrib.auth.models import Group
 from model_bakery import baker
 
+import publicatie_tabellen.publish_observation as publish_observation_module
 from publicatie_tabellen.models import PublicationObservation
 from publicatie_tabellen.publish_observation import (
+    _apply_filterrule_if_present,
+    _apply_sensitive_if_needed,
     _apply_sensitive_rules,
+    _build_measure_dataframe,
+    _finalize_and_save_measure_observations,
     _get_df_with_filterrule,
+    _get_measures_for_publish,
     publishobservation,
 )
 from referentie_tabellen.models import TemporalDimensionType, Unit
@@ -50,6 +59,115 @@ def test_apply_sensitive_rules(test_value, test_unit, expected):
     """change value by rule depending on unit"""
     result = _apply_sensitive_rules(test_value, test_unit)
     assert result == expected
+
+
+def test_apply_sensitive_if_needed_returns_unchanged_when_not_sensitive():
+    mdf = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "SENSITIVE_VAR",
+                "unit": "percentage",
+                "value": 95.0,
+            }
+        ]
+    )
+
+    dfmin = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 49,
+            }
+        ]
+    )
+
+    measure = SimpleNamespace(sensitive=False)
+    result = _apply_sensitive_if_needed(mdf, measure, dfmin)
+
+    assert result is mdf
+    assert result.loc[0, "value"] == 95.0
+
+
+def test_apply_sensitive_if_needed_applies_sensitive_and_small_region_rule():
+    mdf = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "SENSITIVE_VAR",
+                "unit": "percentage",
+                "value": 95.0,
+            },
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "B",
+                "measure_name": "SENSITIVE_VAR",
+                "unit": "percentage",
+                "value": 95.0,
+            },
+        ]
+    )
+
+    dfmin = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 49,
+            },
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "B",
+                "measure_name": "BEVTOTAAL",
+                "value": 50,
+            },
+        ]
+    )
+
+    measure = SimpleNamespace(sensitive=True)
+    result = _apply_sensitive_if_needed(mdf, measure, dfmin)
+
+    # First: sensitive rule caps percentage >= 90 to 90.
+    # Then: values for regions with < 50 inhabitants become NaN.
+    assert np.isnan(result.loc[result["spatialdimensioncode"] == "A", "value"].iloc[0])
+    assert result.loc[result["spatialdimensioncode"] == "B", "value"].iloc[0] == 90.0
+
+
+def test_publishobservation_includes_warning_for_measure_without_data(monkeypatch):
+    measure_no_data = SimpleNamespace(name="NO_DATA", sensitive=False)
+
+    monkeypatch.setattr(
+        publish_observation_module,
+        "_get_dfmin_for_sensitive_rules",
+        lambda: pd.DataFrame(),
+    )
+    monkeypatch.setattr(
+        publish_observation_module,
+        "_get_measures_for_publish",
+        lambda: [measure_no_data],
+    )
+    monkeypatch.setattr(
+        publish_observation_module,
+        "_build_measure_dataframe",
+        lambda measure: (pd.DataFrame(), None),
+    )
+    monkeypatch.setattr(publish_observation_module, "truncate", lambda model: None)
+
+    msg, level = publish_observation_module.publishobservation()
+    assert level == messages.SUCCESS
+    assert "WARNING" in msg
+    assert "NO_DATA" in msg
 
 
 @pytest.mark.parametrize(
@@ -301,10 +419,172 @@ def test_set_decimals(fill_ref_tabellen, decimals, base_value, expected):
         value=base_value,
     )
 
-    publishobservation()
+    mdf, _ = _build_measure_dataframe(measure)
+    _finalize_and_save_measure_observations(mdf)
 
     result = PublicationObservation.objects.values_list("value", flat=True)
     assert list(result) == expected
 
     measure.delete()
     obs.delete()
+
+
+@pytest.mark.django_db
+def test_build_measure_dataframe_adds_missing_calculated_years(fill_ref_tabellen):
+    fixture = fill_ref_tabellen
+
+    temp_2023 = baker.make(
+        TemporalDimension,
+        startdate=datetime.date(2023, 1, 1),
+        type=fixture["tempdimtype"],
+    )
+    temp_2024 = baker.make(
+        TemporalDimension,
+        startdate=datetime.date(2024, 1, 31),
+        type=fixture["tempdimtype"],
+    )
+
+    measure = baker.make(
+        Measure,
+        name="CALC_MEASURE",
+        unit=fixture["unit"],
+        team=baker.make(Group),
+        calculation="( $BASE + $VAR )",
+    )
+
+    baker.make(
+        Observation,
+        measure=measure,
+        temporaldimension=temp_2023,
+        spatialdimension=fixture["spatial"],
+        value=1,
+    )
+    baker.make(
+        ObservationCalculated,
+        measure=measure,
+        temporaldimension=temp_2023,
+        spatialdimension=fixture["spatial"],
+        value=10,
+    )
+    baker.make(
+        ObservationCalculated,
+        measure=measure,
+        temporaldimension=temp_2024,
+        spatialdimension=fixture["spatial"],
+        value=20,
+    )
+
+    mdf, calculated_years = _build_measure_dataframe(measure)
+
+    assert len(mdf) == 2
+    assert set(mdf["temporaldimensionyear"].tolist()) == {2023, 2024}
+    assert calculated_years == [2024]
+
+
+@pytest.mark.django_db
+def test_deprecated_measure_is_included_and_can_be_published(fill_ref_tabellen):
+    fixture = fill_ref_tabellen
+
+    measure = baker.make(
+        Measure,
+        name="DEPRECATED_MEASURE",
+        unit=fixture["unit"],
+        team=baker.make(Group),
+        deprecated=True,
+    )
+    baker.make(
+        Observation,
+        measure=measure,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=123,
+    )
+
+    assert measure.id in set(_get_measures_for_publish().values_list("id", flat=True))
+
+    mdf, _ = _build_measure_dataframe(measure)
+    assert _finalize_and_save_measure_observations(mdf) is True
+    assert PublicationObservation.objects.filter(measure=measure.name).exists()
+
+
+@pytest.mark.django_db
+def test_apply_filterrule_if_present_merges_and_publishes(fill_ref_tabellen):
+    fixture = fill_ref_tabellen
+
+    measure_base = baker.make(
+        Measure,
+        name="BASE",
+        unit=fixture["unit"],
+        team=baker.make(Group),
+    )
+    measure_var = baker.make(
+        Measure,
+        name="VAR",
+        unit=fixture["unit"],
+        team=baker.make(Group),
+    )
+    baker.make(Filter, measure=measure_var, rule="( $BASE < 10 )", value_new=1)
+
+    baker.make(
+        Observation,
+        measure=measure_base,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=9,
+    )
+    baker.make(
+        Observation,
+        measure=measure_var,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=50,
+    )
+
+    mdf, calculated_years = _build_measure_dataframe(measure_var)
+    mdf = _apply_filterrule_if_present(mdf, measure_var, calculated_years)
+    assert _finalize_and_save_measure_observations(mdf) is True
+
+    assert list(PublicationObservation.objects.values_list("value", flat=True)) == [1.0]
+
+
+@pytest.mark.django_db
+def test_publishobservation_happy_flow_end_to_end(fill_ref_tabellen):
+    fixture = fill_ref_tabellen
+
+    measure_base = baker.make(
+        Measure,
+        name="BASE",
+        unit=fixture["unit"],
+        decimals=1,
+        sensitive=False,
+        team=baker.make(Group),
+    )
+    measure_var = baker.make(
+        Measure,
+        name="VAR",
+        unit=fixture["unit"],
+        decimals=0,
+        sensitive=False,
+        team=baker.make(Group),
+    )
+    baker.make(Filter, measure=measure_var, rule="( $BASE < 10 )", value_new=1)
+
+    baker.make(
+        Observation,
+        measure=measure_base,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=9.12,
+    )
+    baker.make(
+        Observation,
+        measure=measure_var,
+        temporaldimension=fixture["temp"],
+        spatialdimension=fixture["spatial"],
+        value=50,
+    )
+
+    publishobservation()
+
+    rows = list(PublicationObservation.objects.values_list("measure", "value"))
+    assert dict(rows) == {"BASE": 9.1, "VAR": 1.0}
