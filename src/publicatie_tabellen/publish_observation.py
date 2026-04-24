@@ -118,7 +118,7 @@ def _get_df_with_filterrule(measure: Measure, calculated_years: list) -> pd.Data
 
 
 def _get_dfmin_for_sensitive_rules() -> pd.DataFrame:
-    """ get dataframe with BEVTOTAAL for all spatialdimensiontypes to 
+    """get dataframe with BEVTOTAAL for all spatialdimensiontypes to
     apply sensitive rule 1: small regions to np.nan"""
     spatialdimtypes = SpatialDimensionType.objects.all().values_list("name", flat=True)
     qsmin = get_qs_for_bevmin_wonmin(
