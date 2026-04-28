@@ -117,6 +117,109 @@ def _get_df_with_filterrule(measure: Measure, calculated_years: list) -> pd.Data
     return dfobs
 
 
+def _get_dfmin_for_sensitive_rules() -> pd.DataFrame:
+    """get dataframe with BEVTOTAAL for all spatialdimensiontypes to
+    apply sensitive rule 1: small regions to np.nan"""
+    spatialdimtypes = SpatialDimensionType.objects.all().values_list("name", flat=True)
+    qsmin = get_qs_for_bevmin_wonmin(
+        Observation,
+        measures=[
+            "BEVTOTAAL",
+        ],
+        spatialdimensiontypes=spatialdimtypes,
+    )
+    return convert_queryset_into_dataframe(qsmin)
+
+
+def _get_measures_for_publish() -> QuerySet:
+    return Measure.objects.all().select_related("filter").order_by("id")
+
+
+def _get_calculated_years_to_add(
+    qsobservation: QuerySet,
+    qscalc_observation: QuerySet,
+) -> list | None:
+    years_obs = qsobservation.values_list("temporaldimensionyear", flat=True).distinct()
+    years_calcobs = qscalc_observation.values_list("temporaldimensionyear", flat=True).distinct()
+    return list(set(years_calcobs) - set(years_obs))
+
+
+def _build_measure_dataframe(measure: Measure) -> tuple[pd.DataFrame, list | None]:
+    calculated = bool(measure.calculation)
+    calculated_years = None
+
+    qsobservation = _get_qs_publishobservation(Observation, measure)
+    mdf = convert_queryset_into_dataframe(qsobservation)
+
+    if calculated:
+        qscalc_observation = _get_qs_publishobservation(ObservationCalculated, measure)
+        if diff := _get_calculated_years_to_add(qsobservation, qscalc_observation):
+            filtered_qs = qscalc_observation.filter(temporaldimensionyear__in=diff)
+            calculated_years = diff
+            mdf = pd.concat(
+                [mdf, convert_queryset_into_dataframe(filtered_qs)],
+                ignore_index=True,
+            )
+
+    return mdf, calculated_years
+
+
+def _apply_filterrule_if_present(
+    mdf: pd.DataFrame,
+    measure: Measure,
+    calculated_years: list | None,
+) -> pd.DataFrame:
+    if not hasattr(measure, "filter"):
+        return mdf
+
+    dfobs = _get_df_with_filterrule(measure, calculated_years)
+    mdf = mdf.merge(
+        dfobs,
+        on=["measure_id", "spatialdimension_id", "temporaldimension_id"],
+        how="left",
+        suffixes=("_x", None),
+    )
+    mdf.drop("value_x", axis=1, inplace=True)
+    logger.info(f"filterrule {measure.filter.rule} applied")
+    return mdf
+
+
+def _apply_sensitive_if_needed(
+    mdf: pd.DataFrame,
+    measure: Measure,
+    dfmin: pd.DataFrame,
+) -> pd.DataFrame:
+    if not measure.sensitive:
+        return mdf
+
+    mdf["value"] = mdf.apply(lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1)
+    logger.info("sensitiverules applied")
+    # apply rule 1: Over gebieden met minder dan 50 inwoners rapporteren we geen privacygevoelige indicatoren
+    mdf = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", mdf, minimum_value=50)
+    logger.info("sensitive less 50 inwoners applied")
+    return mdf
+
+
+def _finalize_and_save_measure_observations(mdf: pd.DataFrame) -> bool:
+    """Finalize the dataframe (drop missing values, round, rename) and persist.
+
+    Returns True if any rows were saved, otherwise False.
+    """
+
+    # remove the by filter and sensitive introduced np.nan values
+    mdf.dropna(subset=["value"], inplace=True)
+    if len(mdf) == 0:
+        return False
+
+    mdf["value"] = mdf.apply(lambda x: round_to_decimal(x.value, x.decimals), axis=1)
+    logger.info("decimals are set")
+
+    mdf.rename(columns={"measure_name": "measure"}, inplace=True)
+    # REMARK: saving an int(= zero decimal) into a floatfield will add a .0 to the int.
+    copy_dataframe(mdf, PublicationObservation)
+    return True
+
+
 def publishobservation() -> tuple:
     """select observations and change value depending on measure attributtes
     -   filterrule -> apply the measure filterrule from  model  Filter to value
@@ -127,86 +230,26 @@ def publishobservation() -> tuple:
     return: tuple(string, django.contrib.messages)
     """
 
-    # get BEVTOTAAL for all types for sensitive rule 1: small regions to np.nan
-    spatialdimtypes = SpatialDimensionType.objects.all().values_list("name", flat=True)
-    qsmin = get_qs_for_bevmin_wonmin(
-        Observation,
-        measures=[
-            "BEVTOTAAL",
-        ],
-        spatialdimensiontypes=spatialdimtypes,
-    )
-    dfmin = convert_queryset_into_dataframe(qsmin)
+    dfmin = _get_dfmin_for_sensitive_rules()
 
     truncate(PublicationObservation)
-    qsmeasure = Measure.objects.filter(deprecated=False)
+    qsmeasure = _get_measures_for_publish()
     measure_no_data = []
 
     for measure in qsmeasure:
-        calculated = bool(measure.calculation)
-        calculated_years = None
-
-        # select observations
-        qsobservation = _get_qs_publishobservation(Observation, measure)
-        mdf = convert_queryset_into_dataframe(qsobservation)
-
-        if calculated:
-            # select complementary calculated years from calcobs (same basemodel as obs)
-            years_obs = qsobservation.values_list("temporaldimensionyear", flat=True).distinct()
-
-            qscalc_observation = _get_qs_publishobservation(ObservationCalculated, measure)
-            years_calcobs = qscalc_observation.values_list("temporaldimensionyear", flat=True).distinct()
-
-            if diff := list(set(years_calcobs) - set(years_obs)):  # als niet leeg
-                filtered_qs = qscalc_observation.filter(temporaldimensionyear__in=diff)
-
-                calculated_years = diff
-                # add to dataframe
-                mdf = pd.concat(
-                    [mdf, convert_queryset_into_dataframe(filtered_qs)],
-                    ignore_index=True,
-                )
+        mdf, calculated_years = _build_measure_dataframe(measure)
 
         if len(mdf) == 0:
             measure_no_data.append(measure.name)
             continue
 
         logger.info(f"selected observations for {measure}: {len(mdf)}")
-        if hasattr(measure, "filter"):
-            dfobs = _get_df_with_filterrule(measure, calculated_years)
+        mdf = _apply_filterrule_if_present(mdf, measure, calculated_years)
+        mdf = _apply_sensitive_if_needed(mdf, measure, dfmin)
 
-            # update mdf with new values from dfobs
-            mdf = mdf.merge(
-                dfobs,
-                on=["measure_id", "spatialdimension_id", "temporaldimension_id"],
-                how="left",
-                suffixes=("_x", None),
-            )
-            mdf.drop("value_x", axis=1, inplace=True)
-
-            logger.info(f"filterrule {measure.filter.rule} applied")
-
-        if measure.sensitive:
-            mdf["value"] = mdf.apply(lambda x: _apply_sensitive_rules(x.value, x.unit), axis=1)
-            logger.info("sensitiverules applied")
-            # apply rule 1: Over gebieden met minder dan 50 inwoners rapporteren we geen privacygevoelige indicatoren
-            mdf = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", mdf, minimum_value=50)
-            logger.info("sensitive less 50 inwoners applied")
-
-        # remove the by filter and sensitive introduced np.nan values
-        mdf.dropna(subset=["value"], inplace=True)
-
-        if len(mdf) == 0:
+        if not _finalize_and_save_measure_observations(mdf):
             measure_no_data.append(measure.name)
             continue
-
-        # round value to decimals
-        mdf["value"] = mdf.apply(lambda x: round_to_decimal(x.value, x.decimals), axis=1)
-        logger.info("decimals are set")
-
-        mdf.rename(columns={"measure_name": "measure"}, inplace=True)
-        # REMARK: saving an int(= zero decimal) into a floatfield will add a .0 to the int.
-        copy_dataframe(mdf, PublicationObservation)
 
     extra = (
         f", WARNING Not included: there aren't any observations for measure's: {measure_no_data}"
