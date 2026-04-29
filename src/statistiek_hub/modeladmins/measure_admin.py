@@ -121,14 +121,26 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
             "Details",
             {
                 "fields": (
-                    "label_uk",
-                    "definition_uk",
+                    "label_short",
+                    "frequency",
                     "description",
                     "parent",
                     "dimension",
                 ),
             },
         ),
+        (
+            "Engelstalige velden",
+            {
+                "fields": (
+                    "label_uk",
+                    "definition_uk",
+                    "label_short_uk",
+                    "frequency_uk",
+                    "description_uk",
+                ),
+            },
+        ),        
         (
             "Product-specific",
             {
