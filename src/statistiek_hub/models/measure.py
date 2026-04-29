@@ -34,9 +34,14 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)
     label_uk = models.CharField(max_length=75, blank=True, default="")
+    label_short = models.CharField(max_length=40, blank=True, default="")
+    label_short_uk = models.CharField(max_length=40, blank=True, default="")
+    frequency = models.CharField(max_length=50, blank=True, default="")
+    frequency_uk = models.CharField(max_length=50, blank=True, default="")
     definition = models.TextField()
     definition_uk = models.TextField(blank=True, default="")
     description = models.TextField(blank=True, default="")
+    description_uk = models.TextField(blank=True, default="")
     calculation = models.CharField(
         max_length=200,
         blank=True,
