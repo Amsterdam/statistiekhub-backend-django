@@ -10,9 +10,14 @@ class PublicationMeasure(models.Model):
     name = models.CharField(unique=True, max_length=50)
     label = models.CharField(max_length=75)
     label_uk = models.CharField(max_length=75, blank=True, null=True)
+    label_short = models.CharField(max_length=40, blank=True, null=True)
+    label_short_uk = models.CharField(max_length=40, blank=True, null=True)
     definition = models.TextField()
     definition_uk = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    description_uk = models.TextField(blank=True, null=True)
+    frequency = models.CharField(max_length=50, blank=True, null=True)
+    frequency_uk = models.CharField(max_length=50, blank=True, null=True)
     source = models.CharField(max_length=100)
     theme = ArrayField(
         base_field=models.CharField(max_length=50),
