@@ -10,7 +10,7 @@ amsterdam-django-oidc==0.2.4
     # via -r requirements.in
 asgiref==3.11.1
     # via django
-azure-core==1.39.0
+azure-core==1.40.0
     # via
     #   -r requirements.in
     #   azure-identity
@@ -24,11 +24,11 @@ azure-identity==1.25.3
     # via -r requirements.in
 azure-keyvault==4.2.0
     # via -r requirements.in
-azure-keyvault-certificates==4.10.0
+azure-keyvault-certificates==4.11.0
     # via azure-keyvault
 azure-keyvault-keys==4.11.0
     # via azure-keyvault
-azure-keyvault-secrets==4.10.0
+azure-keyvault-secrets==4.11.0
     # via
     #   -r requirements.in
     #   azure-keyvault
@@ -44,13 +44,13 @@ celery==5.6.3
     # via
     #   -r requirements.in
     #   django-celery-results
-certifi==2026.2.25
+certifi==2026.4.22
     # via requests
 cffi==2.0.0
     # via cryptography
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
     # via requests
-click==8.3.1
+click==8.3.3
     # via
     #   celery
     #   click-didyoumean
@@ -62,7 +62,7 @@ click-plugins==1.1.1.2
     # via celery
 click-repl==0.3.0
     # via celery
-cryptography==46.0.6
+cryptography==47.0.0
     # via
     #   azure-identity
     #   azure-keyvault-keys
@@ -97,11 +97,11 @@ django-storages[azure]==1.14.6
     # via -r requirements.in
 et-xmlfile==2.0.0
     # via openpyxl
-googleapis-common-protos==1.73.1
+googleapis-common-protos==1.74.0
     # via opentelemetry-exporter-otlp-proto-grpc
 grpcio==1.80.0
     # via opentelemetry-exporter-otlp-proto-grpc
-idna==3.11
+idna==3.13
     # via requests
 importlib-metadata==8.7.1
     # via opentelemetry-api
@@ -116,7 +116,7 @@ kombu==5.6.2
     # via celery
 mozilla-django-oidc==5.0.2
     # via amsterdam-django-oidc
-msal==1.35.1
+msal==1.36.0
     # via
     #   azure-identity
     #   msal-extensions
@@ -186,7 +186,7 @@ opentelemetry-util-http==0.60b1
     #   opentelemetry-instrumentation-django
     #   opentelemetry-instrumentation-requests
     #   opentelemetry-instrumentation-wsgi
-packaging==26.0
+packaging==26.2
     # via
     #   django-csp
     #   kombu
@@ -201,7 +201,7 @@ protobuf==6.33.6
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
-psycopg2-binary==2.9.11
+psycopg2-binary==2.9.12
     # via -r requirements.in
 pycparser==3.0
     # via cffi
@@ -243,7 +243,7 @@ typing-extensions==4.15.0
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
-tzdata==2025.3
+tzdata==2026.2
     # via kombu
 tzlocal==5.3.1
     # via celery
@@ -262,5 +262,5 @@ wrapt==1.17.3
     # via
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-dbapi
-zipp==3.23.0
+zipp==3.23.1
     # via importlib-metadata
