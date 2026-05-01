@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('publicatie_tabellen', '0008_truncate_publicationmeasure'),
+        ("publicatie_tabellen", "0008_truncate_publicationmeasure"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='publicationmeasure',
-            name='description_uk',
+            model_name="publicationmeasure",
+            name="description_uk",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='publicationmeasure',
-            name='frequency',
+            model_name="publicationmeasure",
+            name="frequency",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
         migrations.AddField(
-            model_name='publicationmeasure',
-            name='frequency_uk',
+            model_name="publicationmeasure",
+            name="frequency_uk",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
         migrations.AddField(
-            model_name='publicationmeasure',
-            name='label_short',
+            model_name="publicationmeasure",
+            name="label_short",
             field=models.CharField(blank=True, max_length=40, null=True),
         ),
         migrations.AddField(
-            model_name='publicationmeasure',
-            name='label_short_uk',
+            model_name="publicationmeasure",
+            name="label_short_uk",
             field=models.CharField(blank=True, max_length=40, null=True),
         ),
     ]

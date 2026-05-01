@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('statistiek_hub', '0021_remove_measure_theme'),
+        ("statistiek_hub", "0021_remove_measure_theme"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='measure',
-            name='description_uk',
-            field=models.TextField(blank=True, default=''),
+            model_name="measure",
+            name="description_uk",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AddField(
-            model_name='measure',
-            name='frequency',
-            field=models.CharField(blank=True, default='', max_length=50),
+            model_name="measure",
+            name="frequency",
+            field=models.CharField(blank=True, default="", max_length=50),
         ),
         migrations.AddField(
-            model_name='measure',
-            name='frequency_uk',
-            field=models.CharField(blank=True, default='', max_length=50),
+            model_name="measure",
+            name="frequency_uk",
+            field=models.CharField(blank=True, default="", max_length=50),
         ),
         migrations.AddField(
-            model_name='measure',
-            name='label_short',
-            field=models.CharField(blank=True, default='', max_length=40),
+            model_name="measure",
+            name="label_short",
+            field=models.CharField(blank=True, default="", max_length=40),
         ),
         migrations.AddField(
-            model_name='measure',
-            name='label_short_uk',
-            field=models.CharField(blank=True, default='', max_length=40),
+            model_name="measure",
+            name="label_short_uk",
+            field=models.CharField(blank=True, default="", max_length=40),
         ),
     ]

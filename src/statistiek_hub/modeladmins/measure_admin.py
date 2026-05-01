@@ -140,7 +140,7 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
                     "description_uk",
                 ),
             },
-        ),        
+        ),
         (
             "Product-specific",
             {
