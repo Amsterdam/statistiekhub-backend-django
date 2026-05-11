@@ -20,7 +20,7 @@ def _get_qs_publishmeasure() -> QuerySet:
         Measure.objects.select_related("unit")
         .prefetch_related("themes")
         .all()
-        .defer("created_at", "updated_at", "id")
+        .defer("created_at", "updated_at", "id", "team")
         .annotate(
             unit_code=F("unit__code"),
             unit_symbol=F("unit__symbol"),
