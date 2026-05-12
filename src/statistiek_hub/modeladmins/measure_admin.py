@@ -96,18 +96,16 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
         (
             None,
             {
-                "fields": (
-                    "team",
-                    "themes",
-                ),
+                "fields": ("team",),
             },
         ),
         (
-            "Compulsory",
+            "Verplichte velden",
             {
                 "fields": (
                     "name",
                     "label",
+                    "themes",
                     "definition",
                     "unit",
                     "decimals",
@@ -118,14 +116,13 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
             },
         ),
         (
-            "Details",
+            "Optionele velden",
             {
                 "fields": (
                     "label_short",
-                    "frequency",
                     "description",
-                    "parent",
-                    "dimension",
+                    "frequency",
+                    "calculation",
                 ),
             },
         ),
@@ -134,21 +131,21 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
             {
                 "fields": (
                     "label_uk",
-                    "definition_uk",
                     "label_short_uk",
-                    "frequency_uk",
+                    "definition_uk",
                     "description_uk",
+                    "frequency_uk",
                 ),
             },
         ),
         (
             "Product-specific",
             {
-                "fields": ("calculation", "extra_attr"),
+                "fields": ("extra_attr",),
             },
         ),
         (
-            "Vervallen",
+            "Status velden",
             {
                 "fields": ("deprecated", "deprecated_date", "deprecated_reason"),
             },
