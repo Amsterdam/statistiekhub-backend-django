@@ -12,3 +12,7 @@ SD_MIN_WVOORRBAG = "BBGA_sd_minimum_wvoor_bag"
 EXCLUDE_KLEURENPALET_SD = [4, 9]
 # spatialdimensioncode Amsterdam
 SP_CODE_AMSTERDAM = "0363"
+
+# label standaarddeviatie voor publicatiestatic: field source
+SD_WIJK_LABEL = "Wijk"
+SD_GGW_LABEL = "GGW-gebied"

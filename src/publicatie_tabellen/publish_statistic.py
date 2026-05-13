@@ -9,8 +9,10 @@ from django.db.models.query import QuerySet
 from publicatie_tabellen.constants_settings import (
     EXCLUDE_KLEURENPALET_SD,
     KLEURENPALET,
+    SD_GGW_LABEL,
     SD_MIN_BEVTOTAAL,
     SD_MIN_WVOORRBAG,
+    SD_WIJK_LABEL,
     SP_CODE_AMSTERDAM,
 )
 from publicatie_tabellen.models import PublicationObservation, PublicationStatistic
@@ -135,7 +137,7 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
         .rename(columns={"value": "sd_wijk"})
         .reset_index()
     )
-    _df_wijk["bron_wijk"] = "sdbc"
+    _df_wijk["bron_wijk"] = SD_WIJK_LABEL
 
     _df_geb = (
         _df[_df["spatialdimensiontype"] == "GGW-gebied"]
@@ -144,7 +146,7 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
         .rename(columns={"value": "sd_geb"})
         .reset_index()
     )
-    _df_geb["bron_geb"] = "sdgeb22"
+    _df_geb["bron_geb"] = SD_GGW_LABEL
 
     # std calculation of wijk and geb22 concatenation
     df_wijk_geb = _df_wijk.join(
