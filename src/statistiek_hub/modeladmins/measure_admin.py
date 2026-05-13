@@ -29,6 +29,12 @@ class MeasureForm(forms.ModelForm):
             raise ValidationError("Selecteer minimaal één thema.")
         return themes
 
+    def clean_sources_items(self):
+        sources = self.cleaned_data.get("sources")
+        if not sources:
+            raise ValidationError("Selecteer minimaal één bron.")
+        return sources
+
 
 class CalculationFilter(admin.SimpleListFilter):
     title = "calculation"
@@ -69,6 +75,7 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
     search_fields = ["name", "id"]
     autocomplete_fields = [
         "themes",
+        "sources",
     ]
 
     list_display = (
@@ -89,7 +96,7 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
         "unit",
         "created_at",
         "updated_at",
-        "source",
+        "sources",
     )
 
     fieldsets = (
@@ -109,7 +116,8 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
                     "definition",
                     "unit",
                     "decimals",
-                    "source",
+                    "source_old",
+                    "sources",
                     "temporaltype",
                     "sensitive",
                 ),
