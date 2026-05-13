@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 
-from referentie_tabellen.models import Theme, Unit
+from referentie_tabellen.models import Source, Theme, Unit
 from referentie_tabellen.referentie_choices import TemporaltypeChoices
 from statistiek_hub.validations import check_code_in_name, validate_calculation_string
 
@@ -55,7 +55,8 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     )
     unit = models.ForeignKey(Unit, models.RESTRICT)
     decimals = models.IntegerField(default=0)
-    source = models.CharField(max_length=100)
+    source_old = models.CharField(max_length=100)
+    sources = models.ManyToManyField(Source, related_name="measures_sources")
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
     themes = models.ManyToManyField(Theme, related_name="measures_themes")
     dimension = models.ForeignKey(Dimension, models.SET_NULL, blank=True, null=True)
