@@ -4,7 +4,7 @@ from import_export.instance_loaders import CachedInstanceLoader
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 
-from referentie_tabellen.models import Theme, Unit
+from referentie_tabellen.models import Source, Theme, Unit
 from statistiek_hub.models.dimension import Dimension
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.utils.datetime import convert_to_date
@@ -13,89 +13,97 @@ from statistiek_hub.validations import get_instance
 MANYTOMANY_SEPARATOR = "|"
 
 
-class GroupForeignKeyWidget(ForeignKeyWidget):
+class InstanceForeignKeyWidget(ForeignKeyWidget):
+    def __init__(
+        self,
+        model,
+        field="pk",
+        *,
+        column_name: str,
+        required: bool = True,
+        **kwargs,
+    ):
+        super().__init__(model=model, field=field, **kwargs)
+        self.column_name = column_name
+        self.required = required
+
     def clean(self, value, row, **kwargs):
-        team, error = get_instance(model=Group, field="name", row=row, column="team")
+        raw_value = "" if value is None else str(value).strip()
+        if raw_value == "":
+            if self.required:
+                raise ValueError(f"Kolom '{self.column_name}' is verplicht en mag niet leeg zijn.")
+            return None
+
+        instance, error = get_instance(model=self.model, field=self.field, value=raw_value, column=self.column_name)
         if error:
             raise ValueError(error)
 
-        return team
+        return instance
 
 
-class UnitForeignKeyWidget(ForeignKeyWidget):
-    def clean(self, value, row, **kwargs):
-        unit, error = get_instance(model=Unit, field="name", row=row, column="unit")
-        if error:
-            raise ValueError(error)
+class RequiredManyToManyWidget(ManyToManyWidget):
+    def __init__(
+        self,
+        model,
+        field="pk",
+        separator=MANYTOMANY_SEPARATOR,
+        *,
+        column_name: str,
+        **kwargs,
+    ):
+        super().__init__(model=model, field=field, separator=separator, **kwargs)
+        self.column_name = column_name
 
-        return unit
-
-
-class ThemeManyToManyWidget(ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if value is None or str(value).strip() == "":
-            raise ValueError("Kolom 'theme' is verplicht en mag niet leeg zijn.")
+            raise ValueError(f"Kolom '{self.column_name}' is verplicht en mag niet leeg zijn.")
 
-        values = [v.strip() for v in value.split(MANYTOMANY_SEPARATOR) if v.strip()]
+        values = [v.strip() for v in str(value).split(self.separator) if v.strip()]
         qs = self.model.objects.filter(**{f"{self.field}__in": values})
         found_values = set(qs.values_list(self.field, flat=True))
         missing_values = [v for v in values if v not in found_values]
         if missing_values:
             missing = ", ".join(missing_values)
-            raise ValueError(f"De volgende thema's bestaan niet: {missing}.")
+            raise ValueError(f"De volgende waarde(n) in kolom '{self.column_name}' bestaan niet: {missing}.")
 
         return qs
-
-
-class DimensionForeignKeyWidget(ForeignKeyWidget):
-    def clean(self, value, row, **kwargs):
-        if row["dimension"]:
-            dimension, error = get_instance(model=Dimension, field="code", row=row, column="dimension")
-            if error:
-                raise ValueError(error)
-
-            return dimension
-
-
-class ParentForeignKeyWidget(ForeignKeyWidget):
-    def clean(self, value, row, **kwargs):
-        if row["parent"]:
-            parent, error = get_instance(model=Measure, field="name", row=row, column="parent")
-            if error:
-                raise ValueError(error)
-
-            return parent
 
 
 class MeasureResource(ModelResource):
     unit = Field(
         column_name="unit",
         attribute="unit",
-        widget=UnitForeignKeyWidget(Unit, field="name"),
+        widget=InstanceForeignKeyWidget(Unit, field="name", column_name="unit", required=True),
     )
 
     team = Field(
         column_name="team",
         attribute="team",
-        widget=GroupForeignKeyWidget(Group, field="name"),
+        widget=InstanceForeignKeyWidget(Group, field="name", column_name="team", required=True),
     )
 
     themes = Field(
         column_name="theme",
         attribute="themes",
-        widget=ThemeManyToManyWidget(Theme, field="name"),
+        widget=RequiredManyToManyWidget(Theme, field="name", column_name="theme"),
+    )
+
+    sources = Field(
+        column_name="source",
+        attribute="sources",
+        widget=RequiredManyToManyWidget(Source, field="name", column_name="source"),
     )
 
     dimension = Field(
         column_name="dimension",
         attribute="dimension",
-        widget=DimensionForeignKeyWidget(Dimension, field="code"),
+        widget=InstanceForeignKeyWidget(Dimension, field="code", column_name="dimension", required=False),
     )
 
     parent = Field(
         column_name="parent",
         attribute="parent",
-        widget=ParentForeignKeyWidget(Measure, field="name"),
+        widget=InstanceForeignKeyWidget(Measure, field="name", column_name="parent", required=False),
     )
 
     def before_import(self, dataset, **kwargs):
