@@ -2,12 +2,12 @@ import pytest
 from model_bakery import baker
 
 from referentie_tabellen.models import Theme
-from statistiek_hub.resources.measure_resource import MANYTOMANY_SEPARATOR, ThemeManyToManyWidget
+from statistiek_hub.resources.measure_resource import MANYTOMANY_SEPARATOR, RequiredManyToManyWidget
 
 
-class TestThemeManyToManyWidget:
+class TestRequiredManyToManyWidget:
     def setup_method(self):
-        self.widget = ThemeManyToManyWidget(Theme, field="name")
+        self.widget = RequiredManyToManyWidget(Theme, field="name", column_name="theme")
 
     def test_clean_raises_when_value_blank(self):
         with pytest.raises(ValueError) as exc:
@@ -35,4 +35,6 @@ class TestThemeManyToManyWidget:
         with pytest.raises(ValueError) as exc:
             self.widget.clean(value)
 
-        assert missing_theme in str(exc.value)
+        message = str(exc.value)
+        assert missing_theme in message
+        assert "kolom 'theme'" in message.lower()

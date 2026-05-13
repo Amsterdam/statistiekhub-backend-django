@@ -18,7 +18,6 @@ def _get_qs_publishmeasure() -> QuerySet:
 
     queryset = (
         Measure.objects.select_related("unit")
-        .prefetch_related("themes")
         .all()
         .defer("created_at", "updated_at", "id", "team")
         .annotate(
@@ -26,6 +25,7 @@ def _get_qs_publishmeasure() -> QuerySet:
             unit_symbol=F("unit__symbol"),
             theme=ArrayAgg("themes__name", distinct=True),
             theme_uk=ArrayAgg("themes__name_uk", distinct=True),
+            source=ArrayAgg("sources__name", distinct=True),
         )
     )
     return queryset

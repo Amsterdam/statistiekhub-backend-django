@@ -92,11 +92,12 @@ def check_code_in_name(code: str, name: str) -> ValidationError:
         return ValidationError(f"This field needs to be containing _{code}")
 
 
-def get_instance(model, field, row, column):
+def get_instance(model, field, value, *, column: str | None = None):
     try:
-        instance = model.objects.get(**{f"{field}__iexact": row[column]})
+        instance = model.objects.get(**{f"{field}__iexact": value})
         error = False
     except model.DoesNotExist:
         instance = None
-        error = ObjectDoesNotExist(f"Provided {column}={row[column]} does not exist.")
+        key = column or field
+        error = ObjectDoesNotExist(f"Provided {key}={value} does not exist.")
     return (instance, error)

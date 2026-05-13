@@ -61,3 +61,4 @@ class SourceAdmin(admin.ModelAdmin):
     list_display = ("name", "name_long", "id")
     list_filter = ("name",)
     ordering = ("name_long",)
+    search_fields = ("name",)
