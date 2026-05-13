@@ -9,11 +9,11 @@ from django.db.models.query import QuerySet
 from publicatie_tabellen.constants_settings import (
     EXCLUDE_KLEURENPALET_SD,
     KLEURENPALET,
+    SD_GGW_LABEL,
     SD_MIN_BEVTOTAAL,
     SD_MIN_WVOORRBAG,
-    SP_CODE_AMSTERDAM,
     SD_WIJK_LABEL,
-    SD_GGW_LABEL,
+    SP_CODE_AMSTERDAM,
 )
 from publicatie_tabellen.models import PublicationObservation, PublicationStatistic
 from publicatie_tabellen.utils import (
