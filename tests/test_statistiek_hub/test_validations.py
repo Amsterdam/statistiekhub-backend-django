@@ -16,14 +16,14 @@ from statistiek_hub.validations import (
 class TestValidations:
     @pytest.mark.django_db
     def test_get_instance_notexists(self):
-        result = get_instance(Measure, field="name", row={"measure": "test"}, column="measure")
+        result = get_instance(Measure, field="name", value="test", column="measure")
         assert str(result[1]) == "Provided measure=test does not exist."
 
     @pytest.mark.django_db
     def test_get_instance_exists(self):
         var = "BEVTOT"
         testmeasure = baker.make(Measure, name=var, team=baker.make(Group))
-        result = get_instance(Measure, field="name", row={"measure": var}, column="measure")
+        result = get_instance(Measure, field="name", value=var, column="measure")
         assert result[0].name == testmeasure.name
 
     @pytest.mark.parametrize(

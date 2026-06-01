@@ -18,13 +18,13 @@ class PublicationMeasure(models.Model):
     description_uk = models.TextField(blank=True, null=True)
     frequency = models.CharField(max_length=50, blank=True, null=True)
     frequency_uk = models.CharField(max_length=50, blank=True, null=True)
-    source = models.CharField(max_length=100)
+    source = models.CharField(max_length=200)
     theme = ArrayField(
-        base_field=models.CharField(max_length=50),
+        base_field=models.CharField(max_length=200),
         default=list,
     )
     theme_uk = ArrayField(
-        base_field=models.CharField(max_length=50),
+        base_field=models.CharField(max_length=200),
         default=list,
     )
     unit = models.CharField(max_length=30)
