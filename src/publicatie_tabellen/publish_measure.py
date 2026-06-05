@@ -2,7 +2,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import F
+from django.db.models import F, Q, Value
 from django.db.models.query import QuerySet
 
 from publicatie_tabellen.models import PublicationMeasure
@@ -23,9 +23,24 @@ def _get_qs_publishmeasure() -> QuerySet:
         .annotate(
             unit_code=F("unit__code"),
             unit_symbol=F("unit__symbol"),
-            theme=ArrayAgg("themes__name", distinct=True),
-            theme_uk=ArrayAgg("themes__name_uk", distinct=True),
-            source=ArrayAgg("sources__name", distinct=True),
+            theme=ArrayAgg(
+                "themes__name",
+                filter=Q(themes__name__isnull=False),
+                distinct=True,
+                default=Value([]),
+            ),
+            theme_uk=ArrayAgg(
+                "themes__name_uk",
+                filter=Q(themes__name_uk__isnull=False),
+                distinct=True,
+                default=Value([]),
+            ),
+            source=ArrayAgg(
+                "sources__name",
+                filter=Q(sources__name__isnull=False),
+                distinct=True,
+                default=Value([]),
+            ),
         )
     )
     return queryset
