@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('publicatie_tabellen', '0010_alter_publicationmeasure_source_and_more'),
+        ("publicatie_tabellen", "0010_alter_publicationmeasure_source_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='publicationmeasure',
-            name='theme',
+            model_name="publicationmeasure",
+            name="theme",
             field=models.CharField(max_length=200),
         ),
         migrations.AlterField(
-            model_name='publicationmeasure',
-            name='theme_uk',
+            model_name="publicationmeasure",
+            name="theme_uk",
             field=models.CharField(max_length=200),
         ),
     ]
