@@ -55,7 +55,6 @@ class Measure(TimeStampMixin, AddErrorFuncion):
     )
     unit = models.ForeignKey(Unit, models.RESTRICT)
     decimals = models.IntegerField(default=0)
-    source_old = models.CharField(max_length=100)
     sources = models.ManyToManyField(Source, related_name="measures_sources")
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, blank=True, null=True)
     themes = models.ManyToManyField(Theme, related_name="measures_themes")
