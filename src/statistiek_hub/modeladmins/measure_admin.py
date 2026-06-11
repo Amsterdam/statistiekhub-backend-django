@@ -116,7 +116,6 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
                     "definition",
                     "unit",
                     "decimals",
-                    "source_old",
                     "sources",
                     "temporaltype",
                     "sensitive",
