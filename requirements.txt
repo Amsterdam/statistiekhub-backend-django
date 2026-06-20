@@ -62,7 +62,7 @@ click-plugins==1.1.1.2
     # via celery
 click-repl==0.3.0
     # via celery
-cryptography==48.0.0
+cryptography==48.0.1
     # via
     #   azure-identity
     #   azure-keyvault-keys
