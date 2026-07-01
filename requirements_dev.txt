@@ -8,15 +8,15 @@ asgiref==3.11.1
     # via django
 build==1.5.0
     # via pip-tools
-click==8.4.1
+click==8.4.2
     # via pip-tools
-coverage[toml]==7.14.1
+coverage[toml]==7.14.3
     # via pytest-cov
-django==6.0.5
+django==6.0.6
     # via model-bakery
 iniconfig==2.3.0
     # via pytest
-model-bakery==1.23.4
+model-bakery==1.24.0
     # via -r requirements_dev.in
 packaging==26.2
     # via
@@ -35,7 +35,7 @@ pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
-pytest==9.0.3
+pytest==9.1.1
     # via
     #   -r requirements_dev.in
     #   pytest-cov
