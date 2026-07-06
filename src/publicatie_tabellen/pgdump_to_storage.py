@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 import zipfile
+from typing import Literal, TypeAlias
 
 import django.apps
 from django.core.files.storage import InvalidStorageError, default_storage, storages
@@ -11,17 +12,28 @@ from publicatie_tabellen.models import ChangesLog
 
 logger = logging.getLogger(__name__)
 
+ModelNameList: TypeAlias = list[str]
+AppDumpSelection: TypeAlias = list[tuple[str, Literal["_all_"] | ModelNameList]]
+
 
 class PgDumpToStorage:
     TMP_DIRECTORY = "/tmp/pgdump"
 
-    def start_dump(self, app_names: list):
+    def start_dump(self, app_names: AppDumpSelection) -> None:
         os.makedirs(self.TMP_DIRECTORY, exist_ok=True)
-        for app in app_names:
-            for model in django.apps.apps.get_app_config(app).get_models():
-                if isinstance(model, ChangesLog):
-                    continue
+        for app, selection in app_names:
+            models = self._resolve_models_to_dump(app, selection)
+            for model in models:
                 self._dump_model_to_csv_zip(model)
+
+    def _resolve_models_to_dump(self, app: str, selection: Literal["_all_"] | ModelNameList):
+        if selection == "_all_":
+            return [model for model in django.apps.apps.get_app_config(app).get_models() if model != ChangesLog]
+
+        if not isinstance(selection, list):
+            raise TypeError(f"Expected a list of model names for app '{app}', got {type(selection).__name__}.")
+
+        return [django.apps.apps.get_model(app, model_name) for model_name in selection]
 
     def _dump_model_to_csv_zip(self, model):
         table_name = model._meta.db_table

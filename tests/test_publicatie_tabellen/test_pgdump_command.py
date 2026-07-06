@@ -12,7 +12,7 @@ from model_bakery import baker
 
 from publicatie_tabellen.models import PublicationUpdatedAt
 from publicatie_tabellen.pgdump_to_storage import PgDumpToStorage
-from referentie_tabellen.models import Theme
+from referentie_tabellen.models import SpatialDimensionType, Theme
 
 
 class TestPgDumpToStorage:
@@ -20,12 +20,23 @@ class TestPgDumpToStorage:
     def test_start_dump(self, mock_dump):
         PgDumpToStorage().start_dump(
             [
-                "publicatie_tabellen",
+                ("publicatie_tabellen", "_all_"),
+                ("statistiek_hub", ["SpatialDimension"]),
             ]
         )
 
         assert os.path.isdir(PgDumpToStorage.TMP_DIRECTORY)
         assert mock_dump.called
+
+        shutil.rmtree(PgDumpToStorage.TMP_DIRECTORY)
+
+    @patch("publicatie_tabellen.pgdump_to_storage.PgDumpToStorage._dump_model_to_csv_zip")
+    def test_start_dump_multiple_models_list(self, mock_dump):
+        PgDumpToStorage().start_dump([("referentie_tabellen", ["Theme", "SpatialDimensionType"])])
+
+        assert os.path.isdir(PgDumpToStorage.TMP_DIRECTORY)
+        dumped_models = {call.args[0] for call in mock_dump.call_args_list}
+        assert dumped_models == {Theme, SpatialDimensionType}
 
         shutil.rmtree(PgDumpToStorage.TMP_DIRECTORY)
 
