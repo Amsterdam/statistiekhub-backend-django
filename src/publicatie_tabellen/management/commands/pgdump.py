@@ -6,7 +6,7 @@ from django.db import transaction
 from opentelemetry import trace
 
 from publicatie_tabellen.models import ChangesLog, PublicationUpdatedAt
-from publicatie_tabellen.pgdump_to_storage import PgDumpToStorage
+from publicatie_tabellen.pgdump_to_storage import AppDumpSelection, PgDumpToStorage
 from publicatie_tabellen.publication_main import PublishFunction
 
 tracer = trace.get_tracer(__name__)
@@ -47,8 +47,10 @@ class Command(BaseCommand):
         if changed:
             try:
                 # pg_dump tables
-                app_names = [
-                    "publicatie_tabellen",
+                app_names: AppDumpSelection = [
+                    ("publicatie_tabellen", "_all_"),
+                    ("referentie_tabellen", "_all_"),
+                    ("statistiek_hub", ["SpatialDimension"]),
                 ]
                 dump = PgDumpToStorage()
 
