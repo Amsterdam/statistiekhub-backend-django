@@ -1,8 +1,15 @@
+from datetime import date
+
 import pytest
 from model_bakery import baker
+from tablib import Dataset
 
 from referentie_tabellen.models import Theme
-from statistiek_hub.resources.measure_resource import MANYTOMANY_SEPARATOR, RequiredManyToManyWidget
+from statistiek_hub.resources.measure_resource import (
+    MANYTOMANY_SEPARATOR,
+    MeasureResource,
+    RequiredManyToManyWidget,
+)
 
 
 class TestRequiredManyToManyWidget:
@@ -38,3 +45,35 @@ class TestRequiredManyToManyWidget:
         message = str(exc.value)
         assert missing_theme in message
         assert "kolom 'theme'" in message.lower()
+
+
+@pytest.mark.parametrize(
+    "temporaltype_values, expected",
+    [
+        (["Peildatum", "periode"], [1, 2]),
+        ([" peildatum ", "PERIODE"], [1, 2]),
+        (["1", "2"], [1, 2]),
+    ],
+)
+def test_measure_resource_normalizes_temporaltype_labels_case_insensitive(temporaltype_values, expected):
+    dataset = Dataset()
+    dataset.headers = ["name", "temporaltype"]
+
+    for index, temporaltype_value in enumerate(temporaltype_values, start=1):
+        dataset.append([f"MEASURE_{index}", temporaltype_value])
+
+    resource = MeasureResource()
+    resource.before_import(dataset)
+
+    assert list(dataset["temporaltype"]) == expected
+
+
+def test_measure_resource_normalizes_deprecated_date_in_place():
+    dataset = Dataset()
+    dataset.headers = ["name", "deprecated_date"]
+    dataset.append(["MEASURE_1", "2026-07-21"])
+
+    resource = MeasureResource()
+    resource.before_import(dataset)
+
+    assert list(dataset["deprecated_date"]) == [date(2026, 7, 21)]

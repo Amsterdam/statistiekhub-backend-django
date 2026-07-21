@@ -5,12 +5,42 @@ from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 
 from referentie_tabellen.models import Source, Theme, Unit
+from referentie_tabellen.referentie_choices import TemporaltypeChoices
 from statistiek_hub.models.dimension import Dimension
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.utils.datetime import convert_to_date
 from statistiek_hub.validations import get_instance
 
 MANYTOMANY_SEPARATOR = "|"
+TEMPORALTYPE_LABEL_TO_VALUE = {label.casefold(): value for value, label in TemporaltypeChoices.choices}
+
+
+def _set_dataset_column(dataset, column_name, values):
+    """Replace an existing dataset column with new values in place."""
+    column_index = dataset.headers.index(column_name)
+    if len(values) != len(dataset._data):
+        raise ValueError(f"Kolom '{column_name}' heeft een onverwacht aantal waarden.")
+
+    for row, value in zip(dataset._data, values):
+        row[column_index] = value
+
+
+def _normalize_temporaltype(value):
+    """Normalize temporaltype labels or numeric strings to choice values."""
+    raw_value = "" if value is None else str(value).strip()
+    if raw_value == "":
+        raise ValueError("Kolom 'temporaltype' is verplicht en mag niet leeg zijn.")
+
+    if raw_value.isdigit():
+        numeric_value = int(raw_value)
+        if numeric_value in TemporaltypeChoices.values:
+            return numeric_value
+
+    try:
+        return TEMPORALTYPE_LABEL_TO_VALUE[raw_value.casefold()]
+    except KeyError as exc:
+        valid_values = ", ".join(label for _, label in TemporaltypeChoices.choices)
+        raise ValueError(f"Kolom 'temporaltype' moet een van de waarden {valid_values} bevatten.") from exc
 
 
 class InstanceForeignKeyWidget(ForeignKeyWidget):
@@ -115,10 +145,10 @@ class MeasureResource(ModelResource):
 
         if "deprecated_date" in self._imported_headers:
             # omzetten naar datum veld
-            dataset.append_col(
-                tuple(convert_to_date(x) for x in dataset["deprecated_date"]),
-                header="deprecated_date",
-            )
+            _set_dataset_column(dataset, "deprecated_date", [convert_to_date(x) for x in dataset["deprecated_date"]])
+
+        if "temporaltype" in self._imported_headers:
+            _set_dataset_column(dataset, "temporaltype", [_normalize_temporaltype(x) for x in dataset["temporaltype"]])
 
         return super().before_import(dataset, **kwargs)
 
