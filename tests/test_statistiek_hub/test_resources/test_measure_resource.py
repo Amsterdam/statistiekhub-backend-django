@@ -4,7 +4,7 @@ import pytest
 from model_bakery import baker
 from tablib import Dataset
 
-from referentie_tabellen.models import Theme
+from referentie_tabellen.models import Source, Theme
 from statistiek_hub.resources.measure_resource import (
     MANYTOMANY_SEPARATOR,
     MeasureResource,
@@ -45,6 +45,28 @@ class TestRequiredManyToManyWidget:
         message = str(exc.value)
         assert missing_theme in message
         assert "kolom 'theme'" in message.lower()
+
+    @pytest.mark.django_db
+    def test_clean_returns_queryset_when_all_theme_values_exist_case_insensitive(self):
+        theme_a = baker.make(Theme, name="Theme A", name_uk="Theme A UK", abbreviation="TA")
+        theme_b = baker.make(Theme, name="Theme B", name_uk="Theme B UK", abbreviation="TB")
+
+        value = f"{theme_a.name.lower()}{MANYTOMANY_SEPARATOR} {theme_b.name.upper()}"
+        queryset = self.widget.clean(value)
+
+        assert set(queryset.values_list("id", flat=True)) == {theme_a.id, theme_b.id}
+
+
+@pytest.mark.django_db
+def test_required_many_to_many_widget_is_case_insensitive_for_source():
+    widget = RequiredManyToManyWidget(Source, field="name", column_name="source")
+    source_a = baker.make(Source, name="Source A", name_long="Source A Long")
+    source_b = baker.make(Source, name="Source B", name_long="Source B Long")
+
+    value = f"{source_a.name.lower()}{MANYTOMANY_SEPARATOR}{source_b.name.upper()}"
+    queryset = widget.clean(value)
+
+    assert set(queryset.values_list("id", flat=True)) == {source_a.id, source_b.id}
 
 
 @pytest.mark.parametrize(

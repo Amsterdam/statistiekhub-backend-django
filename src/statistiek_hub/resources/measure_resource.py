@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group
+from django.db.models import Q
 from import_export.fields import Field
 from import_export.instance_loaders import CachedInstanceLoader
 from import_export.resources import ModelResource
@@ -89,9 +90,16 @@ class RequiredManyToManyWidget(ManyToManyWidget):
             raise ValueError(f"Kolom '{self.column_name}' is verplicht en mag niet leeg zijn.")
 
         values = [v.strip() for v in str(value).split(self.separator) if v.strip()]
-        qs = self.model.objects.filter(**{f"{self.field}__in": values})
-        found_values = set(qs.values_list(self.field, flat=True))
-        missing_values = [v for v in values if v not in found_values]
+        if not values:
+            raise ValueError(f"Kolom '{self.column_name}' is verplicht en mag niet leeg zijn.")
+
+        query = Q()
+        for item in values:
+            query |= Q(**{f"{self.field}__iexact": item})
+
+        qs = self.model.objects.filter(query).distinct()
+        found_values = {str(getattr(item, self.field)).casefold() for item in qs}
+        missing_values = [v for v in values if v.casefold() not in found_values]
         if missing_values:
             missing = ", ".join(missing_values)
             raise ValueError(f"De volgende waarde(n) in kolom '{self.column_name}' bestaan niet: {missing}.")
