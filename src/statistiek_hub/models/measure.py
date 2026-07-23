@@ -9,7 +9,7 @@ from django.db.models import Q
 
 from referentie_tabellen.models import Source, Theme, Unit
 from referentie_tabellen.referentie_choices import TemporaltypeChoices
-from statistiek_hub.validations import check_code_in_name, validate_calculation_string
+from statistiek_hub.validations import check_code_in_name, normalize_measure_name, validate_calculation_string
 
 from .dimension import Dimension
 from .model_mixin import AddErrorFuncion, TimeStampMixin
@@ -75,7 +75,10 @@ class Measure(TimeStampMixin, AddErrorFuncion):
         super().clean()
         errors = {}
 
-        self.name = self.name.upper()
+        try:
+            self.name = normalize_measure_name(self.name)
+        except ValueError as exc:
+            self.add_error(errors, {"name": str(exc)})
 
         # if self.unit:
         #     if self.unit.code:
@@ -85,19 +88,15 @@ class Measure(TimeStampMixin, AddErrorFuncion):
         #     else:
         #         pass
 
-        if self.dimension:
-            if self.dimension.code:
-                self.add_error(errors, {"name": check_code_in_name(self.dimension.code, self.name)})
-            else:
-                pass
+        if self.dimension and self.dimension.code:
+            self.add_error(errors, {"name": check_code_in_name(self.dimension.code, self.name)})
 
         if self.deprecated and not self.deprecated_date:
             self.deprecated_date = datetime.datetime.now().date()
 
-        if self.team_id:
-            if any(self.team.name.startswith(prefix) for prefix in self.excluded_group_prefixes):
-                prefix_list = '", "'.join(self.excluded_group_prefixes)
-                self.add_error(errors, {"group": f'Group name cannot start with: "{prefix_list}"'})
+        if self.team_id and any(self.team.name.startswith(prefix) for prefix in self.excluded_group_prefixes):
+            prefix_list = '", "'.join(self.excluded_group_prefixes)
+            self.add_error(errors, {"group": f'Group name cannot start with: "{prefix_list}"'})
 
         if errors:
             raise ValidationError(errors)

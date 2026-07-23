@@ -45,6 +45,20 @@ class TestModelSave:
         assert not Measure.objects.exists()
 
     @pytest.mark.django_db
+    def test_save_measure_name_trimmed_and_upper(self):
+        """name should be trimmed and saved upper"""
+        measure = baker.make(Measure, name="  test_trim  ", team=baker.make(Group))
+
+        assert measure.name == "TEST_TRIM"
+
+    @pytest.mark.django_db
+    def test_save_measure_name_with_internal_space_raises_validation_error(self):
+        with pytest.raises(ValidationError) as excinfo:
+            baker.make(Measure, name="test name", team=baker.make(Group))
+
+        assert "Name mag geen spaties bevatten" in str(excinfo.value)
+
+    @pytest.mark.django_db
     def test_save_observation_validationerror(self):
         """percentage bigger than 200 -> result in validationerror"""
 

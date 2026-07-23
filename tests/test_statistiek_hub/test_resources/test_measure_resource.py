@@ -10,6 +10,7 @@ from statistiek_hub.resources.measure_resource import (
     MeasureResource,
     RequiredManyToManyWidget,
 )
+from statistiek_hub.models.measure import Measure
 
 
 class TestRequiredManyToManyWidget:
@@ -99,3 +100,30 @@ def test_measure_resource_normalizes_deprecated_date_in_place():
     resource.before_import(dataset)
 
     assert list(dataset["deprecated_date"]) == [date(2026, 7, 21)]
+
+
+@pytest.mark.django_db
+def test_measure_resource_import_updates_existing_measure_when_name_not_uppercase():
+    unit = baker.make("referentie_tabellen.Unit", name="aantal")
+    measure = baker.make(
+        Measure,
+        name="EXISTING_MEASURE",
+        label="Old label",
+        definition="Old definition",
+        unit=unit,
+        team=baker.make("auth.Group"),
+    )
+
+    dataset = Dataset()
+    dataset.headers = ["name", "label", "definition", "unit"]
+    dataset.append(["existing_measure", "New label", "New definition", unit.name])
+
+    resource = MeasureResource()
+    result = resource.import_data(dataset, dry_run=False, raise_errors=False)
+
+    assert result.has_errors() is False
+    assert Measure.objects.count() == 1
+
+    measure.refresh_from_db()
+    assert measure.label == "New label"
+    assert measure.definition == "New definition"

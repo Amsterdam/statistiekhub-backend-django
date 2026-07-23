@@ -92,6 +92,18 @@ def check_code_in_name(code: str, name: str) -> ValidationError:
         return ValidationError(f"This field needs to be containing _{code}")
 
 
+def normalize_measure_name(value) -> str:
+    """Normalize and validate measure names shared by model and import resource."""
+    normalized = "" if value is None else str(value).strip().upper()
+    if normalized == "":
+        raise ValueError("Kolom 'name' is verplicht en mag niet leeg zijn.")
+
+    if any(char.isspace() for char in normalized):
+        raise ValueError("Name mag geen spaties bevatten, gebruik _ of - als scheidingsteken.")
+
+    return normalized
+
+
 def get_instance(model, field, value, *, column: str | None = None):
     try:
         instance = model.objects.get(**{f"{field}__iexact": value})

@@ -10,7 +10,7 @@ from referentie_tabellen.referentie_choices import TemporaltypeChoices
 from statistiek_hub.models.dimension import Dimension
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.utils.datetime import convert_to_date
-from statistiek_hub.validations import get_instance
+from statistiek_hub.validations import get_instance, normalize_measure_name
 
 MANYTOMANY_SEPARATOR = "|"
 TEMPORALTYPE_LABEL_TO_VALUE = {label.casefold(): value for value, label in TemporaltypeChoices.choices}
@@ -150,6 +150,8 @@ class MeasureResource(ModelResource):
 
         if "name" not in self._imported_headers:
             raise ValueError("Importbestand mist de kolom 'name' om bestaande metingen te vinden.")
+
+        _set_dataset_column(dataset, "name", [normalize_measure_name(x) for x in dataset["name"]])
 
         if "deprecated_date" in self._imported_headers:
             # omzetten naar datum veld
