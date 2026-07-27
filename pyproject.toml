@@ -19,11 +19,11 @@ omit = [
     "/app/src/main/azure_settings.py",
     "*/urls.py",
     "*/apps.py",
-    "*/models.py",
     "*/utils/timer.py",
     "*/admin.py",
     "/app/src/main/celery.py",
     "/app/src/main/kombu/transport/*",
+    "*/statistiek_hub/migrations/0023_measure_fill_new_fields.py", # skip is a one-time migration of json-fields into separate model-fields
     "*/csv_import/observation/*"  # skip the csv_import/observation code for now
 ]
 

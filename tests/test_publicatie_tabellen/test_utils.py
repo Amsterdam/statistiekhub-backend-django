@@ -208,3 +208,81 @@ def test_set_small_regions_to_nan_if_minimum_uses_threshold_column_when_minimum_
     else:
         assert var_value == expected_var_value
     assert result.loc[result["measure_name"] == "BEVTOTAAL", "value"].iloc[0] == 900.0
+
+
+def test_set_small_regions_to_nan_if_minimum_returns_original_dataframe_when_dfmin_has_no_columns(caplog):
+    dfmin = pd.DataFrame()
+    dfobs = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "VAR",
+                "value": 10.0,
+                "sd_minimum_bevtotaal": 50,
+            }
+        ]
+    )
+
+    result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs)
+
+    pd.testing.assert_frame_equal(result, dfobs)
+    assert "dfmin is missing required columns" in caplog.text
+
+
+def test_set_small_regions_to_nan_if_minimum_raises_on_missing_required_input_columns():
+    dfmin = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 100,
+            }
+        ]
+    )
+    # Missing 'measure_name' column in input dataframe.
+    dfobs = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "value": 10.0,
+            }
+        ]
+    )
+
+    with pytest.raises(ValueError, match="missing required columns"):
+        set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs)
+
+
+def test_set_small_regions_to_nan_if_minimum_raises_when_threshold_column_missing():
+    dfmin = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "BEVTOTAAL",
+                "value": 100,
+            }
+        ]
+    )
+    # Missing sd_minimum_bevtotaal while minimum_value is None.
+    dfobs = pd.DataFrame(
+        [
+            {
+                "temporaldimensionyear": 2024,
+                "spatialdimensiondate": "2024-01-01",
+                "spatialdimensioncode": "A",
+                "measure_name": "VAR",
+                "value": 10.0,
+            }
+        ]
+    )
+
+    with pytest.raises(ValueError, match="missing threshold column"):
+        set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs)
