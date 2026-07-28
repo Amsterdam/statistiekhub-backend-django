@@ -5,12 +5,12 @@ from model_bakery import baker
 from tablib import Dataset
 
 from referentie_tabellen.models import Source, Theme
+from statistiek_hub.models.measure import Measure
 from statistiek_hub.resources.measure_resource import (
     MANYTOMANY_SEPARATOR,
     MeasureResource,
     RequiredManyToManyWidget,
 )
-from statistiek_hub.models.measure import Measure
 
 
 class TestRequiredManyToManyWidget:
