@@ -9,9 +9,9 @@ from model_bakery import baker
 from publicatie_tabellen.constants_settings import (
     EXCLUDE_KLEURENPALET_SD,
     KLEURENPALET,
-    SP_CODE_AMSTERDAM,
     SD_MIN_BEVTOTAAL,
     SD_MIN_WVOORRBAG,
+    SP_CODE_AMSTERDAM,
 )
 from publicatie_tabellen.models import PublicationObservation, PublicationStatistic
 from publicatie_tabellen.publish_observation import publishobservation

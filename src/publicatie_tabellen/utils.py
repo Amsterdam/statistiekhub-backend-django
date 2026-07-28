@@ -130,8 +130,7 @@ def set_small_regions_to_nan_if_minimum(
     required_dfmin_columns = set(join_keys + ["measure_name", "value"])
     if not required_dfmin_columns.issubset(dfmin.columns):
         logger.warning(
-            "set_small_regions_to_nan_if_minimum: dfmin is missing required columns %s; "
-            "returning original dataframe",
+            "set_small_regions_to_nan_if_minimum: dfmin is missing required columns %s; returning original dataframe",
             sorted(required_dfmin_columns - set(dfmin.columns)),
         )
         return dataframe
