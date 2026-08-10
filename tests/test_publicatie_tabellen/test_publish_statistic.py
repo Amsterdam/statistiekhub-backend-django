@@ -2,6 +2,7 @@ import datetime
 
 import numpy as np
 import pytest
+from django.contrib import messages
 from django.contrib.auth.models import Group
 from model_bakery import baker
 
@@ -10,13 +11,15 @@ from publicatie_tabellen.constants_settings import (
     KLEURENPALET,
     SD_MIN_BEVTOTAAL,
     SD_MIN_WVOORRBAG,
+    SP_CODE_AMSTERDAM,
 )
-from publicatie_tabellen.models import PublicationObservation
+from publicatie_tabellen.models import PublicationObservation, PublicationStatistic
 from publicatie_tabellen.publish_observation import publishobservation
 from publicatie_tabellen.publish_statistic import (
     _get_qs_publishstatistic_measure,
-    _get_qs_publishstatistic_obs,
+    _get_qs_publishstatistic_obs_all,
     _select_df_wijk_ggw,
+    publishstatistic,
 )
 from publicatie_tabellen.utils import (
     convert_queryset_into_dataframe,
@@ -192,7 +195,7 @@ def test_get_qs_publishstatistic_measure(fill_ref_tabellen, extra_attr, expected
 )
 @pytest.mark.django_db
 def test_get_df_data_publishstatistic(fill_ref_tabellen, extra_attr, tempdim, spatialdim, expected):
-    """check correct filter for select_get_qs_publishstatistic_obs query selection"""
+    """check correct filter for publishstatistic observation query selection"""
     fixture = fill_ref_tabellen
 
     measuretest = baker.make(
@@ -215,10 +218,11 @@ def test_get_df_data_publishstatistic(fill_ref_tabellen, extra_attr, tempdim, sp
 
     qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
+    qsobservation_all = _get_qs_publishstatistic_obs_all(PublicationObservation)
+    df_obs_all = convert_queryset_into_dataframe(qsobservation_all)
 
     for measure in qsmeasure:
-        qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
-        df_obs = convert_queryset_into_dataframe(qsobservation)
+        df_obs = df_obs_all[df_obs_all["measure_name"] == measure["name"]].copy()
         df = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
         assert len(df) == expected
@@ -266,8 +270,9 @@ def test_select_df_wijk_ggw(fill_bev_won_obs):
     qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
     measure_first = qsmeasure.first()
-    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure_first["name"])
-    df_obs = convert_queryset_into_dataframe(qsobservation)
+    qsobservation_all = _get_qs_publishstatistic_obs_all(PublicationObservation)
+    df_obs_all = convert_queryset_into_dataframe(qsobservation_all)
+    df_obs = df_obs_all[df_obs_all["measure_name"] == measure_first["name"]].copy()
     dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
     assert dfobs["spatialdimensiontype"].unique().tolist().sort() == ["Wijk", "GGW-gebied", "Gemeente"].sort()
@@ -400,8 +405,9 @@ def test_set_small_regions_to_nan_if_minimum(
     qsmeasure = _get_qs_publishstatistic_measure()
     df_measure = convert_queryset_into_dataframe(qsmeasure)
     measure = qsmeasure.get(name=measurevar.name)
-    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
-    df_obs = convert_queryset_into_dataframe(qsobservation)
+    qsobservation_all = _get_qs_publishstatistic_obs_all(PublicationObservation)
+    df_obs_all = convert_queryset_into_dataframe(qsobservation_all)
+    df_obs = df_obs_all[df_obs_all["measure_name"] == measure["name"]].copy()
     dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
@@ -471,18 +477,18 @@ def test_set_small_regions_to_nan_if_minimum_observations(fill_ref_tabellen, bev
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
+    qsobservation_all = _get_qs_publishstatistic_obs_all(PublicationObservation)
+    df_obs_all = convert_queryset_into_dataframe(qsobservation_all)
 
     measure = qsmeasure.get(name=measurevar.name)
-    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
-    df_obs = convert_queryset_into_dataframe(qsobservation)
+    df_obs = df_obs_all[df_obs_all["measure_name"] == measure["name"]].copy()
     dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
     df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
     assert np.testing.assert_equal(df_result[df_result["measure_name"] == "VAR"]["value"].values[0], expected) is None
 
     measure = qsmeasure.get(name=measurebev.name)
-    qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
-    df_obs = convert_queryset_into_dataframe(qsobservation)
+    df_obs = df_obs_all[df_obs_all["measure_name"] == measure["name"]].copy()
     dfobs = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
 
     df_result = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", dfobs, minimum_value=min_value)
@@ -499,4 +505,115 @@ def test_set_small_regions_to_nan_if_minimum_observations(fill_ref_tabellen, bev
     measurebev.delete()
     measurevar.delete()
     obsbev.delete()
+    obsvar.delete()
+
+
+@pytest.mark.django_db
+def test_publishstatistic_does_not_warn_when_join_not_empty_but_sd_all_nan():
+    """Join result exists, but no sd rows after filtering: no warning, no saved rows."""
+    unit = baker.make(Unit, name="aantal")
+    tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
+    temppeildatum = baker.make(TemporalDimension, startdate=datetime.date(2023, 12, 31), type=tempdimtype)
+    spatialdimtypegem = baker.make(SpatialDimensionType, name="Gemeente")
+    spatialgem = baker.make(SpatialDimension, type=spatialdimtypegem, code=SP_CODE_AMSTERDAM)
+    spatialdimtypewijk = baker.make(SpatialDimensionType, name="Wijk")
+    spatialwijk = baker.make(SpatialDimension, type=spatialdimtypewijk)
+
+    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=unit, team=baker.make(Group))
+    measurewon = baker.make(Measure, name="WVOORRBAG", unit=unit, team=baker.make(Group))
+    obsbev = baker.make(
+        Observation,
+        measure=measurebev,
+        temporaldimension=temppeildatum,
+        spatialdimension=spatialwijk,
+        value=1000,
+    )
+    obswon = baker.make(
+        Observation,
+        measure=measurewon,
+        temporaldimension=temppeildatum,
+        spatialdimension=spatialwijk,
+        value=1000,
+    )
+
+    measurevar = baker.make(
+        Measure,
+        name="VAR",
+        unit=unit,
+        extra_attr={KLEURENPALET: 3},
+        team=baker.make(Group),
+    )
+    obsvar = baker.make(
+        Observation,
+        measure=measurevar,
+        temporaldimension=temppeildatum,
+        spatialdimension=spatialgem,
+        value=10,
+    )
+
+    _, _ = publishobservation()
+    message, level = publishstatistic()
+
+    assert level == messages.SUCCESS
+    assert "WARNING" not in message
+    assert PublicationStatistic.objects.count() == 0
+
+    measurebev.delete()
+    measurewon.delete()
+    obsbev.delete()
+    obswon.delete()
+    measurevar.delete()
+    obsvar.delete()
+
+
+@pytest.mark.django_db
+def test_publishstatistic_warns_when_dfstatistic_is_empty_before_dropna(fill_ref_tabellen):
+    """No city average row means empty dfstatistic and measure should be warned."""
+    fixture = fill_ref_tabellen
+
+    measurebev = baker.make(Measure, name="BEVTOTAAL", unit=fixture["unit"], team=baker.make(Group))
+    measurewon = baker.make(Measure, name="WVOORRBAG", unit=fixture["unit"], team=baker.make(Group))
+    obsbev = baker.make(
+        Observation,
+        measure=measurebev,
+        temporaldimension=fixture["temppeildatum"],
+        spatialdimension=fixture["spatialwijk"],
+        value=1000,
+    )
+    obswon = baker.make(
+        Observation,
+        measure=measurewon,
+        temporaldimension=fixture["temppeildatum"],
+        spatialdimension=fixture["spatialwijk"],
+        value=1000,
+    )
+
+    measurevar = baker.make(
+        Measure,
+        name="VAR",
+        unit=fixture["unit"],
+        extra_attr={KLEURENPALET: 3},
+        team=baker.make(Group),
+    )
+    obsvar = baker.make(
+        Observation,
+        measure=measurevar,
+        temporaldimension=fixture["temppeildatum"],
+        spatialdimension=fixture["spatialwijk"],
+        value=10,
+    )
+
+    _, _ = publishobservation()
+    message, level = publishstatistic()
+
+    assert level == messages.SUCCESS
+    assert "WARNING" in message
+    assert "VAR" in message
+    assert PublicationStatistic.objects.count() == 0
+
+    measurebev.delete()
+    measurewon.delete()
+    obsbev.delete()
+    obswon.delete()
+    measurevar.delete()
     obsvar.delete()

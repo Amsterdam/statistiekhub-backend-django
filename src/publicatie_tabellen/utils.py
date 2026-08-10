@@ -1,9 +1,20 @@
+import logging
 from decimal import ROUND_HALF_EVEN, Decimal
 
 import numpy as np
 import pandas as pd
 from django.db.models import F
 from django.db.models.query import QuerySet
+
+from publicatie_tabellen.constants_settings import (
+    MEASURE_BEVTOTAAL,
+    MEASURE_WVOORRBAG,
+    SPATIAL_DIMENSION_GGW,
+    SPATIAL_DIMENSION_WIJK,
+    TEMPORAL_DIMENSIONTYPE_PEILDATUM,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def round_to_base(x, base=5):
@@ -59,9 +70,9 @@ def copy_dataframe(dataframe: pd.DataFrame, copy_to_model):
 
 def get_qs_for_bevmin_wonmin(
     obsmodel,
-    measures: list = ["BEVTOTAAL", "WVOORRBAG"],
-    spatialdimensiontypes: list = ["Wijk", "GGW-gebied"],
-    temporaldimensiontype: str = "Peildatum",
+    measures: tuple[str, ...] = (MEASURE_BEVTOTAAL, MEASURE_WVOORRBAG),
+    spatialdimensiontypes: tuple[str, ...] = (SPATIAL_DIMENSION_WIJK, SPATIAL_DIMENSION_GGW),
+    temporaldimensiontype: str = TEMPORAL_DIMENSIONTYPE_PEILDATUM,
 ) -> QuerySet:
     """get queryset of observations with only measures bevtotaal and wvoorrbag (default),
     for spatialdimensiontype wijk and ggw-gebied (default)
@@ -105,10 +116,29 @@ def set_small_regions_to_nan_if_minimum(
         "spatialdimensioncode",
     ]
 
+    if dataframe.empty:
+        return dataframe
+
+    required_dataframe_columns = set(join_keys + ["measure_name", "value"])
+    missing_dataframe_columns = required_dataframe_columns - set(dataframe.columns)
+    if missing_dataframe_columns:
+        raise ValueError(
+            "set_small_regions_to_nan_if_minimum: dataframe is missing required columns "
+            f"{sorted(missing_dataframe_columns)}"
+        )
+
+    required_dfmin_columns = set(join_keys + ["measure_name", "value"])
+    if not required_dfmin_columns.issubset(dfmin.columns):
+        logger.warning(
+            "set_small_regions_to_nan_if_minimum: dfmin is missing required columns %s; returning original dataframe",
+            sorted(required_dfmin_columns - set(dfmin.columns)),
+        )
+        return dataframe
+
     # get the values of bevtotaal or wvoorrbag
     _df_var_min = dfmin.loc[dfmin["measure_name"] == var_min, join_keys + ["value"]]
 
-    if len(_df_var_min) == 0 or len(dataframe) == 0:
+    if _df_var_min.empty:
         return dataframe
 
     hulp = dataframe.join(
@@ -122,6 +152,11 @@ def set_small_regions_to_nan_if_minimum(
         threshold = minimum_value
     else:
         minimum_value_column = f"sd_minimum_{var_min.lower()}"
+        if minimum_value_column not in hulp.columns:
+            raise ValueError(
+                "set_small_regions_to_nan_if_minimum: dataframe is missing threshold column "
+                f"'{minimum_value_column}' when minimum_value is None"
+            )
         threshold = hulp[minimum_value_column]
 
     mask_too_small = (hulp["measure_name"] != var_min) & (hulp["varc"] < threshold)

@@ -9,11 +9,17 @@ from django.db.models.query import QuerySet
 from publicatie_tabellen.constants_settings import (
     EXCLUDE_KLEURENPALET_SD,
     KLEURENPALET,
+    MEASURE_BEVTOTAAL,
+    MEASURE_WVOORRBAG,
     SD_GGW_LABEL,
     SD_MIN_BEVTOTAAL,
     SD_MIN_WVOORRBAG,
     SD_WIJK_LABEL,
     SP_CODE_AMSTERDAM,
+    SPATIAL_DIMENSION_GEMEENTE,
+    SPATIAL_DIMENSION_GGW,
+    SPATIAL_DIMENSION_WIJK,
+    TEMPORAL_DIMENSIONTYPE_PEILDATUM,
 )
 from publicatie_tabellen.models import PublicationObservation, PublicationStatistic
 from publicatie_tabellen.utils import (
@@ -27,16 +33,25 @@ from statistiek_hub.utils.truncate_model import truncate
 
 logger = logging.getLogger(__name__)
 
+PUBLISHSTATISTIC_MEASURE_BATCH_SIZE = 50
 
-def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_str) -> QuerySet:
-    """get queryset from cleaned obs publication model specificly for publishstatistic"""
+
+def _get_qs_publishstatistic_obs_all(cleaned_obsmodel, measure_names: list[str] | None = None) -> QuerySet:
+    """Get cleaned obs rows needed for publishstatistic, optionally limited to measures."""
+    queryset = cleaned_obsmodel.objects.filter(
+        spatialdimensiontype__in=[
+            SPATIAL_DIMENSION_WIJK,
+            SPATIAL_DIMENSION_GGW,
+            SPATIAL_DIMENSION_GEMEENTE,
+        ],
+        temporaldimensiontype=TEMPORAL_DIMENSIONTYPE_PEILDATUM,
+    )
+
+    if measure_names is not None:
+        queryset = queryset.filter(measure__in=measure_names)
+
     queryset = (
-        cleaned_obsmodel.objects.filter(
-            spatialdimensiontype__in=["Wijk", "GGW-gebied", "Gemeente"],
-            temporaldimensiontype="Peildatum",
-            measure=measure_str,
-        )
-        .annotate(
+        queryset.annotate(
             measure_name=F("measure"),
         )
         .order_by("measure_name", "temporaldimensionyear", "temporaldimensionstartdate")
@@ -57,6 +72,12 @@ def _get_qs_publishstatistic_obs(cleaned_obsmodel, measure_str) -> QuerySet:
     )
 
     return queryset
+
+
+def _iter_measure_batches(measures: list[dict], batch_size: int):
+    """Yield contiguous batches of measure dictionaries."""
+    for start in range(0, len(measures), batch_size):
+        yield measures[start : start + batch_size]
 
 
 def _get_qs_publishstatistic_measure() -> QuerySet:
@@ -99,7 +120,7 @@ def _select_df_mean(df: pd.DataFrame) -> pd.DataFrame:
 def _select_df_wijk_ggw(df: pd.DataFrame) -> pd.DataFrame:
     """Select only spatialdimension 'Wijk' and 'GGW-gebied'"""
     # TODO wat te doen met variabelen die geen std hebben omdat geen wijk en/of 22 gebied?
-    df_wijk_ggw = df[df["spatialdimensiontype"].isin(["Wijk", "GGW-gebied"])][
+    df_wijk_ggw = df[df["spatialdimensiontype"].isin([SPATIAL_DIMENSION_WIJK, SPATIAL_DIMENSION_GGW])][
         [
             "spatialdimensiondate",
             "spatialdimensiontype",
@@ -131,7 +152,7 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     # split df in wijk en gebied22 - standarddeviation
     _df_wijk = (
-        _df[_df["spatialdimensiontype"] == "Wijk"]
+        _df[_df["spatialdimensiontype"] == SPATIAL_DIMENSION_WIJK]
         .groupby(["temporaldimensionyear", "measure_id"])
         .agg({"value": "std"})
         .rename(columns={"value": "sd_wijk"})
@@ -140,7 +161,7 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
     _df_wijk["bron_wijk"] = SD_WIJK_LABEL
 
     _df_geb = (
-        _df[_df["spatialdimensiontype"] == "GGW-gebied"]
+        _df[_df["spatialdimensiontype"] == SPATIAL_DIMENSION_GGW]
         .groupby(["temporaldimensionyear", "measure_id"])
         .agg({"value": "std"})
         .rename(columns={"value": "sd_geb"})
@@ -148,7 +169,7 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
     )
     _df_geb["bron_geb"] = SD_GGW_LABEL
 
-    # std calculation of wijk and geb22 concatenation
+    # std calculation wijk and geb22 concatenation
     df_wijk_geb = _df_wijk.join(
         _df_geb.set_index(["temporaldimensionyear", "measure_id"]),
         on=["temporaldimensionyear", "measure_id"],
@@ -163,6 +184,21 @@ def _sd_berekening(dataframe: pd.DataFrame) -> pd.DataFrame:
     return df_wijk_geb[["temporaldimensionyear", "measure_id", "standarddeviation", "source"]]
 
 
+def _build_df_statistic(df: pd.DataFrame, dfmin: pd.DataFrame) -> pd.DataFrame:
+    """Build publication statistic dataframe for one measure."""
+    df_mean = _select_df_mean(df)
+    df_wijk_ggw = _select_df_wijk_ggw(df)
+    df_filtered = set_small_regions_to_nan_if_minimum(dfmin, MEASURE_BEVTOTAAL, df_wijk_ggw)
+    df_filtered = set_small_regions_to_nan_if_minimum(dfmin, MEASURE_WVOORRBAG, df_filtered)
+    df_sd = _sd_berekening(df_filtered)
+
+    return df_mean.join(
+        df_sd.set_index(["temporaldimensionyear", "measure_id"]),
+        on=["temporaldimensionyear", "measure_id"],
+        how="left",
+    )
+
+
 def publishstatistic() -> tuple:
     """select observations and calculate statistic
     exclude measures with:
@@ -173,49 +209,54 @@ def publishstatistic() -> tuple:
 
     logger.info("get data necessary for calculation of statistic standarddeviation")
     qsmeasure = _get_qs_publishstatistic_measure()
-    df_measure = convert_queryset_into_dataframe(qsmeasure)
+    measure_rows = list(qsmeasure)
 
     qsmin = get_qs_for_bevmin_wonmin(Observation)
     dfmin = convert_queryset_into_dataframe(qsmin)
     truncate(PublicationStatistic)
-    measure_no_sd = []
+    measure_no_sd: list[str] = []
 
-    for measure in qsmeasure:
-        # select observations
-        qsobservation = _get_qs_publishstatistic_obs(PublicationObservation, measure["name"])
-        df_obs = convert_queryset_into_dataframe(qsobservation)
-        df = df_obs.merge(df_measure, how="left", left_on="measure_name", right_on="name")
+    for measure_batch in _iter_measure_batches(measure_rows, PUBLISHSTATISTIC_MEASURE_BATCH_SIZE):
+        batch_names = [measure["name"] for measure in measure_batch]
+        # Build only the metadata DataFrame needed for this batch to lower peak memory usage.
+        df_measure_batch = pd.DataFrame.from_records(measure_batch)
 
-        if len(df) == 0:
-            measure_no_sd.append(measure["name"])
+        qsobservation_batch = _get_qs_publishstatistic_obs_all(PublicationObservation, batch_names)
+        df_obs_batch = convert_queryset_into_dataframe(qsobservation_batch)
+
+        if df_obs_batch.empty:
+            measure_no_sd.extend(batch_names)
+            del df_measure_batch, df_obs_batch
             continue
 
-        logger.info(f"aanmaken df met gemiddelde voor {measure}")
-        df_mean = _select_df_mean(df)
+        df_all = df_obs_batch.merge(df_measure_batch, how="left", left_on="measure_name", right_on="name")
+        grouped_by_measure = {name: group for name, group in df_all.groupby("measure_name")}
 
-        logger.info("berekening standaarddeviatie op wijk en geb22")
-        df_wijk_ggw = _select_df_wijk_ggw(df)
-        _hulp1 = set_small_regions_to_nan_if_minimum(dfmin, "BEVTOTAAL", df_wijk_ggw)
-        _hulp2 = set_small_regions_to_nan_if_minimum(dfmin, "WVOORRBAG", _hulp1)
-        _hulp3 = _sd_berekening(_hulp2)
+        for measure in measure_batch:
+            df = grouped_by_measure.get(measure["name"], pd.DataFrame())
 
-        dfstatistic = df_mean.join(
-            _hulp3.set_index(["temporaldimensionyear", "measure_id"]),
-            on=["temporaldimensionyear", "measure_id"],
-            how="left",
-        )
+            if df.empty:
+                measure_no_sd.append(measure["name"])
+                continue
 
-        if dfstatistic.empty:
-            # if there is no standarddeviation -> no save
-            measure_no_sd.append(measure["name"])
-            continue
+            logger.info("aanmaken df met gemiddelde voor %s", measure["name"])
+            logger.info("berekening standaarddeviatie op wijk en geb22")
+            dfstatistic = _build_df_statistic(df, dfmin)
 
-        # if there is no standarddeviation for specific temporaldimension -> remove record
-        dfstatistic.dropna(subset=["standarddeviation"], inplace=True)
-        dfstatistic.rename(columns={"measure_name": "measure"}, inplace=True)
+            if dfstatistic.empty:
+                # if there is no standarddeviation -> no save
+                measure_no_sd.append(measure["name"])
+                continue
 
-        # gemiddelde en std afronden op 3 decimalen -> set on the model field
-        copy_dataframe(dfstatistic, PublicationStatistic)
+            # if there is no standarddeviation for specific temporaldimension -> remove record
+            dfstatistic = dfstatistic.dropna(subset=["standarddeviation"])
+            dfstatistic = dfstatistic.rename(columns={"measure_name": "measure"})
+
+            # gemiddelde en std afronden op 3 decimalen -> set on the model field
+            copy_dataframe(dfstatistic, PublicationStatistic)
+
+        # Explicitly release references to batch-scoped DataFrames.
+        del df_measure_batch, df_obs_batch, df_all, grouped_by_measure
 
     extra = f", WARNING Not included: no standarddeviation for {measure_no_sd}" if len(measure_no_sd) > 0 else ""
 

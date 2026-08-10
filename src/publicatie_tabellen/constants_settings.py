@@ -16,3 +16,11 @@ SP_CODE_AMSTERDAM = "0363"
 # label standaarddeviatie voor publicatiestatic: field source
 SD_WIJK_LABEL = "Wijk"
 SD_GGW_LABEL = "GGW-gebied"
+
+# gedeelde dimensie- en meetwaarden
+SPATIAL_DIMENSION_WIJK = "Wijk"
+SPATIAL_DIMENSION_GGW = "GGW-gebied"
+SPATIAL_DIMENSION_GEMEENTE = "Gemeente"
+TEMPORAL_DIMENSIONTYPE_PEILDATUM = "Peildatum"
+MEASURE_BEVTOTAAL = "BEVTOTAAL"
+MEASURE_WVOORRBAG = "WVOORRBAG"
