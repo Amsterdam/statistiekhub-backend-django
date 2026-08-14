@@ -41,7 +41,7 @@ class ObservationResource(ModelResource):
         else:
             # load querysets into pandas df
             dfmeasure = set_stringfields_to_upper(
-                pd.DataFrame(list(Measure.objects.values("id", "name", "temporaltype")))
+                pd.DataFrame(list(Measure.objects.values("id", "name", "temporaltype", "deprecated")))
             )
 
             dfspatialdim = set_stringfields_to_upper(
@@ -72,13 +72,31 @@ class ObservationResource(ModelResource):
             df_main["spatial_date"] = df_main["spatial_date"].apply(convert_to_date)
             df_main["temporal_date"] = df_main["temporal_date"].apply(convert_to_date)
 
+            # check measure names: must exist and may not be deprecated
+            if dfmeasure.empty:
+                errors["measure_names"] = ValueError("Model voor measure_names is leeg")
+            else:
+                imported_measure_names = set(df_main["measure"].astype(str).str.upper())
+                known_measure_names = set(dfmeasure["name"].astype(str).str.upper())
+                deprecated_measure_names = set(
+                    dfmeasure.loc[dfmeasure["deprecated"], "name"].astype(str).str.upper()
+                )
+
+                unknown_in_dataset = sorted(imported_measure_names - known_measure_names)
+                if unknown_in_dataset:
+                    errors["measure_names"] = (
+                        "De volgende variabelen in measure bestaan niet: "
+                        f"{unknown_in_dataset}"
+                    )
+
+                deprecated_in_dataset = sorted(imported_measure_names & deprecated_measure_names)
+                if deprecated_in_dataset:
+                    errors["measure_deprecated"] = (
+                        "Vervallen variabelen mogen niet geimporteerd worden: "
+                        f"{deprecated_in_dataset}"
+                    )
+
             check = {
-                "measure_names": {
-                    "dataset": df_main,
-                    "dfmodel": dfmeasure,
-                    "column": ["measure"],
-                    "field": ["name"],
-                },
                 "spatial_dim": {
                     "dataset": df_main,
                     "dfmodel": dfspatialdim,
@@ -93,7 +111,7 @@ class ObservationResource(ModelResource):
                 },
             }
 
-            # check measure_names exists
+            # check spatial and temporal dimensions exist
             for key in check:
                 if check[key]["dfmodel"].empty:
                     errors[key] = ValueError(f"Model voor {key} is leeg")
