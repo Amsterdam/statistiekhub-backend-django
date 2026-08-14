@@ -35,7 +35,7 @@ class FilterResource(ModelResource):
         if error:
             errors["column_names"] = error
         else:
-            dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name")))
+            dfmeasure = pd.DataFrame(list(Measure.objects.values("id", "name", "deprecated")))
 
             # load dataset to pandas dataframe
             df_main = dataset.df
@@ -45,6 +45,14 @@ class FilterResource(ModelResource):
 
             if error:
                 errors["measure_names"] = error
+            else:
+                imported_measure_names = set(df_main["measure"].astype(str).str.upper())
+                deprecated_measure_names = set(dfmeasure.loc[dfmeasure["deprecated"], "name"].astype(str).str.upper())
+                deprecated_in_dataset = sorted(imported_measure_names & deprecated_measure_names)
+                if deprecated_in_dataset:
+                    errors["measure_deprecated"] = (
+                        f"Filters voor vervallen variabelen mogen niet geimporteerd worden: {deprecated_in_dataset}"
+                    )
 
         if errors:
             # to speed validation -> if errors empty dataset so no row's will be checked
