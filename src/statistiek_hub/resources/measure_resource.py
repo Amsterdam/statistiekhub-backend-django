@@ -153,6 +153,16 @@ class MeasureResource(ModelResource):
 
         _set_dataset_column(dataset, "name", [normalize_measure_name(x) for x in dataset["name"]])
 
+        imported_names = {str(name).strip().upper() for name in dataset["name"] if str(name).strip()}
+        existing_deprecated_measure_names = set(
+            Measure.objects.filter(name__in=imported_names, deprecated=True).values_list("name", flat=True)
+        )
+        if existing_deprecated_measure_names:
+            raise ValueError(
+                "Bestaande vervallen variabelen mogen niet geimporteerd worden. "
+                f"Aangetroffen vervallen variabelen: {sorted(existing_deprecated_measure_names)}."
+            )
+
         if "deprecated_date" in self._imported_headers:
             # omzetten naar datum veld
             _set_dataset_column(dataset, "deprecated_date", [convert_to_date(x) for x in dataset["deprecated_date"]])
