@@ -223,7 +223,7 @@ six==1.17.0
     # via
     #   django-db-views
     #   python-dateutil
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via django
 tablib[pandas,xlsx]==3.9.0
     # via django-import-export
