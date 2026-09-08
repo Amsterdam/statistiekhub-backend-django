@@ -85,6 +85,7 @@ function_calculate_observation = r"""
                                                 ' as	(
                                                         select	o.spatialdimension_id
                                                         , 		o.temporaldimension_id
+                                                        ,       t.startdate
                                                         ,       t.year
                                                         , 		o.value
                                                         from	statistiek_hub_observation o
@@ -139,10 +140,17 @@ function_calculate_observation = r"""
 
                                 if p_number > 1 then
 
-                                    p_stmt_join := 	p_stmt_join || 'join	var' || p_number ||
-                                                    ' on var' || p_number || '.spatialdimension_id = var' || p_number -1 || '.spatialdimension_id and var' ||
-                                                    p_number || '.year = var' || p_number -1 || '.year '
-                                                    ;
+                                    p_stmt_join := p_stmt_join ||
+                                        ' join lateral (
+                                            select v.*
+                                            from var' || p_number || ' v
+                                            where v.spatialdimension_id = var1.spatialdimension_id
+                                            and v.year = var1.year
+                                            order by
+                                                abs(v.startdate - var1.startdate),
+                                                v.startdate
+                                            limit 1
+                                        ) var' || p_number || ' on true ';
 
                                 end if;
 
