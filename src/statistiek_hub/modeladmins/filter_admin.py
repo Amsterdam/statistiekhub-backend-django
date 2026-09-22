@@ -2,10 +2,19 @@ from django.contrib import admin
 
 from statistiek_hub.resources.filter_resource import FilterResource
 
-from .admin_mixins import CheckPermissionUserMixin, ImportExportFormatsMixin
+from .admin_mixins import (
+    CheckPermissionUserMixin,
+    DeprecatedMeasureRelationAdminMixin,
+    ImportExportFormatsMixin,
+)
 
 
-class FilterAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
+class FilterAdmin(
+    ImportExportFormatsMixin,
+    DeprecatedMeasureRelationAdminMixin,
+    CheckPermissionUserMixin,
+    admin.ModelAdmin,
+):
     list_display = (
         "measure",
         "rule",
