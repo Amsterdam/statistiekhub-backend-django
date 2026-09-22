@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.exceptions import ObjectDoesNotExist
 from import_export.admin import ExportActionMixin, ImportMixin
 from import_export.formats import base_formats
 
@@ -50,12 +51,18 @@ class DeprecatedMeasureRelationAdminMixin:
     """Block change/delete/add-linking for rows that point to deprecated measures."""
 
     measure_fk_name = "measure"
+    deprecated_measure_invalid_choice_message = (
+        "De gekozen measure is vervallen en kan niet meer geselecteerd worden."
+    )
 
     def _obj_has_deprecated_measure(self, obj):
         """Check whether this row points to a deprecated measure."""
         if obj is None:
             return False
-        measure = getattr(obj, self.measure_fk_name, None)
+        try:
+            measure = getattr(obj, self.measure_fk_name, None)
+        except ObjectDoesNotExist:
+            return False
         return bool(measure and measure.deprecated)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -64,6 +71,10 @@ class DeprecatedMeasureRelationAdminMixin:
             from statistiek_hub.models.measure import Measure
 
             kwargs["queryset"] = Measure.objects.filter(deprecated=False)
+            kwargs.setdefault("error_messages", {})["invalid_choice"] = (
+                self.deprecated_measure_invalid_choice_message
+            )
+
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_change_permission(self, request, obj=None):
