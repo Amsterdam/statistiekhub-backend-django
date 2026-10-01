@@ -6,17 +6,17 @@
 #
 asgiref==3.12.1
     # via django
-build==1.6.0
+build==1.6.1
     # via pip-tools
 click==8.5.0
     # via pip-tools
-coverage[toml]==7.16.0
+coverage[toml]==7.16.2
     # via pytest-cov
-django==6.1
+django==6.1.1
     # via model-bakery
 iniconfig==2.3.0
     # via pytest
-model-bakery==1.24.0
+model-bakery==1.24.1
     # via -r requirements_dev.in
 packaging==26.3
     # via
@@ -31,7 +31,7 @@ pluggy==1.6.0
     #   pytest-cov
 pygments==2.21.0
     # via pytest
-pyproject-hooks==1.2.0
+pyproject-hooks==1.3.3
     # via
     #   build
     #   pip-tools
