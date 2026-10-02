@@ -13,8 +13,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             sql=function_calculate_observation,
-            reverse_sql=(
-                "DROP FUNCTION IF EXISTS public.calculate_observation(integer, character varying);"
-            ),
+            reverse_sql=("DROP FUNCTION IF EXISTS public.calculate_observation(integer, character varying);"),
         )
     ]
