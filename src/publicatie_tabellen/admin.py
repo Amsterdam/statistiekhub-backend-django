@@ -123,6 +123,7 @@ class PublicationObservationAdmin(NoAddDeleteChangePermission):
         "value",
         "temporaldimensiontype",
         "temporaldimensionyear",
+        "temporaldimensionstartdate",
         "spatialdimensiontype",
         "spatialdimensioncode",
         "spatialdimensiondate",
