@@ -7,7 +7,11 @@ from statistiek_hub.models.filter import Filter
 from statistiek_hub.models.measure import Measure
 from statistiek_hub.resources.measure_resource import MeasureResource
 
-from .admin_mixins import CheckPermissionUserMixin, ImportExportFormatsMixin
+from .admin_mixins import (
+    CheckPermissionUserMixin,
+    DeprecatedParentMeasureInlineMixin,
+    ImportExportFormatsMixin,
+)
 
 
 class MeasureForm(forms.ModelForm):
@@ -54,10 +58,11 @@ class CalculationFilter(admin.SimpleListFilter):
         return queryset
 
 
-class FilterInline(admin.TabularInline):
+class FilterInline(DeprecatedParentMeasureInlineMixin, admin.TabularInline):
     model = Filter
     fk_name = "measure"
     extra = 0  # <=== For remove empty fields from admin view
+    deprecated_parent_readonly_fields = ("measure", "rule", "value_new")
 
 
 class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.ModelAdmin):
@@ -161,7 +166,35 @@ class MeasureAdmin(ImportExportFormatsMixin, CheckPermissionUserMixin, admin.Mod
 
     inlines = [FilterInline]
 
+    deprecated_only_editable_fields = (
+        "deprecated",
+        "deprecated_date",
+        "deprecated_reason",
+    )
+
+    def _get_deprecated_readonly_fields(self):
+        all_fields = []
+        for _, config in self.fieldsets:
+            all_fields.extend(config.get("fields", ()))
+
+        editable = set(self.deprecated_only_editable_fields)
+        readonly_fields = [field for field in all_fields if field not in editable]
+
+        # Keep order stable and remove duplicates.
+        return list(dict.fromkeys(readonly_fields))
+
     def get_readonly_fields(self, request, obj=None):
+        if obj and obj.deprecated:
+            return self._get_deprecated_readonly_fields()
         if obj:
             return ["name"]
         return []
+
+    def has_delete_permission(self, request, obj=None):
+        if not super().has_delete_permission(request, obj):
+            return False
+        return not (obj is not None and obj.deprecated)
+
+    def delete_queryset(self, request, queryset):
+        # Prevent bulk delete from removing deprecated measures.
+        super().delete_queryset(request, queryset.filter(deprecated=False))

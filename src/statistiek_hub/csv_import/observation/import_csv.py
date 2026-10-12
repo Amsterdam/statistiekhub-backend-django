@@ -60,7 +60,7 @@ def _transform_measure(df: DataFrame):
     """
     Check and transform the measure (str value) into the corresponding Measure pk
 
-    Raises a MissingValues exception if non-existing measures are in dataframe
+    Raises a MissingValues exception if non-existing or deprecated measures are in dataframe
     """
     logger.info("Transform the measure into the correct measure pk")
 
@@ -74,7 +74,11 @@ def _transform_measure(df: DataFrame):
     if missing_values := list(set(distinct_uppercase_values) - set(existing_values)):
         raise MissingValues(f"Missing measures: {', '.join(list(missing_values))}")
 
-    measure_id_map = dict(Measure.objects.annotate(upper_name=Upper("name")).values_list("upper_name", "id"))
+    deprecated_measure_names = sorted(measure_qs.filter(deprecated=True).values_list("upper_name", flat=True))
+    if deprecated_measure_names:
+        raise MissingValues(f"Deprecated measures are not allowed: {', '.join(deprecated_measure_names)}")
+
+    measure_id_map = dict(measure_qs.values_list("upper_name", "id"))
     df["measure_id"] = df["measure"].map(measure_id_map)
 
     df.drop(columns=["measure"], inplace=True)
