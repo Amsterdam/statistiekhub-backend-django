@@ -75,7 +75,7 @@ services:
   otel-collector:
     build:
       context: docker/otel-collector
-    image: ${REGISTRY:-localhost:5000}/${REPOSITORY:-opdrachten/statistiekhub-otel-collector}:${VERSION:-latest}
+    image: ${REGISTRY:-localhost:5000}/${REPOSITORY:-ams-opdr/statistiekhub-otel-collector}:${VERSION:-latest}
     volumes:
       - ./docker/otel-collector/config.local.yaml:/etc/otelcol-contrib/config.yaml
     depends_on:
@@ -102,7 +102,7 @@ services:
       LOG_LEVEL: debug
 
   app:
-    image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-opdrachten/statistiekhub}:${VERSION:-latest}
+    image:  ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-ams-opdr/statistiekhub}:${VERSION:-latest}
     build:
       context: .
       target: app
