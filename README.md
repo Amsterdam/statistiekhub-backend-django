@@ -9,7 +9,9 @@ a Management module for publishing statistics from the Research and Statistics D
 
 See the Makefile in this project for the description of relevant commands.
 
-1. From the root directory run:
+1. Copy the `compose.override.yml.example`-file and rename it to `compose.override.yml`.
+
+2. From the root directory run:
 
    ```bash
    make build
@@ -42,7 +44,7 @@ See the Makefile in this project for the description of relevant commands.
         sudo chmod 666 /var/run/docker.sock
         ```
 
-2. Apply migrations:
+3. Apply migrations:
 
    ```bash
    make migrate
@@ -54,25 +56,25 @@ See the Makefile in this project for the description of relevant commands.
    make migrations
    ```
 
-3. Check if the build worked
+4. Check if the build worked
 
    ```bash
    make dev
    ```
 
-4. When you confirm the successful build, stop the running container with `Ctrl-C` and fill the database with testdata
+5. When you confirm the successful build, stop the running container with `Ctrl-C` and fill the database with testdata
 
    ```bash
     make load_fixtures 
    ```
 
-5. Last, when you want to add a super-user for django admin, go to the terminal of the backend docker container
+6. Last, when you want to add a super-user for django admin, go to the terminal of the backend docker container
 
    ```bash
    python manage.py createsuperuser
    ```
 
-6. Now all is set and you can run the Composer
+7. Now all is set and you can run the Composer
 
    ```bash
    make dev
