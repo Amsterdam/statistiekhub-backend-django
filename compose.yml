@@ -75,7 +75,6 @@ services:
   otel-collector:
     build:
       context: docker/otel-collector
-    image: ${REGISTRY:-localhost:5000}/${REPOSITORY:-ams-opdr/statistiekhub-otel-collector}:${VERSION:-latest}
     volumes:
       - ./docker/otel-collector/config.local.yaml:/etc/otelcol-contrib/config.yaml
     depends_on:
