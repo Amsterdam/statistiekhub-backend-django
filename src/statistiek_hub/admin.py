@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .modeladmins.admin_mixins import DeprecatedMeasureRelationAdminMixin
 from .modeladmins.filter_admin import FilterAdmin
 from .modeladmins.measure_admin import MeasureAdmin
 from .modeladmins.observation_admin import ObservationAdmin
@@ -42,7 +43,7 @@ class DimensionGroupAdmin(admin.ModelAdmin):
 
 
 @admin.register(TopicSet)
-class TopicSetAdmin(admin.ModelAdmin):
+class TopicSetAdmin(DeprecatedMeasureRelationAdminMixin, admin.ModelAdmin):
     list_display = ("id", "topic", "measure")
     list_filter = ("topic",)
     ordering = ("id",)
