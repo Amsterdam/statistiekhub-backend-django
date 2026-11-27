@@ -51,9 +51,7 @@ class DeprecatedMeasureRelationAdminMixin:
     """Block change/delete/add-linking for rows that point to deprecated measures."""
 
     measure_fk_name = "measure"
-    deprecated_measure_invalid_choice_message = (
-        "De gekozen measure is vervallen en kan niet meer geselecteerd worden."
-    )
+    deprecated_measure_invalid_choice_message = "De gekozen measure is vervallen en kan niet meer geselecteerd worden."
 
     def _obj_has_deprecated_measure(self, obj):
         """Check whether this row points to a deprecated measure."""
@@ -71,9 +69,7 @@ class DeprecatedMeasureRelationAdminMixin:
             from statistiek_hub.models.measure import Measure
 
             kwargs["queryset"] = Measure.objects.filter(deprecated=False)
-            kwargs.setdefault("error_messages", {})["invalid_choice"] = (
-                self.deprecated_measure_invalid_choice_message
-            )
+            kwargs.setdefault("error_messages", {})["invalid_choice"] = self.deprecated_measure_invalid_choice_message
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

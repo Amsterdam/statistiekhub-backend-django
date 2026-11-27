@@ -47,9 +47,7 @@ class FilterResource(ModelResource):
                 missing_as_tuples = [(name,) for name in missing_measure_names]
                 errors["measure_names"] = f"Niet terug gevonden in de referentietabel: {missing_as_tuples} "
             else:
-                existing_deprecated_measure_names = {
-                    name for name, deprecated in existing_measures if deprecated
-                }
+                existing_deprecated_measure_names = {name for name, deprecated in existing_measures if deprecated}
                 if existing_deprecated_measure_names:
                     errors["measure_deprecated"] = (
                         "Filters voor vervallen variabelen mogen niet geimporteerd worden: "
