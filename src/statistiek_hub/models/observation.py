@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 
 from statistiek_hub.validations import check_value_context
@@ -21,7 +21,13 @@ class ObservationBase(TimeStampMixin, AddErrorFuncion):
     def clean(self):
         errors = {}
 
-        self.add_error(errors, {"value": check_value_context(self.measure.unit.code, self.value)})
+        # In admin add forms an invalid/deprecated measure choice can leave the relation unset.
+        if self.measure_id:
+            try:
+                self.add_error(errors, {"value": check_value_context(self.measure.unit.code, self.value)})
+            except ObjectDoesNotExist:
+                # Let Django's normal FK/field validation report the measure error.
+                pass
 
         if errors:
             raise ValidationError(errors)

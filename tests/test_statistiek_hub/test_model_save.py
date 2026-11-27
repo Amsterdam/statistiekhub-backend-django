@@ -84,3 +84,24 @@ class TestModelSave:
                 value=1001,
             )
         assert "Percentage is more than 1000" in str(excinfo.value)
+
+    @pytest.mark.django_db
+    def test_observation_full_clean_without_measure_returns_validation_error(self):
+        tempdimtype = baker.make(TemporalDimensionType, name="Peildatum")
+        temporaldimension = baker.make(
+            TemporalDimension,
+            startdate=datetime.date(2023, 12, 31),
+            type=tempdimtype,
+        )
+        spatialdimension = baker.make(SpatialDimension)
+
+        observation = Observation(
+            value=10,
+            temporaldimension=temporaldimension,
+            spatialdimension=spatialdimension,
+        )
+
+        with pytest.raises(ValidationError) as excinfo:
+            observation.full_clean()
+
+        assert "measure" in excinfo.value.message_dict
