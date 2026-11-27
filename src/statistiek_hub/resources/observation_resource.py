@@ -78,22 +78,16 @@ class ObservationResource(ModelResource):
             else:
                 imported_measure_names = set(df_main["measure"].astype(str).str.upper())
                 known_measure_names = set(dfmeasure["name"].astype(str).str.upper())
-                deprecated_measure_names = set(
-                    dfmeasure.loc[dfmeasure["deprecated"], "name"].astype(str).str.upper()
-                )
+                deprecated_measure_names = set(dfmeasure.loc[dfmeasure["deprecated"], "name"].astype(str).str.upper())
 
                 unknown_in_dataset = sorted(imported_measure_names - known_measure_names)
                 if unknown_in_dataset:
-                    errors["measure_names"] = (
-                        "De volgende variabelen in measure bestaan niet: "
-                        f"{unknown_in_dataset}"
-                    )
+                    errors["measure_names"] = f"De volgende variabelen in measure bestaan niet: {unknown_in_dataset}"
 
                 deprecated_in_dataset = sorted(imported_measure_names & deprecated_measure_names)
                 if deprecated_in_dataset:
                     errors["measure_deprecated"] = (
-                        "Vervallen variabelen mogen niet geimporteerd worden: "
-                        f"{deprecated_in_dataset}"
+                        f"Vervallen variabelen mogen niet geimporteerd worden: {deprecated_in_dataset}"
                     )
 
             check = {
